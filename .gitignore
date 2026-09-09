@@ -1,0 +1,20 @@
+# dependencies and Next.js output
+/node_modules
+/.next
+/out
+
+# local QA and TypeScript caches
+/.playwright-cli
+*.tsbuildinfo
+
+# generated agent guidance from the development server
+/AGENTS.md
+/CLAUDE.md
+
+# logs and environment overrides
+*.log
+.env*
+!.env.example
+
+# operating system files
+.DS_Store
