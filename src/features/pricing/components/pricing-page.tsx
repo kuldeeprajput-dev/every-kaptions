@@ -16,7 +16,7 @@ export function PricingPage() {
 
   return (
     <main>
-      <SiteHeader compact />
+      <SiteHeader />
       <div className="mx-auto w-full max-w-[1120px] px-4 pb-20 pt-12 sm:px-8 lg:pt-16">
         <header>
           <h1 className="display text-4xl text-cream sm:text-5xl">Choose your plan</h1>
