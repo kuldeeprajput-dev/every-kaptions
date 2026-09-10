@@ -131,16 +131,17 @@ export function EditorSidebar({ open, onClose, onUpload }: Props) {
 }
 
 function PlanRow({ label, value, percent }: { label: string; value: string; percent: number }) {
+  const safePercent = Math.min(100, Math.max(0, percent));
   return (
     <div className="mt-3.5">
       <div className="flex items-center justify-between text-xs">
         <span className="text-[#889297] text-[11px] font-medium">{label}</span>
         <strong className="text-white text-xs font-bold">{value}</strong>
       </div>
-      <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/8 p-0.5 border border-white/5">
+      <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#262626]">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-[#f6c453] to-[#e5b33c] transition-all duration-300"
-          style={{ width: `${Math.max(4, percent)}%` }}
+          className="h-full rounded-full bg-[#f6c453] transition-all duration-300"
+          style={{ width: `${safePercent}%` }}
         />
       </div>
     </div>

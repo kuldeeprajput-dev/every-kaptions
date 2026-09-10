@@ -1,99 +1,109 @@
 "use client";
 
-import { useEffect } from "react";
-import { create } from "zustand";
-import { createJSONStorage, persist } from "zustand/middleware";
+import { useCallback, useEffect, useState } from "react";
+import { useAuthStore } from "@/features/auth/store/auth-store";
 import { freePlan } from "../data/editor-config";
 
 const BILLING_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 
-type PlanState = {
+export type UserPlanUsage = {
   transcriptionSecondsUsed: number;
   exportsUsed: number;
   periodStartedAt: number;
-  recordTranscription: (seconds: number) => void;
-  recordExport: () => boolean;
-  refreshPeriod: () => void;
 };
+
+function getUserKey(user: { id?: string; email?: string } | null | undefined): string {
+  if (!user) return "guest";
+  return user.id || user.email || "guest";
+}
 
 function periodHasEnded(periodStartedAt: number, now = Date.now()) {
   return periodStartedAt === 0 || now - periodStartedAt >= BILLING_WINDOW_MS;
 }
 
-export const usePlanStore = create<PlanState>()(
-  persist(
-    (set) => ({
-      transcriptionSecondsUsed: 0,
-      exportsUsed: 0,
-      periodStartedAt: 0,
-      recordTranscription: (seconds) => {
-        set((state) => {
-          const now = Date.now();
-          const expired = periodHasEnded(state.periodStartedAt, now);
-          return {
-            periodStartedAt: expired ? now : state.periodStartedAt,
-            exportsUsed: expired ? 0 : state.exportsUsed,
-            transcriptionSecondsUsed: (expired ? 0 : state.transcriptionSecondsUsed) + Math.max(0, seconds),
-          };
-        });
-      },
-      recordExport: () => {
-        let recorded = false;
-        set((state) => {
-          const now = Date.now();
-          const expired = periodHasEnded(state.periodStartedAt, now);
-          const exportsUsed = expired ? 0 : state.exportsUsed;
-          if (exportsUsed >= freePlan.monthlyExports) return state;
-          recorded = true;
-          return {
-            periodStartedAt: expired ? now : state.periodStartedAt,
-            transcriptionSecondsUsed: expired ? 0 : state.transcriptionSecondsUsed,
-            exportsUsed: exportsUsed + 1,
-          };
-        });
-        return recorded;
-      },
-      refreshPeriod: () => {
-        set((state) => {
-          if (!periodHasEnded(state.periodStartedAt)) return state;
-          return {
-            periodStartedAt: Date.now(),
-            transcriptionSecondsUsed: 0,
-            exportsUsed: 0,
-          };
-        });
-      },
-    }),
-    {
-      name: "replix-free-plan-usage",
-      storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({
-        transcriptionSecondsUsed: state.transcriptionSecondsUsed,
-        exportsUsed: state.exportsUsed,
-        periodStartedAt: state.periodStartedAt,
-      }),
-      skipHydration: true,
-    },
-  ),
-);
+export function getUsageForUser(userKey: string): UserPlanUsage {
+  if (typeof window === "undefined") {
+    return { transcriptionSecondsUsed: 0, exportsUsed: 0, periodStartedAt: 0 };
+  }
+  try {
+    const raw = localStorage.getItem(`everykaptions_plan_usage_${userKey}`);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      const periodStart = Number(parsed.periodStartedAt || 0);
+      if (periodHasEnded(periodStart)) {
+        return { transcriptionSecondsUsed: 0, exportsUsed: 0, periodStartedAt: Date.now() };
+      }
+      return {
+        transcriptionSecondsUsed: Number(parsed.transcriptionSecondsUsed || 0),
+        exportsUsed: Number(parsed.exportsUsed || 0),
+        periodStartedAt: periodStart || Date.now(),
+      };
+    }
+  } catch {
+    // fallback
+  }
+  return { transcriptionSecondsUsed: 0, exportsUsed: 0, periodStartedAt: Date.now() };
+}
+
+export function saveUsageForUser(userKey: string, usage: UserPlanUsage) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(`everykaptions_plan_usage_${userKey}`, JSON.stringify(usage));
+  } catch {
+    // ignore
+  }
+}
 
 export function usePlanSummary() {
-  const transcriptionSecondsUsed = usePlanStore((state) => state.transcriptionSecondsUsed);
-  const exportsUsed = usePlanStore((state) => state.exportsUsed);
-  const periodStartedAt = usePlanStore((state) => state.periodStartedAt);
-  const refreshPeriod = usePlanStore((state) => state.refreshPeriod);
+  const user = useAuthStore((state) => state.user);
+  const userKey = getUserKey(user);
 
+  const [usage, setUsage] = useState<UserPlanUsage>(() => getUsageForUser(userKey));
+
+  // Sync state whenever logged-in user changes (e.g. new Gmail ID logs in)
   useEffect(() => {
-    void (async () => {
-      await usePlanStore.persist.rehydrate();
-      refreshPeriod();
-    })();
-  }, [refreshPeriod]);
+    setUsage(getUsageForUser(userKey));
+  }, [userKey]);
+
+  const recordTranscription = useCallback((seconds: number) => {
+    setUsage((prev) => {
+      const now = Date.now();
+      const expired = periodHasEnded(prev.periodStartedAt, now);
+      const nextUsage: UserPlanUsage = {
+        periodStartedAt: expired ? now : (prev.periodStartedAt || now),
+        exportsUsed: expired ? 0 : prev.exportsUsed,
+        transcriptionSecondsUsed: (expired ? 0 : prev.transcriptionSecondsUsed) + Math.max(0, seconds),
+      };
+      saveUsageForUser(userKey, nextUsage);
+      return nextUsage;
+    });
+  }, [userKey]);
+
+  const recordExport = useCallback(() => {
+    let recorded = false;
+    setUsage((prev) => {
+      const now = Date.now();
+      const expired = periodHasEnded(prev.periodStartedAt, now);
+      const currentExports = expired ? 0 : prev.exportsUsed;
+      if (currentExports >= freePlan.monthlyExports) {
+        return prev;
+      }
+      recorded = true;
+      const nextUsage: UserPlanUsage = {
+        periodStartedAt: expired ? now : (prev.periodStartedAt || now),
+        transcriptionSecondsUsed: expired ? 0 : prev.transcriptionSecondsUsed,
+        exportsUsed: currentExports + 1,
+      };
+      saveUsageForUser(userKey, nextUsage);
+      return nextUsage;
+    });
+    return recorded;
+  }, [userKey]);
 
   const totalSeconds = freePlan.transcriptionMinutes * 60;
-  const remainingSeconds = Math.max(0, totalSeconds - transcriptionSecondsUsed);
-  const remainingExports = Math.max(0, freePlan.monthlyExports - exportsUsed);
-  const periodStart = periodStartedAt || Date.now();
+  const remainingSeconds = Math.max(0, totalSeconds - usage.transcriptionSecondsUsed);
+  const remainingExports = Math.max(0, freePlan.monthlyExports - usage.exportsUsed);
+  const periodStart = usage.periodStartedAt || Date.now();
   const daysRemaining = Math.ceil((periodStart + BILLING_WINDOW_MS - Date.now()) / (24 * 60 * 60 * 1000));
 
   return {
@@ -105,5 +115,18 @@ export function usePlanSummary() {
     exportsPercent: (remainingExports / freePlan.monthlyExports) * 100,
     canTranscribe: remainingSeconds > 0,
     canExport: remainingExports > 0,
+    recordTranscription,
+    recordExport,
   };
 }
+
+// Global store wrapper for backward compatibility
+export const usePlanStore = {
+  getState: () => ({
+    transcriptionSecondsUsed: 0,
+    refreshPeriod: () => {},
+  }),
+  persist: {
+    rehydrate: async () => {},
+  },
+};

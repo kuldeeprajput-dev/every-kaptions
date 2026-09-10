@@ -196,9 +196,6 @@ export function MediaEditor({ editor, onBack }: Props) {
   };
 
   const activeSeg = editor.activeSegment || editor.segments.find((segment) => segment.id === editor.selectedSegmentId) || editor.segments[0];
-  const activeSegmentNumber = activeSeg
-    ? editor.segments.findIndex((segment) => segment.id === activeSeg.id) + 1
-    : 0;
 
   return (
     <main className="min-h-[100dvh] overflow-x-hidden bg-[#070808] font-sans text-[#d8d8d6] select-none">
@@ -219,7 +216,7 @@ export function MediaEditor({ editor, onBack }: Props) {
           canRedo={editor.canRedo}
           onUndo={editor.undo}
           onRedo={editor.redo}
-          className="hidden md:flex"
+          className="flex"
         />
 
         <div className="header-actions ml-auto flex min-w-0 items-center gap-1.5 text-[#c8c2b6] sm:gap-2">
@@ -347,32 +344,17 @@ export function MediaEditor({ editor, onBack }: Props) {
           </div>
         </section>
 
-        <section className="order-1 flex min-h-[540px] flex-col bg-black p-3 sm:min-h-[620px] sm:p-4 lg:order-2 lg:min-h-0 lg:p-5">
-          <div className="mx-auto mb-3 flex w-full max-w-3xl items-center justify-between gap-3">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#727c80]">Live preview</p>
-              <p className="mt-1 text-xs text-[#8a9295]">
-                {activeSegmentNumber > 0 ? "Caption " + activeSegmentNumber + " of " + editor.segments.length : "No active caption"}
-              </p>
-            </div>
-            <EditorHistoryButtons
-              canUndo={editor.canUndo}
-              canRedo={editor.canRedo}
-              onUndo={editor.undo}
-              onRedo={editor.redo}
-              className="flex md:hidden"
-            />
-          </div>
-          <div className="mx-auto flex w-full max-w-3xl flex-1 items-center justify-center">
+        <section className="order-1 flex min-h-[500px] flex-col items-center justify-center bg-black p-2 sm:p-4 lg:order-2 lg:min-h-0 lg:h-full">
+          <div className="mx-auto flex w-full max-w-4xl flex-1 items-center justify-center min-h-0 my-auto">
             <div
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerUp}
               onPointerCancel={handlePointerUp}
               className={cn(
-                "group relative flex w-auto max-w-full touch-none items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-[#121313] shadow-2xl shadow-black transition-all",
-                aspectRatio === "9:16" && "aspect-[9/16] max-h-[52dvh] sm:max-h-[58dvh] lg:max-h-[calc(100dvh-250px)]",
-                aspectRatio === "1:1" && "aspect-square max-h-[52dvh] sm:max-h-[58dvh] lg:max-h-[calc(100dvh-250px)]",
-                aspectRatio === "16:9" && "aspect-[16/9] w-full max-h-[52dvh] sm:max-h-[58dvh] lg:max-h-[calc(100dvh-250px)]",
+                "group relative flex w-auto max-w-full touch-none items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-[#0d0e0e] shadow-2xl shadow-black transition-all mx-auto my-auto",
+                aspectRatio === "9:16" && "aspect-[9/16] h-full max-h-[64dvh] lg:max-h-[calc(100dvh-190px)]",
+                aspectRatio === "1:1" && "aspect-square h-full max-h-[64dvh] lg:max-h-[calc(100dvh-190px)]",
+                aspectRatio === "16:9" && "aspect-[16/9] w-full max-h-[64dvh] lg:max-h-[calc(100dvh-190px)]",
               )}
             >
               {isAudio ? (
