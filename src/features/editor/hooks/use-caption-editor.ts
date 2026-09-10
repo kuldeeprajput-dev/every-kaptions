@@ -112,6 +112,54 @@ export function useCaptionEditor() {
     setSegments((current) => current.map((segment) => (segment.id === segmentId ? { ...segment, text } : segment)));
   }, []);
 
+  const splitSegment = useCallback((segmentId: string) => {
+    const index = segments.findIndex((segment) => segment.id === segmentId);
+    const segment = segments[index];
+    if (!segment || segment.end - segment.start < 0.4) return;
+
+    const preferredTime = currentTime > segment.start && currentTime < segment.end ? currentTime : (segment.start + segment.end) / 2;
+    const splitTime = Math.min(segment.end - 0.2, Math.max(segment.start + 0.2, preferredTime));
+    const tokens = segment.text.trim().split(/\s+/).filter(Boolean);
+    if (tokens.length < 2) return;
+
+    const ratio = (splitTime - segment.start) / (segment.end - segment.start);
+    const tokenIndex = Math.min(tokens.length - 1, Math.max(1, Math.round(tokens.length * ratio)));
+    const hasWordTiming = segment.words.length >= 2;
+    const wordIndex = hasWordTiming
+      ? Math.min(segment.words.length - 1, Math.max(1, Math.round(segment.words.length * ratio)))
+      : 0;
+    const first = { ...segment, text: tokens.slice(0, tokenIndex).join(" "), end: splitTime, words: hasWordTiming ? segment.words.slice(0, wordIndex) : [] };
+    const second = {
+      ...segment,
+      id: `${segment.id}-split-${splitTime.toFixed(2)}`,
+      text: tokens.slice(tokenIndex).join(" "),
+      start: splitTime,
+      words: hasWordTiming ? segment.words.slice(wordIndex) : [],
+    };
+    const next = [...segments];
+    next.splice(index, 1, first, second);
+    setSegments(next);
+    setSelectedSegmentId(second.id);
+  }, [currentTime, segments]);
+
+  const mergeWithNext = useCallback((segmentId: string) => {
+    const index = segments.findIndex((segment) => segment.id === segmentId);
+    const segment = segments[index];
+    const nextSegment = segments[index + 1];
+    if (!segment || !nextSegment) return;
+
+    const merged = {
+      ...segment,
+      text: `${segment.text.trim()} ${nextSegment.text.trim()}`.trim(),
+      end: nextSegment.end,
+      words: [...segment.words, ...nextSegment.words],
+    };
+    const next = [...segments];
+    next.splice(index, 2, merged);
+    setSegments(next);
+    setSelectedSegmentId(merged.id);
+  }, [segments]);
+
   const deleteSegment = useCallback((segmentId: string) => {
     setSegments((current) => current.filter((segment) => segment.id !== segmentId));
     setSelectedSegmentId("");
@@ -163,6 +211,8 @@ export function useCaptionEditor() {
     transcribe,
     reset,
     updateSegment,
+    splitSegment,
+    mergeWithNext,
     deleteSegment,
     downloadCaptions,
     setLanguage,

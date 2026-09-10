@@ -8,6 +8,7 @@ import { cn } from "@/shared/lib/cn";
 import { captionStyles } from "../data/editor-config";
 import { formatClockTime } from "../lib/captions";
 import type { useCaptionEditor } from "../hooks/use-caption-editor";
+import { CaptionTimeline } from "./caption-timeline";
 
 type Props = {
   editor: ReturnType<typeof useCaptionEditor>;
@@ -70,7 +71,7 @@ export function MediaEditor({ editor }: Props) {
         </div>
       ) : null}
 
-      <div className="grid lg:h-[calc(100vh-66px)] lg:grid-cols-[minmax(250px,320px)_minmax(360px,1fr)_280px]">
+      <div className="grid lg:h-[calc(100vh-246px)] lg:grid-cols-[minmax(250px,320px)_minmax(360px,1fr)_280px]">
         <section className="order-2 border-white/8 bg-[#111210] lg:order-1 lg:overflow-y-auto lg:border-r">
           <div className="sticky top-0 z-10 border-b border-white/8 bg-[#111210] px-4 py-4">
             <div className="flex items-center justify-between gap-3">
@@ -201,6 +202,7 @@ export function MediaEditor({ editor }: Props) {
           </button>
         </aside>
       </div>
+      <CaptionTimeline editor={editor} onSeek={seekTo} />
     </main>
   );
 }
