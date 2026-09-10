@@ -64,6 +64,12 @@ export function MediaEditor({ editor }: Props) {
         </div>
       </header>
 
+      {editor.error ? (
+        <div role="alert" className="border-b border-red-400/20 bg-red-400/10 px-4 py-2 text-center text-xs text-red-200">
+          {editor.error} <Link href="/pricing" className="ml-1 font-bold underline">View plans</Link>
+        </div>
+      ) : null}
+
       <div className="grid lg:h-[calc(100vh-66px)] lg:grid-cols-[minmax(250px,320px)_minmax(360px,1fr)_280px]">
         <section className="order-2 border-white/8 bg-[#111210] lg:order-1 lg:overflow-y-auto lg:border-r">
           <div className="sticky top-0 z-10 border-b border-white/8 bg-[#111210] px-4 py-4">

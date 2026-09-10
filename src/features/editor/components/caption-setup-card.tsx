@@ -8,6 +8,8 @@ type Props = {
   status: TranscriptionState;
   error: string;
   captionCount: number;
+  remainingMinutes: number;
+  canTranscribe: boolean;
   onLanguageChange: (language: string) => void;
   onGenerate: () => void;
   onDownload: () => void;
@@ -20,6 +22,8 @@ export function CaptionSetupCard({
   status,
   error,
   captionCount,
+  remainingMinutes,
+  canTranscribe,
   onLanguageChange,
   onGenerate,
   onDownload,
@@ -52,9 +56,10 @@ export function CaptionSetupCard({
       {!isReady ? (
         <>
           <div className="mt-6">
-            <label htmlFor="caption-language" className="text-sm font-semibold text-cream">
-              Spoken language
-            </label>
+            <div className="flex items-center justify-between gap-3">
+              <label htmlFor="caption-language" className="text-sm font-semibold text-cream">Spoken language</label>
+              <span className="text-[10px] font-semibold text-amber">{remainingMinutes.toFixed(1)} min remaining</span>
+            </div>
             <p className="mt-1 text-xs leading-5 text-[#788187]">Choose a language for better names and word timing.</p>
             <select
               id="caption-language"
@@ -89,11 +94,11 @@ export function CaptionSetupCard({
           <button
             type="button"
             onClick={onGenerate}
-            disabled={isWorking}
+            disabled={isWorking || !canTranscribe}
             className="mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-amber px-5 text-sm font-bold text-black transition hover:bg-[#ffd467] disabled:cursor-wait disabled:opacity-70"
           >
             {isWorking ? <LoaderCircle size={18} className="animate-spin" /> : <Sparkles size={17} />}
-            {isWorking ? "Listening and creating captions…" : "Create captions"}
+            {isWorking ? "Listening and creating captions…" : canTranscribe ? "Create captions" : "Transcription limit reached"}
           </button>
           <p className="mt-3 text-center text-[11px] text-[#626a6e]">Your file is sent securely to Groq for transcription.</p>
         </>

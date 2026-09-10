@@ -6,6 +6,7 @@ import { useRef, useState } from "react";
 import { Brand } from "@/shared/components/brand";
 import { cn } from "@/shared/lib/cn";
 import { useCaptionEditor } from "../hooks/use-caption-editor";
+import { usePlanSummary } from "../store/plan-store";
 import { AccountMenu } from "./account-menu";
 import { CaptionSetupCard } from "./caption-setup-card";
 import { EditorSidebar } from "./editor-sidebar";
@@ -20,6 +21,7 @@ export function EditorPage() {
   const [tab, setTab] = useState<ReelTab>("In progress");
   const inputRef = useRef<HTMLInputElement>(null);
   const editor = useCaptionEditor();
+  const plan = usePlanSummary();
   const openUpload = () => inputRef.current?.click();
   const selectFile = (file: File) => {
     if (editor.chooseFile(file)) setTab("In progress");
@@ -47,7 +49,7 @@ export function EditorPage() {
           >
             Upgrade
           </Link>
-          <p className="hidden text-xs text-[#8b8b8b] xl:block">3 of 3 free exports left · resets Oct 1, 2026</p>
+          <p className="hidden text-xs text-[#8b8b8b] xl:block">{plan.remainingExports} of 3 free exports left · resets in {plan.resetDays} days</p>
         </div>
       </header>
 
@@ -95,6 +97,8 @@ export function EditorPage() {
                 status={editor.status}
                 error={editor.error}
                 captionCount={editor.segments.length}
+                remainingMinutes={plan.remainingMinutes}
+                canTranscribe={plan.canTranscribe}
                 onLanguageChange={editor.setLanguage}
                 onGenerate={editor.transcribe}
                 onDownload={() => editor.downloadCaptions("srt")}

@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { MAX_CAPTION_FILE_BYTES } from "../data/editor-config";
+import { freePlan, MAX_CAPTION_FILE_BYTES } from "../data/editor-config";
 import { buildSrt, buildVtt, normalizeTranscript } from "../lib/captions";
+import { usePlanStore } from "../store/plan-store";
 import type {
   CaptionExportFormat,
   CaptionSegment,
@@ -32,6 +33,8 @@ export function useCaptionEditor() {
   const [selectedSegmentId, setSelectedSegmentId] = useState("");
   const [styleId, setStyleId] = useState<CaptionStyleId>("yellow");
   const mediaUrlRef = useRef("");
+  const recordTranscription = usePlanStore((state) => state.recordTranscription);
+  const recordExport = usePlanStore((state) => state.recordExport);
 
   useEffect(() => {
     return () => {
@@ -68,6 +71,14 @@ export function useCaptionEditor() {
       return;
     }
 
+    const planState = usePlanStore.getState();
+    planState.refreshPeriod();
+    if (usePlanStore.getState().transcriptionSecondsUsed >= freePlan.transcriptionMinutes * 60) {
+      setError("You have used all free transcription minutes. Upgrade to create more captions.");
+      setStatus("error");
+      return;
+    }
+
     setError("");
     setStatus("transcribing");
     const body = new FormData();
@@ -84,12 +95,13 @@ export function useCaptionEditor() {
       setSegments(result.segments);
       setDuration(result.duration);
       setSelectedSegmentId(result.segments[0]?.id ?? "");
+      recordTranscription(result.duration);
       setStatus("ready");
     } catch (caughtError) {
       setError(caughtError instanceof Error ? caughtError.message : "Captions could not be created. Please try again.");
       setStatus("error");
     }
-  }, [file, language]);
+  }, [file, language, recordTranscription]);
 
   const activeSegment = useMemo(
     () => segments.find((segment) => currentTime >= segment.start && currentTime < segment.end) ?? null,
@@ -120,6 +132,11 @@ export function useCaptionEditor() {
 
   const downloadCaptions = useCallback((format: CaptionExportFormat) => {
     if (segments.length === 0) return;
+    if (!recordExport()) {
+      setError("Your three free exports are used. Upgrade to export more caption files.");
+      return;
+    }
+    setError("");
     const content = format === "srt" ? buildSrt(segments) : buildVtt(segments);
     const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -128,7 +145,7 @@ export function useCaptionEditor() {
     link.download = `${file?.name.replace(/\.[^.]+$/, "") || "captions"}.${format}`;
     link.click();
     URL.revokeObjectURL(url);
-  }, [file, segments]);
+  }, [file, recordExport, segments]);
 
   return {
     file,
