@@ -265,14 +265,14 @@ export function MediaEditor({ editor, onBack }: Props) {
       ) : null}
 
       <div className="grid lg:h-[calc(100dvh-246px)] lg:grid-cols-[minmax(250px,320px)_minmax(360px,1fr)_320px]">
-        <section className="order-2 border-white/8 bg-[#111210] lg:order-1 lg:overflow-y-auto lg:border-r">
-          <div className="sticky top-0 z-10 border-b border-white/8 bg-[#111210] px-4 py-4">
+        <section className="order-2 border-white/8 bg-[#0e0f0d] lg:order-1 lg:overflow-y-auto lg:border-r custom-scrollbar">
+          <div className="sticky top-0 z-10 border-b border-white/8 bg-[#0e0f0d]/95 backdrop-blur-md px-4 py-4">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[.15em] text-[#727c80]">Captions</p>
                 <h1 className="mt-1 text-sm font-semibold text-cream">Review every line</h1>
               </div>
-              <span className="rounded-full border border-[#f6c453]/25 bg-[#f6c453]/8 px-2.5 py-1 text-[10px] font-bold text-[#f6c453]">
+              <span className="rounded-full border border-[#f6c453]/30 bg-[#f6c453]/10 px-2.5 py-1 text-[10px] font-bold text-[#f6c453]">
                 {editor.segments.length} lines
               </span>
             </div>
@@ -619,7 +619,7 @@ export function MediaEditor({ editor, onBack }: Props) {
           </div>
         </section>
 
-        <aside className="order-3 border-t border-white/8 bg-[#111210] p-4 lg:overflow-y-auto lg:border-l lg:border-t-0 font-sans">
+        <aside className="order-3 border-t border-white/8 bg-[#0e0f0d] p-4 lg:overflow-y-auto lg:border-l lg:border-t-0 font-sans custom-scrollbar">
           <p className="text-[10px] font-bold uppercase tracking-[.15em] text-[#727c80]">Caption style</p>
           <h2 className="mt-1 text-sm font-semibold text-cream">Choose a viral look</h2>
 
