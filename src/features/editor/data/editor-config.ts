@@ -137,6 +137,54 @@ const captionOutputOptions: CaptionOutputOption[] = [
     nativeName: "English",
     description: "Clear English captions with names and meaning preserved.",
   },
+  {
+    value: "te",
+    label: "Telugu",
+    nativeName: "తెలుగు",
+    description: "Natural Telugu captions written in Telugu script.",
+  },
+  {
+    value: "ta",
+    label: "Tamil",
+    nativeName: "தமிழ்",
+    description: "Natural Tamil captions written in Tamil script.",
+  },
+  {
+    value: "kn",
+    label: "Kannada",
+    nativeName: "ಕನ್ನಡ",
+    description: "Natural Kannada captions written in Kannada script.",
+  },
+  {
+    value: "ml",
+    label: "Malayalam",
+    nativeName: "മലയാളം",
+    description: "Natural Malayalam captions written in Malayalam script.",
+  },
+  {
+    value: "mr",
+    label: "Marathi",
+    nativeName: "मराठी",
+    description: "Natural Marathi captions written in Devanagari.",
+  },
+  {
+    value: "bn",
+    label: "Bengali",
+    nativeName: "বাংলা",
+    description: "Natural Bengali captions written in Bengali script.",
+  },
+  {
+    value: "gu",
+    label: "Gujarati",
+    nativeName: "ગુજરાતી",
+    description: "Natural Gujarati captions written in Gujarati script.",
+  },
+  {
+    value: "pa",
+    label: "Punjabi",
+    nativeName: "ਪੰਜਾਬੀ",
+    description: "Natural Punjabi captions written in Gurmukhi.",
+  },
 ];
 
 export function getCaptionOutputOptions(spokenLanguage: string) {

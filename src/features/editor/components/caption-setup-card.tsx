@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { AlertCircle, Check, Languages, LoaderCircle, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { AlertCircle, LoaderCircle, X } from "lucide-react";
 import { getCaptionOutputOption, getCaptionOutputOptions, getLanguageOption, indianLanguageOptions } from "../data/editor-config";
 import type { CaptionOutputLanguage, TranscriptionState } from "../types/captions";
 
@@ -47,9 +47,9 @@ export function CaptionSetupCard({
     };
   }, [file]);
 
-  const currentLang = useMemo(() => getLanguageOption(language), [language]);
-  const outputOptions = useMemo(() => getCaptionOutputOptions(language), [language]);
-  const selectedOutput = useMemo(() => getCaptionOutputOption(outputLanguage), [outputLanguage]);
+  const currentLang = getLanguageOption(language);
+  const outputOptions = getCaptionOutputOptions(language);
+  const selectedOutput = getCaptionOutputOption(outputLanguage);
 
   useEffect(() => {
     if (isWorking) return;
@@ -168,50 +168,35 @@ export function CaptionSetupCard({
 
           <div className="mt-4">
             <div className="mb-2 flex items-center justify-between gap-3">
-              <p id="caption-output-label" className="text-xs font-medium text-white">Caption output</p>
-              <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#f6c453]">Choose one</span>
+              <label htmlFor="caption-output" className="text-xs font-medium text-white">
+                Caption output
+              </label>
+              <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#f6c453]">
+                {outputLanguage === "same" ? "Automatic" : "Translate"}
+              </span>
             </div>
-            <div role="radiogroup" aria-labelledby="caption-output-label" className="grid gap-2">
-              {outputOptions.map((option) => {
-                const isSelected = outputLanguage === option.value;
-                const detail = option.value === "same" ? currentLang.nativeName : option.nativeName;
-
-                return (
-                  <button
-                    key={option.value}
-                    type="button"
-                    role="radio"
-                    aria-checked={isSelected}
-                    disabled={isWorking}
-                    onClick={() => onOutputLanguageChange(option.value)}
-                    className={
-                      "flex min-h-[72px] items-center gap-3 rounded-2xl border px-3 py-3 text-left transition " +
-                      (isSelected
-                        ? "border-[#f6c453]/70 bg-[#1e1b12] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
-                        : "border-white/10 bg-[#11110f] hover:border-white/20 hover:bg-[#171613]")
-                    }
-                  >
-                    <span className={
-                      "grid size-9 shrink-0 place-items-center rounded-xl " +
-                      (isSelected ? "bg-[#f6c453]/12 text-[#f6c453]" : "bg-white/5 text-[#777]")
-                    }>
-                      <Languages size={17} aria-hidden="true" />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-semibold text-white">{option.label}</span>
-                      <span className="mt-0.5 block truncate text-[11px] text-[#9a9f9f]">{detail}</span>
-                    </span>
-                    <span className={
-                      "grid size-6 shrink-0 place-items-center rounded-full border " +
-                      (isSelected ? "border-[#f6c453] bg-[#f6c453] text-black" : "border-white/15 text-transparent")
-                    }>
-                      <Check size={14} strokeWidth={3} aria-hidden="true" />
-                    </span>
-                  </button>
-                );
-              })}
+            <div className="relative">
+              <select
+                id="caption-output"
+                value={outputLanguage}
+                onChange={(event) => onOutputLanguageChange(event.target.value as CaptionOutputLanguage)}
+                disabled={isWorking}
+                aria-describedby="caption-output-help"
+                className="h-11 w-full cursor-pointer appearance-none rounded-xl border border-[#3e382b] bg-[#141311] px-4 pr-10 text-sm font-semibold text-white outline-none transition focus:border-[#f6c453] focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {outputOptions.map((option) => (
+                  <option key={option.value} value={option.value} className="bg-[#1c1b18] text-white">
+                    {option.value === "same"
+                      ? "Same as spoken — " + currentLang.label
+                      : option.label + " — " + option.nativeName}
+                  </option>
+                ))}
+              </select>
+              <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-[#999]">
+                ▼
+              </span>
             </div>
-            <p aria-live="polite" className="mt-2 text-[11px] leading-relaxed text-[#788187]">
+            <p id="caption-output-help" aria-live="polite" className="mt-2 text-[11px] leading-relaxed text-[#788187]">
               {selectedOutput.description}
               {outputLanguage === "same" ? "" : " The original caption timing is preserved."}
             </p>

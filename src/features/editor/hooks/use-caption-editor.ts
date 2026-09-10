@@ -4,13 +4,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { freePlan, MAX_CAPTION_FILE_BYTES } from "../data/editor-config";
 import { buildSrt, buildVtt, normalizeTranscript } from "../lib/captions";
 import { usePlanStore } from "../store/plan-store";
-import type {
-  CaptionExportFormat,
-  CaptionOutputLanguage,
-  CaptionSegment,
-  CaptionStyleId,
-  TranscriptPayload,
-  TranscriptionState,
+import {
+  isCaptionOutputLanguage,
+  type CaptionExportFormat,
+  type CaptionOutputLanguage,
+  type CaptionSegment,
+  type CaptionStyleId,
+  type TranscriptPayload,
+  type TranscriptionState,
 } from "../types/captions";
 
 const ACCEPTED_FILE_TYPES = new Set(["video/mp4", "video/quicktime", "video/webm", "audio/mpeg", "audio/wav", "audio/webm"]);
@@ -281,11 +282,7 @@ export function useCaptionEditor() {
     setFile(fileObj);
     setMediaUrl(nextUrl);
     setLanguage(stored.language || "en");
-    setOutputLanguage(
-      stored.outputMode === "en" || stored.outputMode === "hi" || stored.outputMode === "hinglish"
-        ? stored.outputMode
-        : "same",
-    );
+    setOutputLanguage(isCaptionOutputLanguage(stored.outputMode) ? stored.outputMode : "same");
     setSegments(stored.segments || []);
     setPast([]);
     setFuture([]);

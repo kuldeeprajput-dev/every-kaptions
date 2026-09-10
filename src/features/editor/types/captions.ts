@@ -27,7 +27,28 @@ export type CaptionStyleId =
 
 export type CaptionExportFormat = "srt" | "vtt" | "txt";
 
-export type CaptionOutputLanguage = "same" | "en" | "hi" | "hinglish";
+export const captionOutputLanguages = [
+  "same",
+  "hinglish",
+  "en",
+  "hi",
+  "te",
+  "ta",
+  "kn",
+  "ml",
+  "mr",
+  "bn",
+  "gu",
+  "pa",
+] as const;
+
+export type CaptionOutputLanguage = (typeof captionOutputLanguages)[number];
+
+const captionOutputLanguageSet = new Set<string>(captionOutputLanguages);
+
+export function isCaptionOutputLanguage(value: unknown): value is CaptionOutputLanguage {
+  return typeof value === "string" && captionOutputLanguageSet.has(value);
+}
 
 export type CaptionStyle = {
   id: CaptionStyleId;

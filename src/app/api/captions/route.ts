@@ -1,16 +1,26 @@
-import type { CaptionOutputLanguage, TranscriptPayload } from "@/features/editor/types/captions";
+import {
+  isCaptionOutputLanguage,
+  type CaptionOutputLanguage,
+  type TranscriptPayload,
+} from "@/features/editor/types/captions";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
 const GROQ_TRANSCRIPTION_URL = "https://api.groq.com/openai/v1/audio/transcriptions";
 const GROQ_CHAT_URL = "https://api.groq.com/openai/v1/chat/completions";
-const OUTPUT_LANGUAGES = new Set<CaptionOutputLanguage>(["same", "en", "hi", "hinglish"]);
-
 const OUTPUT_INSTRUCTIONS: Record<Exclude<CaptionOutputLanguage, "same">, string> = {
   en: "Write clear, natural English captions.",
   hi: "Write natural Hindi captions in Devanagari script.",
   hinglish: "Write natural conversational Hinglish in Latin script. Translate the meaning into Hindi while keeping commonly used English creator and technology terms.",
+  te: "Write natural Telugu captions in Telugu script.",
+  ta: "Write natural Tamil captions in Tamil script.",
+  kn: "Write natural Kannada captions in Kannada script.",
+  ml: "Write natural Malayalam captions in Malayalam script.",
+  mr: "Write natural Marathi captions in Devanagari script.",
+  bn: "Write natural Bengali captions in Bengali script.",
+  gu: "Write natural Gujarati captions in Gujarati script.",
+  pa: "Write natural Punjabi captions in Gurmukhi script.",
 };
 const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
 const SUPPORTED_TYPES = new Set([
@@ -25,10 +35,6 @@ const SUPPORTED_TYPES = new Set([
 
 function errorResponse(message: string, status: number) {
   return Response.json({ error: message }, { status });
-}
-
-function isOutputLanguage(value: unknown): value is CaptionOutputLanguage {
-  return typeof value === "string" && OUTPUT_LANGUAGES.has(value as CaptionOutputLanguage);
 }
 
 function needsConversion(spokenLanguage: unknown, outputLanguage: CaptionOutputLanguage) {
@@ -66,7 +72,7 @@ async function convertTranscript(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: process.env.GROQ_TRANSLATION_MODEL ?? "llama-3.1-8b-instant",
+      model: process.env.GROQ_TRANSLATION_MODEL ?? "openai/gpt-oss-20b",
       temperature: 0.1,
       max_completion_tokens: Math.min(2048, Math.max(300, Math.ceil(sourceJson.length * 0.7))),
       response_format: { type: "json_object" },
@@ -149,8 +155,8 @@ export async function POST(request: Request) {
     if (file.type && !SUPPORTED_TYPES.has(file.type)) {
       return errorResponse("Use an MP3, MP4, MOV, WAV, or WebM file.", 415);
     }
-    if (requestedOutput !== null && !isOutputLanguage(requestedOutput)) {
-      return errorResponse("Choose Same as spoken, English, Hindi, or Hinglish for caption output.", 400);
+    if (requestedOutput !== null && !isCaptionOutputLanguage(requestedOutput)) {
+      return errorResponse("Choose a supported caption output language.", 400);
     }
     const outputLanguage: CaptionOutputLanguage = requestedOutput === null ? "same" : requestedOutput;
 
