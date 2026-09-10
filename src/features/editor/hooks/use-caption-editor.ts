@@ -238,25 +238,36 @@ export function useCaptionEditor() {
   }, []);
 
   const downloadCaptions = useCallback((format: CaptionExportFormat) => {
-    if (segments.length === 0) return;
-    if (!plan.recordExport()) {
-      setError("Your three free exports are used. Upgrade to export more caption files.");
-      return;
+    if (segments.length === 0) return false;
+    if (!plan.canExport) {
+      setError("Your monthly exports limit is reached. Upgrade to export more caption files.");
+      return false;
     }
-    setError("");
-    let content = "";
-    if (format === "srt") content = buildSrt(segments);
-    else if (format === "vtt") content = buildVtt(segments);
-    else content = segments.map((s) => s.text).join("\n");
+    try {
+      setError("");
+      let content = "";
+      if (format === "srt") content = buildSrt(segments);
+      else if (format === "vtt") content = buildVtt(segments);
+      else content = segments.map((s) => s.text).join("\n");
 
-    const mime = format === "txt" ? "text/plain" : "text/plain;charset=utf-8";
-    const blob = new Blob([content], { type: mime });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${file?.name.replace(/\.[^.]+$/, "") || "captions"}.${format}`;
-    link.click();
-    URL.revokeObjectURL(url);
+      const mime = format === "txt" ? "text/plain" : "text/plain;charset=utf-8";
+      const blob = new Blob([content], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${file?.name.replace(/\.[^.]+$/, "") || "captions"}.${format}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      // ONLY record export quota after successful file delivery!
+      plan.recordExport();
+      return true;
+    } catch {
+      setError("Export failed. Your plan export count was not charged.");
+      return false;
+    }
   }, [file, plan, segments]);
 
   const loadStoredProject = useCallback((stored: {
