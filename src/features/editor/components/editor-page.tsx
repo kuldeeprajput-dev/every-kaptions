@@ -9,6 +9,7 @@ import { useCaptionEditor } from "../hooks/use-caption-editor";
 import { AccountMenu } from "./account-menu";
 import { CaptionSetupCard } from "./caption-setup-card";
 import { EditorSidebar } from "./editor-sidebar";
+import { MediaEditor } from "./media-editor";
 import { UploadCard } from "./upload-card";
 
 type ReelTab = "In progress" | "Finished";
@@ -23,6 +24,8 @@ export function EditorPage() {
   const selectFile = (file: File) => {
     if (editor.chooseFile(file)) setTab("In progress");
   };
+
+  if (editor.status === "ready") return <MediaEditor editor={editor} />;
 
   return (
     <main className="min-h-screen bg-[#080909] text-[#d5d5d5]">
