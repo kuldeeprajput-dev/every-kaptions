@@ -6,6 +6,7 @@ import { buildSrt, buildVtt, normalizeTranscript } from "../lib/captions";
 import { usePlanStore } from "../store/plan-store";
 import type {
   CaptionExportFormat,
+  CaptionOutputLanguage,
   CaptionSegment,
   CaptionStyleId,
   TranscriptPayload,
@@ -25,6 +26,7 @@ export function useCaptionEditor() {
   const [file, setFile] = useState<File | null>(null);
   const [mediaUrl, setMediaUrl] = useState("");
   const [language, setLanguage] = useState("en");
+  const [outputLanguage, setOutputLanguage] = useState<CaptionOutputLanguage>("same");
   const [status, setStatus] = useState<TranscriptionState>("idle");
   const [error, setError] = useState("");
   const [segments, setSegments] = useState<CaptionSegment[]>([]);
@@ -58,6 +60,7 @@ export function useCaptionEditor() {
     mediaUrlRef.current = nextUrl;
     setFile(nextFile);
     setMediaUrl(nextUrl);
+    setOutputLanguage("same");
     setSegments([]);
     setPast([]);
     setFuture([]);
@@ -90,7 +93,7 @@ export function useCaptionEditor() {
     const body = new FormData();
     body.append("file", file);
     body.append("language", language);
-    body.append("outputLanguage", language);
+    body.append("outputLanguage", outputLanguage);
 
     try {
       const response = await fetch("/api/captions", { method: "POST", body });
@@ -112,7 +115,7 @@ export function useCaptionEditor() {
       setError(caughtError instanceof Error ? caughtError.message : "Captions could not be created. Please try again.");
       setStatus("error");
     }
-  }, [file, language, recordTranscription]);
+  }, [file, language, outputLanguage, recordTranscription]);
 
   const activeSegment = useMemo(
     () => segments.find((segment) => currentTime >= segment.start && currentTime < segment.end) ?? null,
@@ -224,6 +227,7 @@ export function useCaptionEditor() {
     mediaUrlRef.current = "";
     setFile(null);
     setMediaUrl("");
+    setOutputLanguage("same");
     setSegments([]);
     setPast([]);
     setFuture([]);
@@ -262,6 +266,7 @@ export function useCaptionEditor() {
     fileBlob: Blob;
     fileType: string;
     language: string;
+    outputMode?: CaptionOutputLanguage;
     segments: CaptionSegment[];
     duration: number;
     styleId?: string;
@@ -276,6 +281,11 @@ export function useCaptionEditor() {
     setFile(fileObj);
     setMediaUrl(nextUrl);
     setLanguage(stored.language || "en");
+    setOutputLanguage(
+      stored.outputMode === "en" || stored.outputMode === "hi" || stored.outputMode === "hinglish"
+        ? stored.outputMode
+        : "same",
+    );
     setSegments(stored.segments || []);
     setPast([]);
     setFuture([]);
@@ -292,6 +302,7 @@ export function useCaptionEditor() {
     file,
     mediaUrl,
     language,
+    outputLanguage,
     status,
     error,
     segments,
@@ -314,6 +325,7 @@ export function useCaptionEditor() {
     deleteSegment,
     downloadCaptions,
     setLanguage,
+    setOutputLanguage,
     setDuration,
     setCurrentTime,
     setSelectedSegmentId,

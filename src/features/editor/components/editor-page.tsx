@@ -94,12 +94,14 @@ export function EditorPage() {
               <CaptionSetupCard
                 file={editor.file}
                 language={editor.language}
+                outputLanguage={editor.outputLanguage}
                 status={editor.status}
                 error={editor.error}
                 captionCount={editor.segments.length}
                 remainingMinutes={plan.remainingMinutes}
                 canTranscribe={plan.canTranscribe}
                 onLanguageChange={editor.setLanguage}
+                onOutputLanguageChange={editor.setOutputLanguage}
                 onGenerate={editor.transcribe}
                 onDownload={() => editor.downloadCaptions("srt")}
                 onReset={editor.reset}

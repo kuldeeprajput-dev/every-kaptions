@@ -27,6 +27,8 @@ export type CaptionStyleId =
 
 export type CaptionExportFormat = "srt" | "vtt" | "txt";
 
+export type CaptionOutputLanguage = "same" | "en" | "hi" | "hinglish";
+
 export type CaptionStyle = {
   id: CaptionStyleId;
   name: string;

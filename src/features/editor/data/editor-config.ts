@@ -1,4 +1,4 @@
-import type { CaptionStyle } from "../types/captions";
+import type { CaptionOutputLanguage, CaptionStyle } from "../types/captions";
 
 export const MAX_CAPTION_FILE_BYTES = 25 * 1024 * 1024;
 
@@ -7,7 +7,6 @@ export type LanguageOption = {
   label: string;
   nativeName: string;
   supported: boolean;
-  outputDescription: string;
 };
 
 export const indianLanguageOptions: LanguageOption[] = [
@@ -16,98 +15,84 @@ export const indianLanguageOptions: LanguageOption[] = [
     label: "English",
     nativeName: "English",
     supported: true,
-    outputDescription: "English speech stays in English.",
   },
   {
     value: "hi",
     label: "Hindi",
     nativeName: "Hindi (हिंदी)",
     supported: true,
-    outputDescription: "Hindi speech stays in Hindi.",
   },
   {
     value: "te",
     label: "Telugu",
     nativeName: "Telugu (తెలుగు)",
     supported: true,
-    outputDescription: "Telugu speech stays in Telugu.",
   },
   {
     value: "ta",
     label: "Tamil",
     nativeName: "Tamil (தமிழ்)",
     supported: true,
-    outputDescription: "Tamil speech stays in Tamil.",
   },
   {
     value: "kn",
     label: "Kannada",
     nativeName: "Kannada (ಕನ್ನಡ)",
     supported: true,
-    outputDescription: "Kannada speech stays in Kannada.",
   },
   {
     value: "ml",
     label: "Malayalam",
     nativeName: "Malayalam (മലയാളം)",
     supported: true,
-    outputDescription: "Malayalam speech stays in Malayalam.",
   },
   {
     value: "mr",
     label: "Marathi",
     nativeName: "Marathi (मराठी)",
     supported: true,
-    outputDescription: "Marathi speech stays in Marathi.",
   },
   {
     value: "bn",
     label: "Bengali",
     nativeName: "Bengali (বাংলা)",
     supported: true,
-    outputDescription: "Bengali speech stays in Bengali.",
   },
   {
     value: "gu",
     label: "Gujarati",
     nativeName: "Gujarati (ગુજરાતી)",
     supported: true,
-    outputDescription: "Gujarati speech stays in Gujarati.",
   },
   {
     value: "pa",
     label: "Punjabi",
     nativeName: "Punjabi (ਪੰਜਾਬੀ)",
     supported: true,
-    outputDescription: "Punjabi speech stays in Punjabi.",
   },
   {
     value: "or",
     label: "Odia",
     nativeName: "Odia (ଓଡ଼ିଆ)",
     supported: false,
-    outputDescription: "Odia captioning is being prepared.",
   },
   {
     value: "as",
     label: "Assamese",
     nativeName: "Assamese (অসমীয়া)",
     supported: false,
-    outputDescription: "Assamese captioning is being prepared.",
   },
   {
     value: "bho",
     label: "Bhojpuri",
     nativeName: "Bhojpuri (भोजपुरी)",
     supported: false,
-    outputDescription: "Bhojpuri captioning is being prepared.",
   },
   {
     value: "mai",
     label: "Maithili",
     nativeName: "Maithili (मैथिली)",
     supported: false,
-    outputDescription: "Maithili captioning is being prepared.",
   },
 ];
 
@@ -118,6 +103,50 @@ export const languageOptions = indianLanguageOptions.map((option) => ({
 
 export function getLanguageOption(value: string) {
   return indianLanguageOptions.find((option) => option.value === value) ?? indianLanguageOptions[0];
+}
+
+export type CaptionOutputOption = {
+  value: CaptionOutputLanguage;
+  label: string;
+  nativeName: string;
+  description: string;
+};
+
+const captionOutputOptions: CaptionOutputOption[] = [
+  {
+    value: "same",
+    label: "Same as spoken",
+    nativeName: "Original language",
+    description: "Fastest option. Keeps the words in the language used in the recording.",
+  },
+  {
+    value: "hinglish",
+    label: "Hinglish",
+    nativeName: "Hindi + English",
+    description: "Natural Hindi in English letters, with familiar English words kept where they sound better.",
+  },
+  {
+    value: "hi",
+    label: "Hindi",
+    nativeName: "हिंदी",
+    description: "Natural Hindi captions written in Devanagari.",
+  },
+  {
+    value: "en",
+    label: "English",
+    nativeName: "English",
+    description: "Clear English captions with names and meaning preserved.",
+  },
+];
+
+export function getCaptionOutputOptions(spokenLanguage: string) {
+  return captionOutputOptions.filter(
+    (option) => option.value === "same" || option.value === "hinglish" || option.value !== spokenLanguage,
+  );
+}
+
+export function getCaptionOutputOption(value: CaptionOutputLanguage) {
+  return captionOutputOptions.find((option) => option.value === value) ?? captionOutputOptions[0];
 }
 
 export const captionStyles: CaptionStyle[] = [
