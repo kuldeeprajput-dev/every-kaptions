@@ -193,7 +193,7 @@ export function CaptionSetupCard({
                   >
                     <span className={
                       "grid size-9 shrink-0 place-items-center rounded-xl " +
-                      (isSelected ? "bg-[#f6c453]/12 text-[#f6c453]" : "bg-white/5 text-[#777]")}
+                      (isSelected ? "bg-[#f6c453]/12 text-[#f6c453]" : "bg-white/5 text-[#777]")
                     }>
                       <Languages size={17} aria-hidden="true" />
                     </span>
