@@ -15,6 +15,8 @@ export type CaptionSegment = {
 
 export type CaptionStyleId = "yellow" | "minimal" | "classic" | "dark";
 
+export type CaptionExportFormat = "srt" | "vtt";
+
 export type CaptionStyle = {
   id: CaptionStyleId;
   name: string;
