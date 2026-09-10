@@ -5,5 +5,5 @@ export const brand = {
   email: "hello@everykaptions.com",
   socialLabel: "X / Twitter",
   socialUrl: "https://x.com/kuldeepdotcom",
-  profileImage: "/media/kuldeep-profile.png",
+  profileImage: "/media/founder.webp",
 } as const;
