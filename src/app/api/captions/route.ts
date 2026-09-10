@@ -29,6 +29,7 @@ export async function POST(request: Request) {
     const formData = await request.formData();
     const file = formData.get("file");
     const language = formData.get("language");
+    const outputLanguage = formData.get("outputLanguage");
 
     if (!(file instanceof File)) return errorResponse("Choose a video or audio file first.", 400);
     if (file.size === 0) return errorResponse("The selected file is empty.", 400);
@@ -38,12 +39,19 @@ export async function POST(request: Request) {
     if (file.type && !SUPPORTED_TYPES.has(file.type)) {
       return errorResponse("Use an MP3, MP4, MOV, WAV, or WebM file.", 415);
     }
+    if (outputLanguage !== null && (typeof outputLanguage !== "string" || outputLanguage !== language)) {
+      return errorResponse("Caption output must match the selected spoken language.", 400);
+    }
 
     const providerBody = new FormData();
     providerBody.append("file", file, file.name);
     providerBody.append("model", process.env.GROQ_TRANSCRIPTION_MODEL ?? "whisper-large-v3-turbo");
     providerBody.append("response_format", "verbose_json");
     providerBody.append("temperature", "0");
+    providerBody.append(
+      "prompt",
+      "Transcribe faithfully in the selected spoken language. Do not translate the speech into another language.",
+    );
     providerBody.append("timestamp_granularities[]", "word");
     if (typeof language === "string" && language && language !== "auto") {
       providerBody.append("language", language);

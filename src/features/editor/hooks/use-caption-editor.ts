@@ -84,6 +84,7 @@ export function useCaptionEditor() {
     const body = new FormData();
     body.append("file", file);
     body.append("language", language);
+    body.append("outputLanguage", language);
 
     try {
       const response = await fetch("/api/captions", { method: "POST", body });

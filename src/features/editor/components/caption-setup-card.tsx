@@ -1,5 +1,8 @@
-import { AlertCircle, Check, FileVideo, LoaderCircle, Sparkles, X } from "lucide-react";
-import { formatFileSize, languageOptions } from "../data/editor-config";
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { AlertCircle, Check, Languages, LoaderCircle, X } from "lucide-react";
+import { getLanguageOption, indianLanguageOptions } from "../data/editor-config";
 import type { TranscriptionState } from "../types/captions";
 
 type Props = {
@@ -7,12 +10,12 @@ type Props = {
   language: string;
   status: TranscriptionState;
   error: string;
-  captionCount: number;
-  remainingMinutes: number;
+  captionCount?: number;
+  remainingMinutes?: number;
   canTranscribe: boolean;
   onLanguageChange: (language: string) => void;
   onGenerate: () => void;
-  onDownload: () => void;
+  onDownload?: () => void;
   onReset: () => void;
 };
 
@@ -21,96 +24,196 @@ export function CaptionSetupCard({
   language,
   status,
   error,
-  captionCount,
   remainingMinutes,
   canTranscribe,
   onLanguageChange,
   onGenerate,
-  onDownload,
   onReset,
 }: Props) {
   const isWorking = status === "transcribing" || status === "uploading";
-  const isReady = status === "ready";
+
+  const [mediaUrl, setMediaUrl] = useState<string>("");
+
+  useEffect(() => {
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    setMediaUrl(url);
+    return () => {
+      URL.revokeObjectURL(url);
+    };
+  }, [file]);
+
+  const currentLang = useMemo(() => getLanguageOption(language), [language]);
+
+  useEffect(() => {
+    if (isWorking) return;
+
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onReset();
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [isWorking, onReset]);
 
   return (
-    <section className="mt-5 w-full max-w-xl rounded-2xl border border-white/10 bg-[#121313] p-4 shadow-2xl shadow-black/20 sm:p-6">
-      <div className="flex items-start gap-3">
-        <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-amber/10 text-amber">
-          <FileVideo size={21} aria-hidden="true" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-cream">{file.name}</p>
-          <p className="mt-1 text-xs text-[#788187]">{formatFileSize(file.size)} · Ready to process</p>
-        </div>
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 p-0 sm:items-center sm:p-4 backdrop-blur-sm animate-in fade-in duration-200">
+      <button
+        type="button"
+        className="absolute inset-0 w-full h-full cursor-default bg-transparent"
+        onClick={() => {
+          if (!isWorking) onReset();
+        }}
+        aria-label="Close modal"
+      />
+
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-busy={isWorking}
+        aria-labelledby="media-setup-title"
+        aria-describedby="media-setup-description"
+        className="relative z-10 max-h-[calc(100dvh-1rem)] w-full max-w-[460px] overflow-y-auto rounded-t-[24px] border border-white/10 bg-[#161513] p-5 shadow-2xl font-sans sm:max-h-[calc(100dvh-2rem)] sm:rounded-[24px] sm:p-6">
         <button
           type="button"
           onClick={onReset}
           disabled={isWorking}
-          className="grid size-9 shrink-0 place-items-center rounded-lg text-[#7d8589] transition hover:bg-white/5 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
-          aria-label="Remove selected file"
+          className="absolute right-4 top-4 grid size-8 place-items-center rounded-full text-[#777] hover:bg-white/10 hover:text-white transition cursor-pointer disabled:opacity-40"
+          aria-label="Close setup modal"
         >
           <X size={18} />
         </button>
-      </div>
 
-      {!isReady ? (
-        <>
-          <div className="mt-6">
-            <div className="flex items-center justify-between gap-3">
-              <label htmlFor="caption-language" className="text-sm font-semibold text-cream">Spoken language</label>
-              <span className="text-[10px] font-semibold text-amber">{remainingMinutes.toFixed(1)} min remaining</span>
-            </div>
-            <p className="mt-1 text-xs leading-5 text-[#788187]">Choose a language for better names and word timing.</p>
+        <h2 id="media-setup-title" className="text-center text-xl font-bold tracking-tight text-white sm:text-2xl">
+          Prepare your media
+        </h2>
+        <p id="media-setup-description" className="mt-1.5 text-center text-xs leading-relaxed text-[#8d8d89]">
+          Choose how captions should appear before upload starts.
+        </p>
+
+        <div className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-black aspect-video flex items-center justify-center relative">
+          {mediaUrl ? (
+            file.type.startsWith("audio/") ? (
+              <div className="flex flex-col items-center justify-center p-4 text-center">
+                <audio src={mediaUrl} controls className="w-full max-w-[280px]" />
+                <p className="mt-2 text-xs text-[#888]">{file.name}</p>
+              </div>
+            ) : (
+              <video
+                src={mediaUrl}
+                controls
+                playsInline
+                className="h-full w-full object-contain"
+                preload="metadata"
+              />
+            )
+          ) : null}
+        </div>
+
+        <div aria-live="polite" className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs">
+          <span className="flex items-center gap-2 font-medium text-[#4ade80]">
+            <span className="size-2 rounded-full bg-[#4ade80]" />
+            Ready for processing
+          </span>
+          <span className="text-[#7f878a]">
+            {(file.size / (1024 * 1024)).toFixed(1)} MB
+            {typeof remainingMinutes === "number" ? " · " + remainingMinutes.toFixed(1) + " min left" : ""}
+          </span>
+        </div>
+
+        <div className="mt-5">
+          <p className="text-[10px] font-bold tracking-[0.14em] uppercase text-[#6f7b82]">
+            LANGUAGE SETTINGS
+          </p>
+
+          <label htmlFor="spoken-lang" className="mt-3 block text-xs font-medium text-white">
+            What language is spoken?
+          </label>
+          <div className="mt-1.5 relative">
             <select
-              id="caption-language"
+              id="spoken-lang"
               value={language}
-              onChange={(event) => onLanguageChange(event.target.value)}
+              onChange={(e) => onLanguageChange(e.target.value)}
               disabled={isWorking}
-              className="mt-3 min-h-11 w-full rounded-xl border border-white/10 bg-[#0b0c0c] px-3 text-sm text-cream outline-none transition focus:border-amber/60"
+              style={{ outline: "none" }}
+              className="w-full h-11 appearance-none rounded-xl border border-[#3e382b] bg-[#141311] px-4 text-sm font-semibold text-white outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[#f6c453] transition cursor-pointer"
             >
-              {languageOptions.map((option) => (
-                <option key={option.value} value={option.value}>{option.label}</option>
+              {indianLanguageOptions.map((option) => (
+                <option
+                  key={option.value}
+                  value={option.value}
+                  disabled={!option.supported}
+                  className={option.supported ? "bg-[#1c1b18] text-white" : "bg-[#1c1b18] text-[#666]"}
+                >
+                  {option.nativeName}
+                  {!option.supported ? " (Coming soon)" : ""}
+                </option>
               ))}
             </select>
+            <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-[#999]">
+              ▼
+            </div>
           </div>
+          <p className="mt-1.5 text-[11px] text-[#788187]">
+            Choose the language actually spoken in your recording.
+          </p>
 
-          <div className="mt-5 rounded-xl border border-white/8 bg-black/20 p-3">
-            <p className="flex items-center gap-2 text-xs font-semibold text-[#a8afb2]">
-              <Sparkles size={14} className="text-amber" /> What happens next
+          <div className="mt-4">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <p className="text-xs font-medium text-white">Caption output</p>
+              <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#f6c453]">Automatic</span>
+            </div>
+            <div
+              role="status"
+              className="flex min-h-16 items-center gap-3 rounded-2xl border border-[#f6c453]/55 bg-[#1e1b12] px-3.5 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+            >
+              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#f6c453]/12 text-[#f6c453]">
+                <Languages size={17} aria-hidden="true" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-semibold text-white">Same as spoken</span>
+                <span className="mt-0.5 block truncate text-[11px] text-[#9a9f9f]">{currentLang.nativeName}</span>
+              </span>
+              <span className="grid size-6 shrink-0 place-items-center rounded-full bg-[#f6c453] text-black">
+                <Check size={14} strokeWidth={3} aria-hidden="true" />
+              </span>
+            </div>
+            <p className="mt-2 text-[11px] leading-relaxed text-[#788187]">
+              {currentLang.outputDescription} EveryKaptions keeps the transcript in the selected spoken language.
             </p>
-            <ol className="mt-3 grid gap-2 text-xs text-[#788187] sm:grid-cols-3">
-              <li><strong className="text-cream">1.</strong> Upload audio</li>
-              <li><strong className="text-cream">2.</strong> Create captions</li>
-              <li><strong className="text-cream">3.</strong> Review and export</li>
-            </ol>
           </div>
-
-          {error ? (
-            <p role="alert" className="mt-4 flex items-start gap-2 rounded-xl bg-red-500/10 px-3 py-2.5 text-xs leading-5 text-red-300">
-              <AlertCircle size={16} className="mt-0.5 shrink-0" /> {error}
-            </p>
-          ) : null}
-
-          <button
-            type="button"
-            onClick={onGenerate}
-            disabled={isWorking || !canTranscribe}
-            className="mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-amber px-5 text-sm font-bold text-black transition hover:bg-[#ffd467] disabled:cursor-wait disabled:opacity-70"
-          >
-            {isWorking ? <LoaderCircle size={18} className="animate-spin" /> : <Sparkles size={17} />}
-            {isWorking ? "Listening and creating captions…" : canTranscribe ? "Create captions" : "Transcription limit reached"}
-          </button>
-          <p className="mt-3 text-center text-[11px] text-[#626a6e]">Your file is sent securely to Groq for transcription.</p>
-        </>
-      ) : (
-        <div className="mt-6 rounded-xl border border-emerald-400/20 bg-emerald-400/5 p-4">
-          <p className="flex items-center gap-2 font-semibold text-emerald-300"><Check size={18} /> Captions are ready</p>
-          <p className="mt-2 text-sm leading-6 text-[#929a9e]">We found {captionCount} editable caption segments. Download them now or start over with another recording.</p>
-          <button type="button" onClick={onDownload} className="mt-4 min-h-11 rounded-xl bg-cream px-5 text-sm font-bold text-black">
-            Download .SRT
-          </button>
         </div>
-      )}
-    </section>
+
+        {error ? (
+          <p role="alert" className="mt-4 flex items-start gap-2 rounded-xl bg-red-500/10 px-3 py-2.5 text-xs text-red-300">
+            <AlertCircle size={15} className="mt-0.5 shrink-0" /> {error}
+          </p>
+        ) : null}
+
+        <button
+          type="button"
+          onClick={onGenerate}
+          disabled={isWorking || !canTranscribe || !currentLang.supported}
+          className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#f4ecdc] text-sm font-bold text-black shadow-[0_0_24px_rgba(244,236,220,0.22)] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+        >
+          {isWorking ? (
+            <>
+              <LoaderCircle size={18} className="animate-spin" />
+              <span>Processing video...</span>
+            </>
+          ) : (
+            <span>Continue</span>
+          )}
+        </button>
+
+        <button
+          type="button"
+          onClick={onReset}
+          disabled={isWorking}
+          className="mt-2.5 w-full text-center text-xs font-semibold text-[#888888] hover:text-white transition cursor-pointer py-1"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
   );
 }
