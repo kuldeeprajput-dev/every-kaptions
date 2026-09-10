@@ -24,7 +24,7 @@ function fileError(file: File) {
 export function useCaptionEditor() {
   const [file, setFile] = useState<File | null>(null);
   const [mediaUrl, setMediaUrl] = useState("");
-  const [language, setLanguage] = useState("auto");
+  const [language, setLanguage] = useState("en");
   const [status, setStatus] = useState<TranscriptionState>("idle");
   const [error, setError] = useState("");
   const [segments, setSegments] = useState<CaptionSegment[]>([]);
@@ -32,7 +32,10 @@ export function useCaptionEditor() {
   const [currentTime, setCurrentTime] = useState(0);
   const [selectedSegmentId, setSelectedSegmentId] = useState("");
   const [styleId, setStyleId] = useState<CaptionStyleId>("yellow");
+  const [past, setPast] = useState<CaptionSegment[][]>([]);
+  const [future, setFuture] = useState<CaptionSegment[][]>([]);
   const mediaUrlRef = useRef("");
+  const lastTextEditRef = useRef<{ segmentId: string; updatedAt: number } | null>(null);
   const recordTranscription = usePlanStore((state) => state.recordTranscription);
   const recordExport = usePlanStore((state) => state.recordExport);
 
@@ -56,6 +59,9 @@ export function useCaptionEditor() {
     setFile(nextFile);
     setMediaUrl(nextUrl);
     setSegments([]);
+    setPast([]);
+    setFuture([]);
+    lastTextEditRef.current = null;
     setDuration(0);
     setCurrentTime(0);
     setSelectedSegmentId("");
@@ -94,7 +100,11 @@ export function useCaptionEditor() {
       const result = normalizeTranscript(payload);
       if (result.segments.length === 0) throw new Error("No speech was found. Try a video with clearer audio.");
       setSegments(result.segments);
+      setPast([]);
+      setFuture([]);
+      lastTextEditRef.current = null;
       setDuration(result.duration);
+      setCurrentTime(0);
       setSelectedSegmentId(result.segments[0]?.id ?? "");
       recordTranscription(result.duration);
       setStatus("ready");
@@ -109,9 +119,51 @@ export function useCaptionEditor() {
     [currentTime, segments],
   );
 
+  const pushHistory = useCallback((nextSegments: CaptionSegment[]) => {
+    setPast((previous) => [...previous.slice(-29), segments]);
+    setFuture([]);
+    lastTextEditRef.current = null;
+    setSegments(nextSegments);
+  }, [segments]);
+
+  const undo = useCallback(() => {
+    const previous = past.at(-1);
+    if (!previous) return;
+    setPast((history) => history.slice(0, -1));
+    setFuture((history) => [segments, ...history].slice(0, 30));
+    setSegments(previous);
+    setSelectedSegmentId((selectedId) =>
+      previous.some((segment) => segment.id === selectedId) ? selectedId : (previous[0]?.id ?? ""),
+    );
+    lastTextEditRef.current = null;
+  }, [past, segments]);
+
+  const redo = useCallback(() => {
+    const next = future[0];
+    if (!next) return;
+    setFuture((history) => history.slice(1));
+    setPast((history) => [...history.slice(-29), segments]);
+    setSegments(next);
+    setSelectedSegmentId((selectedId) =>
+      next.some((segment) => segment.id === selectedId) ? selectedId : (next[0]?.id ?? ""),
+    );
+    lastTextEditRef.current = null;
+  }, [future, segments]);
+
   const updateSegment = useCallback((segmentId: string, text: string) => {
-    setSegments((current) => current.map((segment) => (segment.id === segmentId ? { ...segment, text } : segment)));
-  }, []);
+    const now = Date.now();
+    const lastEdit = lastTextEditRef.current;
+    const beginsNewEdit = !lastEdit || lastEdit.segmentId !== segmentId || now - lastEdit.updatedAt > 800;
+
+    if (beginsNewEdit) {
+      setPast((history) => [...history.slice(-29), segments]);
+    }
+    setFuture([]);
+    lastTextEditRef.current = { segmentId, updatedAt: now };
+    setSegments((current) =>
+      current.map((segment) => (segment.id === segmentId ? { ...segment, text } : segment)),
+    );
+  }, [segments]);
 
   const splitSegment = useCallback((segmentId: string) => {
     const index = segments.findIndex((segment) => segment.id === segmentId);
@@ -139,9 +191,9 @@ export function useCaptionEditor() {
     };
     const next = [...segments];
     next.splice(index, 1, first, second);
-    setSegments(next);
+    pushHistory(next);
     setSelectedSegmentId(second.id);
-  }, [currentTime, segments]);
+  }, [currentTime, pushHistory, segments]);
 
   const mergeWithNext = useCallback((segmentId: string) => {
     const index = segments.findIndex((segment) => segment.id === segmentId);
@@ -157,14 +209,15 @@ export function useCaptionEditor() {
     };
     const next = [...segments];
     next.splice(index, 2, merged);
-    setSegments(next);
+    pushHistory(next);
     setSelectedSegmentId(merged.id);
-  }, [segments]);
+  }, [pushHistory, segments]);
 
   const deleteSegment = useCallback((segmentId: string) => {
-    setSegments((current) => current.filter((segment) => segment.id !== segmentId));
+    const next = segments.filter((segment) => segment.id !== segmentId);
+    pushHistory(next);
     setSelectedSegmentId("");
-  }, []);
+  }, [pushHistory, segments]);
 
   const reset = useCallback(() => {
     if (mediaUrlRef.current) URL.revokeObjectURL(mediaUrlRef.current);
@@ -172,6 +225,9 @@ export function useCaptionEditor() {
     setFile(null);
     setMediaUrl("");
     setSegments([]);
+    setPast([]);
+    setFuture([]);
+    lastTextEditRef.current = null;
     setDuration(0);
     setCurrentTime(0);
     setSelectedSegmentId("");
@@ -186,8 +242,13 @@ export function useCaptionEditor() {
       return;
     }
     setError("");
-    const content = format === "srt" ? buildSrt(segments) : buildVtt(segments);
-    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+    let content = "";
+    if (format === "srt") content = buildSrt(segments);
+    else if (format === "vtt") content = buildVtt(segments);
+    else content = segments.map((s) => s.text).join("\n");
+
+    const mime = format === "txt" ? "text/plain" : "text/plain;charset=utf-8";
+    const blob = new Blob([content], { type: mime });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
@@ -195,6 +256,37 @@ export function useCaptionEditor() {
     link.click();
     URL.revokeObjectURL(url);
   }, [file, recordExport, segments]);
+
+  const loadStoredProject = useCallback((stored: {
+    name: string;
+    fileBlob: Blob;
+    fileType: string;
+    language: string;
+    segments: CaptionSegment[];
+    duration: number;
+    styleId?: string;
+  }) => {
+    const fileObj = new File([stored.fileBlob], stored.name, {
+      type: stored.fileType || "video/mp4",
+    });
+    if (mediaUrlRef.current) URL.revokeObjectURL(mediaUrlRef.current);
+    const nextUrl = URL.createObjectURL(fileObj);
+    mediaUrlRef.current = nextUrl;
+
+    setFile(fileObj);
+    setMediaUrl(nextUrl);
+    setLanguage(stored.language || "en");
+    setSegments(stored.segments || []);
+    setPast([]);
+    setFuture([]);
+    lastTextEditRef.current = null;
+    setDuration(stored.duration || 0);
+    setCurrentTime(0);
+    if (stored.styleId) setStyleId(stored.styleId as CaptionStyleId);
+    setSelectedSegmentId(stored.segments?.[0]?.id ?? "");
+    setStatus("ready");
+    setError("");
+  }, []);
 
   return {
     file,
@@ -208,9 +300,14 @@ export function useCaptionEditor() {
     selectedSegmentId,
     styleId,
     activeSegment,
+    canUndo: past.length > 0,
+    canRedo: future.length > 0,
+    undo,
+    redo,
     chooseFile,
     transcribe,
     reset,
+    loadStoredProject,
     updateSegment,
     splitSegment,
     mergeWithNext,

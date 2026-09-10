@@ -13,9 +13,19 @@ export type CaptionSegment = {
   words: CaptionWord[];
 };
 
-export type CaptionStyleId = "yellow" | "minimal" | "classic" | "dark";
+export type CaptionStyleId =
+  | "yellow"
+  | "minimal"
+  | "classic"
+  | "dark"
+  | "viral_alex"
+  | "hormozi"
+  | "neon"
+  | "subtitles"
+  | "red_box"
+  | "gradient";
 
-export type CaptionExportFormat = "srt" | "vtt";
+export type CaptionExportFormat = "srt" | "vtt" | "txt";
 
 export type CaptionStyle = {
   id: CaptionStyleId;
