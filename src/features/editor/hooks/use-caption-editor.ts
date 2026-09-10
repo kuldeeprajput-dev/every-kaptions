@@ -1,25 +1,29 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { freePlan, MAX_CAPTION_FILE_BYTES } from "../data/editor-config";
+import { getCaptionMediaType, MAX_CAPTION_FILE_BYTES } from "../data/editor-config";
+import {
+  discardCaptionUpload,
+  needsCaptionTranslation,
+  transcribeUploadedMedia,
+  translateCaptionTranscript,
+  uploadCaptionMedia,
+} from "../lib/caption-api";
 import { buildSrt, buildVtt, normalizeTranscript } from "../lib/captions";
-import { usePlanStore, usePlanSummary } from "../store/plan-store";
+import { usePlanSummary } from "../store/plan-store";
 import {
   isCaptionOutputLanguage,
   type CaptionExportFormat,
   type CaptionOutputLanguage,
   type CaptionSegment,
   type CaptionStyleId,
-  type TranscriptPayload,
   type TranscriptionState,
 } from "../types/captions";
-
-const ACCEPTED_FILE_TYPES = new Set(["video/mp4", "video/quicktime", "video/webm", "audio/mpeg", "audio/wav", "audio/webm"]);
 
 function fileError(file: File) {
   if (file.size === 0) return "This file is empty. Choose another recording.";
   if (file.size > MAX_CAPTION_FILE_BYTES) return "Choose a file smaller than 25 MB for transcription.";
-  if (file.type && !ACCEPTED_FILE_TYPES.has(file.type)) return "Choose an MP4, MOV, WebM, MP3, or WAV file.";
+  if (!getCaptionMediaType(file)) return "Choose an MP4, MOV, WebM, MP3, or WAV file.";
   return "";
 }
 
@@ -29,6 +33,7 @@ export function useCaptionEditor() {
   const [language, setLanguage] = useState("en");
   const [outputLanguage, setOutputLanguage] = useState<CaptionOutputLanguage>("same");
   const [status, setStatus] = useState<TranscriptionState>("idle");
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState("");
   const [segments, setSegments] = useState<CaptionSegment[]>([]);
   const [duration, setDuration] = useState(0);
@@ -69,6 +74,7 @@ export function useCaptionEditor() {
     setCurrentTime(0);
     setSelectedSegmentId("");
     setError("");
+    setUploadProgress(0);
     setStatus("idle");
     return true;
   }, []);
@@ -87,17 +93,24 @@ export function useCaptionEditor() {
     }
 
     setError("");
-    setStatus("transcribing");
-    const body = new FormData();
-    body.append("file", file);
-    body.append("language", language);
-    body.append("outputLanguage", outputLanguage);
+    setUploadProgress(0);
+    setStatus("uploading");
+    let temporaryPathname = "";
 
     try {
-      const response = await fetch("/api/captions", { method: "POST", body });
-      const payload = (await response.json()) as TranscriptPayload & { error?: string };
-      if (!response.ok) throw new Error(payload.error || "Captions could not be created.");
+      const uploadedMedia = await uploadCaptionMedia(file, setUploadProgress);
+      temporaryPathname = uploadedMedia.pathname;
 
+      setStatus("transcribing");
+      let payload = await transcribeUploadedMedia(uploadedMedia, file, language);
+      temporaryPathname = "";
+
+      if (needsCaptionTranslation(language, outputLanguage)) {
+        setStatus("translating");
+        payload = await translateCaptionTranscript(payload, outputLanguage);
+      }
+
+      setStatus("preparing");
       const result = normalizeTranscript(payload);
       if (result.segments.length === 0) throw new Error("No speech was found. Try a video with clearer audio.");
       setSegments(result.segments);
@@ -108,8 +121,10 @@ export function useCaptionEditor() {
       setCurrentTime(0);
       setSelectedSegmentId(result.segments[0]?.id ?? "");
       plan.recordTranscription(result.duration);
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
       setStatus("ready");
     } catch (caughtError) {
+      if (temporaryPathname) await discardCaptionUpload(temporaryPathname);
       setError(caughtError instanceof Error ? caughtError.message : "Captions could not be created. Please try again.");
       setStatus("error");
     }
@@ -234,6 +249,7 @@ export function useCaptionEditor() {
     setCurrentTime(0);
     setSelectedSegmentId("");
     setError("");
+    setUploadProgress(0);
     setStatus("idle");
   }, []);
 
@@ -309,6 +325,7 @@ export function useCaptionEditor() {
     language,
     outputLanguage,
     status,
+    uploadProgress,
     error,
     segments,
     duration,

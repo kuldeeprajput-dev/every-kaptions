@@ -10,6 +10,7 @@ type Props = {
   language: string;
   outputLanguage: CaptionOutputLanguage;
   status: TranscriptionState;
+  uploadProgress: number;
   error: string;
   captionCount?: number;
   remainingMinutes?: number;
@@ -26,6 +27,7 @@ export function CaptionSetupCard({
   language,
   outputLanguage,
   status,
+  uploadProgress,
   error,
   remainingMinutes,
   canTranscribe,
@@ -34,7 +36,20 @@ export function CaptionSetupCard({
   onGenerate,
   onReset,
 }: Props) {
-  const isWorking = status === "transcribing" || status === "uploading";
+  const isWorking = ["uploading", "transcribing", "translating", "preparing"].includes(status);
+  const willTranslate = outputLanguage !== "same";
+  const progressSteps = willTranslate
+    ? ["Upload", "Transcribe", "Translate", "Prepare"]
+    : ["Upload", "Transcribe", "Prepare"];
+  const progressStep = status === "uploading"
+    ? { label: `Uploading media · ${uploadProgress}%`, index: 0 }
+    : status === "transcribing"
+      ? { label: "Listening and creating captions", index: 1 }
+      : status === "translating"
+        ? { label: "Translating into your chosen language", index: 2 }
+        : status === "preparing"
+          ? { label: "Preparing your editor", index: progressSteps.length - 1 }
+          : null;
 
   const [mediaUrl, setMediaUrl] = useState<string>("");
 
@@ -116,15 +131,56 @@ export function CaptionSetupCard({
         </div>
 
         <div aria-live="polite" className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs">
-          <span className="flex items-center gap-2 font-medium text-[#4ade80]">
-            <span className="size-2 rounded-full bg-[#4ade80]" />
-            Ready for processing
+          <span
+            className={isWorking
+              ? "flex items-center gap-2 font-medium text-[#f6c453]"
+              : "flex items-center gap-2 font-medium text-[#4ade80]"}
+          >
+            {isWorking ? (
+              <LoaderCircle size={14} className="animate-spin" aria-hidden="true" />
+            ) : (
+              <span className="size-2 rounded-full bg-[#4ade80]" />
+            )}
+            {progressStep?.label ?? "Ready for processing"}
           </span>
           <span className="text-[#7f878a]">
             {(file.size / (1024 * 1024)).toFixed(1)} MB
             {typeof remainingMinutes === "number" ? " · " + remainingMinutes.toFixed(1) + " min left" : ""}
           </span>
         </div>
+
+        {progressStep ? (
+          <div
+            className="mt-3"
+            aria-label={`Caption creation step ${progressStep.index + 1} of ${progressSteps.length}`}
+          >
+            <div className={willTranslate ? "grid grid-cols-4 gap-1.5" : "grid grid-cols-3 gap-1.5"}>
+              {progressSteps.map((step, index) => (
+                <div key={step} className="min-w-0">
+                  <div
+                    className={index <= progressStep.index
+                      ? "h-1 rounded-full bg-[#f6c453] transition-colors"
+                      : "h-1 rounded-full bg-white/10 transition-colors"}
+                  />
+                  <span className={index === progressStep.index
+                    ? "mt-1 block truncate text-[9px] font-semibold text-[#d9b95f]"
+                    : "mt-1 block truncate text-[9px] text-[#646464]"}
+                  >
+                    {step}
+                  </span>
+                </div>
+              ))}
+            </div>
+            {status === "uploading" ? (
+              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
+                <div
+                  className="h-full rounded-full bg-[#f6c453] transition-[width] duration-200"
+                  style={{ width: `${Math.max(2, uploadProgress)}%` }}
+                />
+              </div>
+            ) : null}
+          </div>
+        ) : null}
 
         <div className="mt-5">
           <p className="text-[10px] font-bold tracking-[0.14em] uppercase text-[#6f7b82]">
@@ -217,8 +273,8 @@ export function CaptionSetupCard({
         >
           {isWorking ? (
             <>
-              <LoaderCircle size={18} className="animate-spin" />
-              <span>Creating captions...</span>
+              <LoaderCircle size={18} className="animate-spin" aria-hidden="true" />
+              <span>{progressStep?.label ?? "Creating captions"}</span>
             </>
           ) : (
             <span>Continue</span>

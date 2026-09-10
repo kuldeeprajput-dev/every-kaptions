@@ -87,5 +87,12 @@ export type TranscriptionResult = {
   segments: CaptionSegment[];
 };
 
-export type TranscriptionState = "idle" | "uploading" | "transcribing" | "ready" | "error";
+export type TranscriptionState =
+  | "idle"
+  | "uploading"
+  | "transcribing"
+  | "translating"
+  | "preparing"
+  | "ready"
+  | "error";
 

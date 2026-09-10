@@ -250,6 +250,7 @@ export function EditorPage() {
                 language={editor.language}
                 outputLanguage={editor.outputLanguage}
                 status={editor.status}
+                uploadProgress={editor.uploadProgress}
                 error={editor.error}
                 canTranscribe={plan.canTranscribe}
                 onLanguageChange={editor.setLanguage}

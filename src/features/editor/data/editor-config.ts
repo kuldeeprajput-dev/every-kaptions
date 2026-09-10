@@ -2,6 +2,32 @@ import type { CaptionOutputLanguage, CaptionStyle } from "../types/captions";
 
 export const MAX_CAPTION_FILE_BYTES = 25 * 1024 * 1024;
 
+export const CAPTION_MEDIA_TYPES = [
+  "audio/mpeg",
+  "audio/mp4",
+  "audio/wav",
+  "audio/webm",
+  "video/mp4",
+  "video/quicktime",
+  "video/webm",
+] as const;
+
+const CAPTION_MEDIA_TYPE_BY_EXTENSION: Record<string, (typeof CAPTION_MEDIA_TYPES)[number]> = {
+  mp3: "audio/mpeg",
+  mp4: "video/mp4",
+  mov: "video/quicktime",
+  wav: "audio/wav",
+  webm: "video/webm",
+};
+
+export function getCaptionMediaType(file: { name: string; type: string }) {
+  const normalizedType = file.type === "audio/x-wav" ? "audio/wav" : file.type;
+  if (CAPTION_MEDIA_TYPES.some((type) => type === normalizedType)) return normalizedType;
+
+  const extension = file.name.split(".").pop()?.toLowerCase() ?? "";
+  return CAPTION_MEDIA_TYPE_BY_EXTENSION[extension] ?? null;
+}
+
 export type LanguageOption = {
   value: string;
   label: string;
