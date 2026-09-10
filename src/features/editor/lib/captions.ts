@@ -77,10 +77,11 @@ export function formatClockTime(seconds: number) {
 
 export function formatCaptionTimestamp(seconds: number, separator: "," | "." = ",") {
   const safeSeconds = Math.max(0, seconds);
-  const hours = pad(safeSeconds / 3600);
-  const minutes = pad((safeSeconds % 3600) / 60);
-  const secs = pad(safeSeconds % 60);
-  const milliseconds = pad(Math.round((safeSeconds % 1) * 1000), 3);
+  const totalMilliseconds = Math.round(safeSeconds * 1000);
+  const hours = pad(totalMilliseconds / 3_600_000);
+  const minutes = pad((totalMilliseconds % 3_600_000) / 60_000);
+  const secs = pad((totalMilliseconds % 60_000) / 1000);
+  const milliseconds = pad(totalMilliseconds % 1000, 3);
   return `${hours}:${minutes}:${secs}${separator}${milliseconds}`;
 }
 
@@ -96,4 +97,3 @@ export function buildVtt(segments: CaptionSegment[]) {
     .join("\n\n");
   return `WEBVTT\n\n${cues}`;
 }
-
