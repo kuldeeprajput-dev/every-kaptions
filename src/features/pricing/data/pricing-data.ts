@@ -175,3 +175,97 @@ export const faqs = [
       "Securely through Razorpay. Monthly plans use UPI Autopay (PhonePe/Paytm will ask you to set up autopay and enter your UPI PIN) or card. If UPI gets stuck, try Card or switch to Yearly (one-time payment, no autopay). Card details are processed by Razorpay, never stored on our servers.",
   },
 ] as const;
+
+export interface SubscriptionTier {
+  id: string;
+  name: string;
+  badge: string;
+  badgeClass: string;
+  recommendedInMonthly?: boolean;
+  monthlyPrice: number;
+  yearlyPrice: number;
+  monthlyNote: string;
+  yearlyNote: string;
+  ctaLabel: string;
+  ctaVariant: "primary" | "outline";
+  features: string[];
+}
+
+export const subscriptionTiers: SubscriptionTier[] = [
+  {
+    id: "free",
+    name: "Free",
+    badge: "Free",
+    badgeClass: "text-[#c8c2b6] border-[rgba(200,194,182,0.3)]",
+    monthlyPrice: 0,
+    yearlyPrice: 0,
+    monthlyNote: "3 minutes every month, no card needed.",
+    yearlyNote: "3 minutes every month, no card needed.",
+    ctaLabel: "Start for free",
+    ctaVariant: "outline",
+    features: [
+      "3 min of captioning / month",
+      "3 exports / month (watermarked)",
+      "Classic presets; preview every style in the editor",
+      "30+ fonts; preview in the editor",
+      "Telugu: Tanglish or Telugu lipi",
+      "Watermark on exports",
+      "Exports expire after 1 hour",
+      "Content Pack not included",
+    ],
+  },
+  {
+    id: "creator",
+    name: "Creator",
+    badge: "Creator",
+    badgeClass: "text-[#c4b5fd] border-[rgba(167,139,250,0.35)]",
+    recommendedInMonthly: true,
+    monthlyPrice: 399,
+    yearlyPrice: 333,
+    monthlyNote:
+      "Creator presets, premium fonts, keyword emphasis, caption animation, and limited AI vertical thumbnails (1 per generation, 1K, 15 credits/mo).",
+    yearlyNote: "Billed ₹3,990/yr. Pay 10 months, get 12 (2 months free).",
+    ctaLabel: "Subscribe",
+    ctaVariant: "primary",
+    features: [
+      "30 min of captioning / month",
+      "Up to 30 watermark-free exports / day",
+      "Unlimited uploads",
+      "Saved exports; re-download anytime",
+      "Creator presets, premium fonts, keyword emphasis, caption animation",
+      "Content Pack: AI titles, IG caption, hashtags",
+      "Limited AI vertical thumbnails: 1 per generation, 1K, 15 credits/mo",
+      "Priority support",
+    ],
+  },
+  {
+    id: "studio",
+    name: "Studio",
+    badge: "Studio",
+    badgeClass: "text-[#86efac] border-[rgba(134,239,172,0.35)]",
+    monthlyPrice: 999,
+    yearlyPrice: 833,
+    monthlyNote: "45 min/month. 2 thumbnail options per generation, up to 4K, 60 credits/mo.",
+    yearlyNote: "Billed ₹9,990/yr. Pay 10 months, get 12 (2 months free).",
+    ctaLabel: "Subscribe",
+    ctaVariant: "primary",
+    features: [
+      "45 min of captioning / month",
+      "Up to 30 watermark-free exports / day",
+      "Unlimited uploads",
+      "Saved exports; re-download anytime",
+      "Everything in Creator, plus Neon Pop and Gold Luxe",
+      "AI thumbnails: 2 options per generation, up to 4K, 60 credits/mo",
+      "Scheduling Instagram posts up to 30 days ahead",
+      "Priority support",
+    ],
+  },
+];
+
+export function getTierPrice(tier: SubscriptionTier, interval: BillingInterval): number {
+  return interval === "Monthly" ? tier.monthlyPrice : tier.yearlyPrice;
+}
+
+export function getTierNote(tier: SubscriptionTier, interval: BillingInterval): string {
+  return interval === "Monthly" ? tier.monthlyNote : tier.yearlyNote;
+}
