@@ -6,7 +6,7 @@ import { cn } from "@/shared/lib/cn";
 import { usePlanSummary } from "../store/plan-store";
 
 const sidebarLinks = [
-  { label: "My reels", icon: Film, href: "" },
+  { label: "My reels", icon: Film, href: "/studio" },
   { label: "Thumbnails", icon: ImageIcon, href: "", comingSoon: true },
   { label: "Help & support", icon: CircleHelp, href: "/support" },
   { label: "Share feedback", icon: MessageSquare, href: "mailto:hello@everykaptions.com" },
@@ -24,7 +24,7 @@ export function EditorSidebar({ open, onClose, onUpload }: Props) {
   return (
     <aside
       className={cn(
-        "fixed bottom-0 left-0 top-16 z-30 flex w-[266px] flex-col border-r border-white/8 bg-[#0b0c0c] p-4 transition-transform md:translate-x-0",
+        "fixed bottom-0 left-0 top-[56px] z-30 flex w-[266px] flex-col border-r border-white/8 bg-[#0b0c0c] p-4 transition-transform md:translate-x-0",
         open ? "translate-x-0" : "-translate-x-full",
       )}
     >
@@ -71,7 +71,7 @@ export function EditorSidebar({ open, onClose, onUpload }: Props) {
         <PlanRow label="Transcription" value={`${plan.remainingMinutes.toFixed(1)} min left`} percent={plan.transcriptionPercent} />
         <PlanRow label="Exports" value={`${plan.remainingExports} of 3 left`} percent={plan.exportsPercent} />
         <p className="mt-3 text-xs text-[#667177]">Usage resets in {plan.resetDays} days</p>
-        <Link href="/pricing" className="mt-4 flex min-h-10 items-center justify-center rounded-xl bg-amber text-sm font-bold text-black">
+        <Link href="/pricing" className="mt-4 flex min-h-10 items-center justify-center rounded-xl bg-amber text-sm font-bold !text-black">
           Upgrade
         </Link>
       </div>

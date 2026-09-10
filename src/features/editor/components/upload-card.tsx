@@ -1,4 +1,6 @@
-import { FileVideo, Upload } from "lucide-react";
+"use client";
+
+import { Upload } from "lucide-react";
 
 type Props = {
   onClick: () => void;
@@ -8,23 +10,34 @@ type Props = {
 export function UploadCard({ onClick, onFile }: Props) {
   return (
     <div
-      className="mt-5 flex min-h-60 w-full max-w-xl flex-col items-center justify-center rounded-2xl border border-dashed border-white/20 bg-[#111] px-6 py-10 text-center transition hover:border-amber/50 sm:min-h-72"
+      role="button"
+      tabIndex={0}
+      onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick();
+        }
+      }}
       onDragOver={(event) => event.preventDefault()}
       onDrop={(event) => {
         event.preventDefault();
         const file = event.dataTransfer.files[0];
         if (file) onFile(file);
       }}
+      className="group flex h-[360px] w-[210px] cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-white/15 bg-[#121212] p-5 text-center transition-colors hover:border-white/30"
     >
-      <span className="grid size-14 place-items-center rounded-2xl bg-amber/10 text-amber">
-        <Upload size={24} aria-hidden="true" />
-      </span>
-      <h2 className="mt-4 text-lg font-bold text-cream">Upload your first video</h2>
-      <p className="mt-2 max-w-sm text-sm leading-6 text-[#7b8387]">Drop a recording here, or choose a file. We will turn the speech into captions you can edit.</p>
-      <button type="button" onClick={onClick} className="mt-5 flex min-h-11 items-center gap-2 rounded-xl bg-cream px-5 text-sm font-bold text-black">
-        <FileVideo size={17} /> Choose video
-      </button>
-      <p className="mt-4 text-[11px] text-[#626a6e]">MP4, MOV, WebM, MP3, or WAV · maximum 25 MB</p>
+      <div className="mb-3.5 flex size-12 items-center justify-center rounded-xl bg-[#1c1c1c] text-[#888] transition-colors group-hover:text-white">
+        <Upload size={20} strokeWidth={1.8} />
+      </div>
+      <p className="mb-1 text-sm font-semibold text-white">
+        + New caption
+      </p>
+      <p className="text-[11px] leading-relaxed text-[#6f7b82]">
+        MP4 or MOV · up to 3<br />
+        min · 1080p · up to 300<br />
+        MB
+      </p>
     </div>
   );
 }

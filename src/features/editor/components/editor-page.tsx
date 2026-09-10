@@ -1,57 +1,187 @@
 "use client";
 
-import { CheckCircle2, Clock3, Menu, Sparkles } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRef, useState } from "react";
-import { Brand } from "@/shared/components/brand";
+import { useRouter } from "next/navigation";
+import { CheckCircle2, Film, Menu, Play, Trash2 } from "lucide-react";
+import { LogoWordmark } from "@/shared/components/logo-wordmark";
 import { cn } from "@/shared/lib/cn";
 import { useCaptionEditor } from "../hooks/use-caption-editor";
+import { formatClockTime } from "../lib/captions";
+import { deleteProject, getAllProjects, saveProject, type StoredProject } from "../lib/media-db";
 import { usePlanSummary } from "../store/plan-store";
 import { AccountMenu } from "./account-menu";
 import { CaptionSetupCard } from "./caption-setup-card";
 import { EditorSidebar } from "./editor-sidebar";
-import { MediaEditor } from "./media-editor";
 import { UploadCard } from "./upload-card";
 
 type ReelTab = "In progress" | "Finished";
 
+function StoredReelCard({
+  project,
+  onDelete,
+}: {
+  project: StoredProject;
+  onDelete: (id: string) => void;
+}) {
+  const router = useRouter();
+  const [videoUrl, setVideoUrl] = useState<string>("");
+
+  useEffect(() => {
+    if (!project.fileBlob) return;
+    const url = URL.createObjectURL(project.fileBlob);
+    setVideoUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [project.fileBlob]);
+
+  return (
+    <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#141311] p-3.5 transition hover:border-[#f6c453]/40 hover:bg-[#191815] font-sans">
+      {/* Thumbnail */}
+      <div
+        onClick={() => router.push(`/editor/${project.id}`)}
+        className="relative aspect-[9/16] max-h-[220px] w-full cursor-pointer overflow-hidden rounded-xl bg-black flex items-center justify-center border border-white/5"
+      >
+        {videoUrl ? (
+          project.fileType?.startsWith("audio/") ? (
+            <div className="flex flex-col items-center justify-center p-3 text-center">
+              <Film className="text-[#f6c453]" size={28} />
+              <span className="mt-1 text-[10px] text-[#888]">Audio file</span>
+            </div>
+          ) : (
+            <video
+              src={videoUrl}
+              muted
+              playsInline
+              preload="metadata"
+              className="h-full w-full object-cover"
+            />
+          )
+        ) : (
+          <div className="text-xs text-[#555]">Loading...</div>
+        )}
+
+        {/* Hover play overlay */}
+        <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition">
+          <div className="flex size-10 items-center justify-center rounded-full bg-[#f6c453] text-black shadow-lg">
+            <Play size={18} className="ml-0.5 fill-black" />
+          </div>
+        </div>
+      </div>
+
+      {/* Title & Info */}
+      <div className="mt-3 flex items-start justify-between gap-2">
+        <div
+          onClick={() => router.push(`/editor/${project.id}`)}
+          className="cursor-pointer overflow-hidden flex-1"
+        >
+          <h3 className="truncate text-xs font-semibold text-white group-hover:text-[#f6c453] transition">
+            {project.name}
+          </h3>
+          <p className="mt-0.5 text-[10px] text-[#777]">
+            {formatClockTime(project.duration || 0)} · {project.segments?.length || 0} lines
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(project.id);
+          }}
+          className="p-1 text-[#666] hover:text-red-400 transition cursor-pointer"
+          title="Delete reel"
+        >
+          <Trash2 size={14} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function EditorPage() {
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [tab, setTab] = useState<ReelTab>("In progress");
+  const [projects, setProjects] = useState<StoredProject[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const editor = useCaptionEditor();
   const plan = usePlanSummary();
+
+  // Load saved projects from IndexedDB on mount
+  useEffect(() => {
+    async function loadProjects() {
+      const list = await getAllProjects();
+      setProjects(list);
+    }
+    void loadProjects();
+  }, []);
+
   const openUpload = () => inputRef.current?.click();
   const selectFile = (file: File) => {
     if (editor.chooseFile(file)) setTab("In progress");
   };
 
-  if (editor.status === "ready") return <MediaEditor editor={editor} />;
+  // Handle transcription success -> Save project to IndexedDB and redirect to /editor/[mediaId]
+  useEffect(() => {
+    if (editor.status === "ready" && editor.file && editor.segments.length > 0) {
+      const mediaId = `media_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+      const saveAndNavigate = async () => {
+        const newProject: StoredProject = {
+          id: mediaId,
+          name: editor.file!.name,
+          fileBlob: editor.file!,
+          fileType: editor.file!.type || "video/mp4",
+          fileSize: editor.file!.size,
+          language: editor.language,
+          outputMode: editor.outputLanguage,
+          status: "ready",
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+          segments: editor.segments,
+          duration: editor.duration,
+          styleId: editor.styleId,
+        };
+        await saveProject(newProject);
+        router.push(`/editor/${mediaId}`);
+      };
+      void saveAndNavigate();
+    }
+  }, [editor.status, editor.file, editor.segments, editor.duration, editor.styleId, editor.language, editor.outputLanguage, router]);
+
+  const handleDeleteProject = async (id: string) => {
+    await deleteProject(id);
+    setProjects((prev) => prev.filter((p) => p.id !== id));
+  };
 
   return (
-    <main className="min-h-screen bg-[#080909] text-[#d5d5d5]">
-      <header className="relative z-40 flex h-16 items-center border-b border-white/8 px-4 sm:h-[66px] sm:px-6 lg:px-14">
+    <main className="min-h-screen bg-[#080808] text-[#d5d5d5] font-sans">
+      {/* Top Header */}
+      <div className="app-header relative z-40 flex h-[56px] items-center justify-between border-b border-white/8 bg-[#0c0b0ad1] px-4 py-[8px] sm:px-6 md:px-[48px] text-[#c8c2b6]">
         <button
           type="button"
-          className="mr-3 grid size-10 place-items-center text-cream md:hidden"
+          className="mr-3 grid size-9 place-items-center text-[#888] md:hidden"
           onClick={() => setSidebarOpen(true)}
           aria-label="Open sidebar"
         >
-          <Menu size={21} />
+          <Menu size={20} />
         </button>
-        <Brand large />
-        <div className="ml-auto flex items-center gap-3">
+        <Link href="/studio" className="inline-flex shrink-0 items-center">
+          <LogoWordmark className="w-[210.57px] h-[26.7px]" />
+        </Link>
+        <div className="header-actions ml-auto flex items-center gap-3 text-[#c8c2b6]">
           <AccountMenu open={menuOpen} onToggle={() => setMenuOpen((value) => !value)} />
           <Link
             href="/pricing"
-            className="hidden min-h-11 items-center rounded-full border border-white/15 px-5 text-sm font-semibold text-cream sm:flex"
+            className="flex h-8 items-center rounded-full border border-white/20 px-3.5 text-xs font-semibold text-white transition hover:border-white/40"
           >
             Upgrade
           </Link>
-          <p className="hidden text-xs text-[#8b8b8b] xl:block">{plan.remainingExports} of 3 free exports left · resets in {plan.resetDays} days</p>
+          <p className="hidden text-xs text-[#737373] md:block pl-1">
+            {plan.remainingExports} of 3 free exports left · resets Oct 1, 2026
+          </p>
         </div>
-      </header>
+      </div>
 
       <EditorSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} onUpload={openUpload} />
       {sidebarOpen ? (
@@ -63,21 +193,21 @@ export function EditorPage() {
         />
       ) : null}
 
-      <section className="px-4 py-6 sm:px-6 md:ml-[266px] md:px-8 md:py-8">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-[.16em] text-amber">Caption studio</p>
-            <h1 className="mt-1 text-2xl font-bold text-white sm:text-[28px]">Your reels</h1>
-          </div>
-          <div className="flex rounded-full border border-white/10 bg-[#171717] p-1">
+      {/* Main Content */}
+      <section className="px-6 py-5 md:ml-[266px]">
+        {/* Header Row */}
+        <div className="flex items-center justify-between gap-4">
+          <h1 className="text-2xl font-bold tracking-tight text-white sm:text-[28px]">Your reels</h1>
+
+          <div className="flex items-center rounded-full border border-white/5 bg-[#161616] p-0.5">
             {(["In progress", "Finished"] as const).map((item) => (
               <button
                 key={item}
                 type="button"
                 onClick={() => setTab(item)}
                 className={cn(
-                  "rounded-full px-4 py-2 text-xs font-semibold",
-                  tab === item ? "bg-amber text-black" : "text-[#838383]",
+                  "rounded-full px-3.5 py-1.5 text-xs font-semibold transition cursor-pointer",
+                  tab === item ? "bg-[#f6c453] text-black" : "text-[#777] hover:text-white",
                 )}
               >
                 {item}
@@ -85,11 +215,35 @@ export function EditorPage() {
             ))}
           </div>
         </div>
-        <div className="mt-3 rounded-xl border border-amber/25 bg-amber/5 px-4 py-3 text-sm text-amber">
-          Projects stay available for about 1 hour, so review and export them before they expire.
+
+        {/* Notice Banner */}
+        <div className="mt-4 rounded-xl border border-[#3e3419] bg-[#141209] px-4 py-2.5 text-xs text-[#d9a838]">
+          Edits stay about 1 hour to tweak and re-export.
         </div>
+
+        {/* Tab Content */}
         {tab === "In progress" ? (
-          <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,640px)_280px]">
+          <div className="mt-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <UploadCard onClick={openUpload} onFile={selectFile} />
+
+              {/* Saved reels from IndexedDB */}
+              {projects.map((project) => (
+                <StoredReelCard
+                  key={project.id}
+                  project={project}
+                  onDelete={handleDeleteProject}
+                />
+              ))}
+            </div>
+
+            {editor.error && !editor.file ? (
+              <p role="alert" className="mt-3 text-xs text-red-400">
+                {editor.error}
+              </p>
+            ) : null}
+
+            {/* Preparation Popup Modal */}
             {editor.file ? (
               <CaptionSetupCard
                 file={editor.file}
@@ -97,38 +251,22 @@ export function EditorPage() {
                 outputLanguage={editor.outputLanguage}
                 status={editor.status}
                 error={editor.error}
-                captionCount={editor.segments.length}
-                remainingMinutes={plan.remainingMinutes}
                 canTranscribe={plan.canTranscribe}
                 onLanguageChange={editor.setLanguage}
                 onOutputLanguageChange={editor.setOutputLanguage}
                 onGenerate={editor.transcribe}
-                onDownload={() => editor.downloadCaptions("srt")}
                 onReset={editor.reset}
               />
-            ) : (
-              <div>
-                <UploadCard onClick={openUpload} onFile={selectFile} />
-                {editor.error ? <p role="alert" className="mt-3 text-sm text-red-300">{editor.error}</p> : null}
-              </div>
-            )}
-
-            <aside className="mt-5 rounded-2xl border border-white/8 bg-[#101111] p-5">
-              <h2 className="flex items-center gap-2 text-sm font-bold text-cream"><Sparkles size={16} className="text-amber" /> A simple first export</h2>
-              <div className="mt-5 space-y-5">
-                <GuideStep icon={CheckCircle2} title="Use clear audio" copy="Speech close to the microphone creates cleaner captions." />
-                <GuideStep icon={Clock3} title="Keep it short" copy="The free plan includes three transcription minutes each month." />
-                <GuideStep icon={Sparkles} title="Review before export" copy="Fix names, timing, and emphasis in the media editor." />
-              </div>
-            </aside>
+            ) : null}
           </div>
         ) : (
-          <div className="mt-16 rounded-2xl border border-dashed border-white/10 px-5 py-16 text-center">
-            <CheckCircle2 className="mx-auto text-[#596064]" />
-            <h2 className="mt-4 font-semibold text-cream">No finished exports yet</h2>
-            <p className="mt-2 text-sm text-[#6f7476]">Exported caption files will be easy to find here.</p>
+          <div className="mt-20 text-center">
+            <CheckCircle2 className="mx-auto text-[#444]" size={28} />
+            <h2 className="mt-3 text-sm font-semibold text-[#888]">No finished exports yet</h2>
+            <p className="mt-1 text-xs text-[#555]">Exported caption files will appear here.</p>
           </div>
         )}
+
         <input
           ref={inputRef}
           type="file"
@@ -142,23 +280,5 @@ export function EditorPage() {
         />
       </section>
     </main>
-  );
-}
-
-type GuideStepProps = {
-  icon: typeof Sparkles;
-  title: string;
-  copy: string;
-};
-
-function GuideStep({ icon: Icon, title, copy }: GuideStepProps) {
-  return (
-    <div className="flex gap-3">
-      <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-white/5 text-amber"><Icon size={15} /></span>
-      <div>
-        <h3 className="text-sm font-semibold text-[#d7d9da]">{title}</h3>
-        <p className="mt-1 text-xs leading-5 text-[#727b80]">{copy}</p>
-      </div>
-    </div>
   );
 }
