@@ -22,15 +22,15 @@ export function PricingPage() {
   return (
     <>
       <header className="sticky top-0 z-[100] bg-[#0c0b0a]/92 border-b border-[rgba(244,236,220,0.08)] backdrop-blur-md">
-        <div className="max-w-[960px] mx-auto px-6 py-4 flex items-center justify-between gap-4">
-          <Link className="inline-flex items-center gap-2.5 text-inherit shrink-0 no-underline" href="/" aria-label="EveryKaptions homepage">
-            <LogoWordmark className="h-6 w-[calc(24px*268/28)] min-w-[calc(24px*268/28)] shrink-0 object-fill object-left" />
+        <div className="max-w-[960px] mx-auto px-3.5 sm:px-6 py-3 md:py-4 flex items-center justify-between gap-2 sm:gap-4">
+          <Link className="inline-flex items-center gap-2 text-inherit shrink-0 no-underline" href="/" aria-label="EveryKaptions homepage">
+            <LogoWordmark className="text-[18px] xs:text-[20px] sm:text-[22px] md:text-[26px] md:h-6 md:w-[calc(24px*268/28)] md:min-w-[calc(24px*268/28)] shrink-0 object-fill object-left" />
           </Link>
-          <nav className="flex items-center gap-2 shrink-0 ml-auto">
-            <Link href="/" className="!text-[#8a8478] hover:!text-[#f4ecdc] text-[13px] font-semibold inline-flex items-center min-h-[44px] px-3 py-2.5 no-underline transition-colors">
+          <nav className="flex items-center gap-0.5 sm:gap-2 shrink-0 ml-auto">
+            <Link href="/" className="!text-[#8a8478] hover:!text-[#f4ecdc] text-xs sm:text-[13px] font-semibold inline-flex items-center min-h-[36px] sm:min-h-[44px] px-2 sm:px-3 py-1.5 sm:py-2.5 no-underline transition-colors">
               Home
             </Link>
-            <Link href="/roadmap" className="!text-[#8a8478] hover:!text-[#f4ecdc] text-[13px] font-semibold inline-flex items-center min-h-[44px] px-3 py-2.5 no-underline transition-colors">
+            <Link href="/roadmap" className="!text-[#8a8478] hover:!text-[#f4ecdc] text-xs sm:text-[13px] font-semibold inline-flex items-center min-h-[36px] sm:min-h-[44px] px-2 sm:px-3 py-1.5 sm:py-2.5 no-underline transition-colors">
               Roadmap
             </Link>
           </nav>
@@ -50,14 +50,14 @@ export function PricingPage() {
 
         <div className="text-center mb-5 md:mb-6">
           <div
-            className="w-full max-w-full md:w-auto inline-flex items-center justify-stretch md:justify-start gap-1 p-1 bg-[rgba(244,236,220,0.04)] border border-[rgba(244,236,220,0.1)] rounded-full"
+            className="w-full max-w-[390px] md:max-w-none md:w-auto inline-flex items-center justify-between md:justify-start gap-1 p-1 bg-[rgba(244,236,220,0.04)] border border-[rgba(244,236,220,0.1)] rounded-full"
             role="tablist"
             aria-label="Billing interval"
           >
             <button
               type="button"
               className={cn(
-                "flex-1 md:flex-initial min-h-[44px] md:min-h-0 px-3 md:px-[18px] py-2.5 md:py-2 text-xs md:text-[13px] font-semibold rounded-full border-0 cursor-pointer font-inherit transition-colors duration-200",
+                "flex-1 md:flex-initial min-h-[38px] md:min-h-0 px-2 xs:px-3 md:px-[18px] py-2 text-[11px] xs:text-xs md:text-[13px] font-semibold rounded-full border-0 cursor-pointer font-inherit transition-colors duration-200 whitespace-nowrap inline-flex items-center justify-center",
                 billing === "Monthly"
                   ? "bg-[#f4ecdc] text-[#0c0b0a]"
                   : "bg-transparent text-[#8a8478] hover:text-[#f4ecdc]"
@@ -71,7 +71,7 @@ export function PricingPage() {
             <button
               type="button"
               className={cn(
-                "flex-1 md:flex-initial min-h-[44px] md:min-h-0 px-3 md:px-[18px] py-2.5 md:py-2 text-xs md:text-[13px] font-semibold rounded-full border-0 cursor-pointer font-inherit transition-colors duration-200",
+                "flex-1 md:flex-initial min-h-[38px] md:min-h-0 px-2 xs:px-3 md:px-[18px] py-2 text-[11px] xs:text-xs md:text-[13px] font-semibold rounded-full border-0 cursor-pointer font-inherit transition-colors duration-200 whitespace-nowrap inline-flex items-center justify-center",
                 billing === "One-time"
                   ? "bg-[#f4ecdc] text-[#0c0b0a]"
                   : "bg-transparent text-[#8a8478] hover:text-[#f4ecdc]"
@@ -85,7 +85,7 @@ export function PricingPage() {
             <button
               type="button"
               className={cn(
-                "flex-1 md:flex-initial min-h-[44px] md:min-h-0 px-3 md:px-[18px] py-2.5 md:py-2 text-xs md:text-[13px] font-semibold rounded-full border-0 cursor-pointer font-inherit transition-colors duration-200",
+                "flex-[1.2] md:flex-initial min-h-[38px] md:min-h-0 px-2 xs:px-2.5 md:px-[18px] py-2 text-[11px] xs:text-xs md:text-[13px] font-semibold rounded-full border-0 cursor-pointer font-inherit transition-colors duration-200 whitespace-nowrap inline-flex items-center justify-center",
                 billing === "Yearly"
                   ? "bg-[#f4ecdc] text-[#0c0b0a]"
                   : "bg-transparent text-[#8a8478] hover:text-[#f4ecdc]"
@@ -94,10 +94,10 @@ export function PricingPage() {
               role="tab"
               aria-selected={billing === "Yearly"}
             >
-              Yearly
+              <span>Yearly</span>
               <span
                 className={cn(
-                  "inline-block ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full tracking-[0.02em]",
+                  "inline-block ml-1 md:ml-1.5 text-[9px] xs:text-[10px] font-bold px-1.5 py-0.5 rounded-full tracking-[0.02em] shrink-0",
                   billing === "Yearly"
                     ? "bg-[rgba(40,80,40,0.18)] text-[#2c5e2c]"
                     : "bg-[rgba(127,179,127,0.18)] text-[#7fb37f]"
