@@ -48,7 +48,7 @@ export const compactReviews: CompactReview[] = [
   {
     name: "Sharath",
     quote:
-      "I tried the Replix Captions yesterday, and honestly, it was really good. The captions were accurate, the spelling was on point, and everything worked smoothly. I loved the overall experience.",
+      "I tried EveryKaptions yesterday, and honestly, it was really good. The captions were accurate, the spelling was on point, and everything worked smoothly. I loved the overall experience.",
   },
   {
     name: "@sunny",
@@ -62,5 +62,5 @@ export const compactReviews: CompactReview[] = [
 
 export const thumbnailSamples: string[] = Array.from(
   { length: 9 },
-  (_, index) => `/media/thumbs/thumb-${index + 1}.webp`
+  () => "/media/kuldeep-profile.png",
 );

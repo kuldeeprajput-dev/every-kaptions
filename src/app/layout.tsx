@@ -22,8 +22,8 @@ const archivoBlack = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Replix Captions — Your content studio",
-  description: "Editable word-by-word captions, social copy, and thumbnails for every post.",
+  title: "EveryKaptions — Captions for every creator",
+  description: "Editable multilingual captions and clean subtitle exports for every post.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

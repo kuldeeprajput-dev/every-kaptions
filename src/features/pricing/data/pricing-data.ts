@@ -87,8 +87,8 @@ export const comparisons = [
     feature: "AI thumbnails",
     free: "Not included",
     onetime: "Not included",
-    creator: "Yes: 1 thumbnail per generation, 1K (15 credits/mo)",
-    studio: "Yes: 2 options per generation, up to 4K (60 credits/mo)",
+    creator: "Coming soon",
+    studio: "Coming soon",
   },
 ] as const;
 
@@ -106,13 +106,13 @@ export const faqs = [
   {
     question: "What is Creator vs Studio?",
     answer:
-      "Creator (₹399/mo) removes the watermark, unlocks Creator presets (Punch, Cove, Spotlight, Reel, Noir, Gradient Fill, Frosted Glass), premium fonts, keyword emphasis, caption animation, saved exports, Content Pack (AI YouTube titles, IG caption, and hashtags from your transcript), limited AI vertical thumbnails (1 per generation, 1K, 15 credits/mo), and posting Reels to Instagram after export. Studio (₹999/mo) includes everything in Creator plus Neon Pop, Gold Luxe, 45 minutes of captioning per month, 2 thumbnail options per generation, up to 4K, 60 credits/mo, and scheduling Instagram posts up to 30 days ahead.",
+      "Creator (₹399/mo) removes the watermark, unlocks Creator presets (Punch, Cove, Spotlight, Reel, Noir, Gradient Fill, Frosted Glass), premium fonts, keyword emphasis, caption animation, saved exports, Content Pack (AI YouTube titles, IG caption, and hashtags from your transcript), and posting Reels to Instagram after export. Studio (₹999/mo) includes everything in Creator plus Neon Pop, Gold Luxe, 45 minutes of captioning per month, and scheduling Instagram posts up to 30 days ahead. Personalized thumbnail tools are coming soon.",
     hasHtml: true,
   },
   {
     question: "What do I get with a monthly subscription?",
     answer:
-      "Creator includes 30 minutes of captioning every month, up to 30 watermark-free exports per day, unlimited uploads, saved exports (your last 50), Content Pack (AI YouTube titles, IG caption, and hashtags from your transcript), Creator style presets, premium fonts, keyword emphasis, caption animation, limited AI vertical thumbnails (1 per generation, 1K, 15 credits/mo), posting Reels to Instagram after export, and priority support. Studio includes everything in Creator plus Neon Pop, Gold Luxe, 45 minutes of captioning per month, 2 thumbnail options per generation, up to 4K, 60 credits/mo, and scheduling Instagram posts up to 30 days ahead. You are billed each month until you cancel.",
+      "Creator includes 30 minutes of captioning every month, up to 30 watermark-free exports per day, unlimited uploads, saved exports (your last 50), Content Pack (AI YouTube titles, IG caption, and hashtags from your transcript), Creator style presets, premium fonts, keyword emphasis, caption animation, posting Reels to Instagram after export, and priority support. Studio includes everything in Creator plus Neon Pop, Gold Luxe, 45 minutes of captioning per month, and scheduling Instagram posts up to 30 days ahead. Personalized thumbnail tools are coming soon and are not included in current billing. You are billed each month until you cancel.",
   },
   {
     question: "How does monthly billing work with UPI?",
@@ -140,7 +140,7 @@ export const faqs = [
       "Yes. Cancelling stops all future billing, and your access stays active until the end of the current paid period. Scheduled Instagram posts stay queued until that date, then they are cancelled. Reels already on Instagram stay up.",
   },
   {
-    question: "Can I post to Instagram from Replix Captions?",
+    question: "Can I post to Instagram from EveryKaptions?",
     answer:
       "Yes. After you export, Creator plans can post the Reel now. Studio can also pick a time up to 30 days ahead. You need an Instagram professional account (Business or Creator), not a personal profile. The video must be vertical, between 5 and 90 seconds.",
   },
@@ -218,12 +218,12 @@ export const subscriptionTiers: SubscriptionTier[] = [
     id: "creator",
     name: "Creator",
     badge: "Creator",
-    badgeClass: "text-[#c4b5fd] border-[rgba(167,139,250,0.35)]",
+    badgeClass: "text-[#f6c453] border-[rgba(246,196,83,0.35)]",
     recommendedInMonthly: true,
     monthlyPrice: 399,
     yearlyPrice: 333,
     monthlyNote:
-      "Creator presets, premium fonts, keyword emphasis, caption animation, and limited AI vertical thumbnails (1 per generation, 1K, 15 credits/mo).",
+      "Creator presets, premium fonts, keyword emphasis, and caption animation.",
     yearlyNote: "Billed ₹3,990/yr. Pay 10 months, get 12 (2 months free).",
     ctaLabel: "Subscribe",
     ctaVariant: "primary",
@@ -234,7 +234,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
       "Saved exports; re-download anytime",
       "Creator presets, premium fonts, keyword emphasis, caption animation",
       "Content Pack: AI titles, IG caption, hashtags",
-      "Limited AI vertical thumbnails: 1 per generation, 1K, 15 credits/mo",
+      "Personalized thumbnails (coming soon)",
       "Priority support",
     ],
   },
@@ -242,10 +242,10 @@ export const subscriptionTiers: SubscriptionTier[] = [
     id: "studio",
     name: "Studio",
     badge: "Studio",
-    badgeClass: "text-[#86efac] border-[rgba(134,239,172,0.35)]",
+    badgeClass: "text-[#f4ecdc] border-[rgba(244,236,220,0.3)]",
     monthlyPrice: 999,
     yearlyPrice: 833,
-    monthlyNote: "45 min/month. 2 thumbnail options per generation, up to 4K, 60 credits/mo.",
+    monthlyNote: "45 min/month with expanded styles and scheduling tools.",
     yearlyNote: "Billed ₹9,990/yr. Pay 10 months, get 12 (2 months free).",
     ctaLabel: "Subscribe",
     ctaVariant: "primary",
@@ -255,7 +255,7 @@ export const subscriptionTiers: SubscriptionTier[] = [
       "Unlimited uploads",
       "Saved exports; re-download anytime",
       "Everything in Creator, plus Neon Pop and Gold Luxe",
-      "AI thumbnails: 2 options per generation, up to 4K, 60 credits/mo",
+      "Personalized thumbnails (coming soon)",
       "Scheduling Instagram posts up to 30 days ahead",
       "Priority support",
     ],

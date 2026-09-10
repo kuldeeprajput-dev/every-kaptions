@@ -8,7 +8,7 @@ import { useAuth } from "@/features/auth/store/auth-store";
 const accountLinks = [
   { label: "Home", href: "/" },
   { label: "Help & support", href: "/support" },
-  { label: "Share feedback", href: "#" },
+  { label: "Share feedback", href: "mailto:hello@everykaptions.com" },
   { label: "Terms of Service", href: "#", policy: true },
   { label: "Privacy Policy", href: "#", policy: true },
   { label: "Refund Policy", href: "#", policy: true },

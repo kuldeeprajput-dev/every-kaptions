@@ -23,7 +23,7 @@ export function PricingPage() {
     <>
       <header className="sticky top-0 z-[100] bg-[#0c0b0a]/92 border-b border-[rgba(244,236,220,0.08)] backdrop-blur-md">
         <div className="max-w-[960px] mx-auto px-6 py-4 flex items-center justify-between gap-4">
-          <Link className="inline-flex items-center gap-2.5 text-inherit shrink-0 no-underline" href="/" aria-label="Replix Captions homepage">
+          <Link className="inline-flex items-center gap-2.5 text-inherit shrink-0 no-underline" href="/" aria-label="EveryKaptions homepage">
             <LogoWordmark className="h-6 w-[calc(24px*268/28)] min-w-[calc(24px*268/28)] shrink-0 object-fill object-left" />
           </Link>
           <nav className="flex items-center gap-2 shrink-0 ml-auto">

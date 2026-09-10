@@ -4,8 +4,8 @@ import { LegalNav } from "@/features/legal/components/legal-nav";
 import { SUBPROCESSORS } from "@/features/legal/data/subprocessors";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Replix Captions",
-  description: "Privacy Policy for Replix Captions: what information we collect, how we use and share it, and your rights.",
+  title: "Privacy Policy | EveryKaptions",
+  description: "Privacy Policy for EveryKaptions: what information we collect, how we use and share it, and your rights.",
 };
 
 export default function PrivacyPage() {
@@ -17,7 +17,7 @@ export default function PrivacyPage() {
       <p className="text-dim text-[0.875rem] mb-7 leading-[1.65]">Last updated: 31 August 2026</p>
 
       <p className="text-body text-[0.9375rem] leading-[1.65]">
-        Replix Captions (&quot;we&quot;, &quot;us&quot;) is a sole proprietorship of Sai Santosh Kumar, registered in
+        EveryKaptions (&quot;we&quot;, &quot;us&quot;) is a creator-led software service operated by Kuldeep, based in
         India. This policy explains what personal information we collect, how we use it, who we share it with, and the choices you have.
         Features, subprocessors, and data practices may change as the product evolves.
         By using the service, you agree to this policy.
@@ -50,7 +50,7 @@ export default function PrivacyPage() {
 
       <h2 className="text-[1rem] font-semibold text-cream mt-7 mb-2.5 leading-[1.65]">Usage analytics and error monitoring</h2>
       <p className="text-body text-[0.9375rem] leading-[1.65]">
-        We use product analytics to understand how creators use Replix Captions, such as which pages and editor steps are reached.
+        We use product analytics to understand how creators use EveryKaptions, such as which pages and editor steps are reached.
         We also use error monitoring to detect crashes and fix problems faster. These tools may record page views, clicks, and limited session replay on some visits.
         We use this data to improve the service, not for advertising.
       </p>
@@ -157,8 +157,8 @@ export default function PrivacyPage() {
       </ul>
       <p className="text-body text-[0.9375rem] leading-[1.65]">
         To request access, correction, or deletion, email{" "}
-        <a href="mailto:hello@replixcaptions.com" className="text-amber hover:text-cream hover:underline no-underline transition-colors duration-150">
-          hello@replixcaptions.com
+        <a href="mailto:hello@everykaptions.com" className="text-amber hover:text-cream hover:underline no-underline transition-colors duration-150">
+          hello@everykaptions.com
         </a>{" "}
         or use our{" "}
         <Link href="/support" className="text-amber hover:text-cream hover:underline no-underline transition-colors duration-150">
@@ -190,7 +190,7 @@ export default function PrivacyPage() {
         <li className="mb-1.5 leading-[1.65]"><strong className="text-cream font-semibold">Processing:</strong> when you generate a thumbnail, your photo (if you chose one) and text from your video&apos;s transcript are sent to third-party AI image providers (currently <strong className="text-cream font-semibold">kie.ai</strong> and <strong className="text-cream font-semibold">Google&apos;s Gemini API</strong>) so they can create the image. Your photo is shared as a short-lived, time-limited private link rather than a permanent public URL. Neither provider is authorised to use your photo to train their own models, and both process the data to fulfil your request under their own policies.</li>
         <li className="mb-1.5 leading-[1.65]"><strong className="text-cream font-semibold">Storage:</strong> your saved photo and generated thumbnails are stored in our cloud storage. We keep them until you delete the photo or delete your account. Deleting your account also removes your saved photo and generated thumbnails.</li>
         <li className="mb-1.5 leading-[1.65]"><strong className="text-cream font-semibold">Deletion:</strong> you can delete your saved photo in the product at any time. Deletion permanently removes the photo from our storage right away.</li>
-        <li className="mb-1.5 leading-[1.65]"><strong className="text-cream font-semibold">Your rights (DPDP Act 2023):</strong> you may request access, correction, or erasure of this data, and you may withdraw consent. Withdrawing consent means we delete your saved photo and the thumbnail feature that needs it becomes unavailable. For grievances, use our <Link href="/legal/contact" className="text-amber hover:text-cream hover:underline no-underline transition-colors duration-150">contact page</Link> or email <a href="mailto:hello@replixcaptions.com" className="text-amber hover:text-cream hover:underline no-underline transition-colors duration-150">hello@replixcaptions.com</a>.</li>
+        <li className="mb-1.5 leading-[1.65]"><strong className="text-cream font-semibold">Your rights (DPDP Act 2023):</strong> you may request access, correction, or erasure of this data, and you may withdraw consent. Withdrawing consent means we delete your saved photo and the thumbnail feature that needs it becomes unavailable. For grievances, use our <Link href="/legal/contact" className="text-amber hover:text-cream hover:underline no-underline transition-colors duration-150">contact page</Link> or email <a href="mailto:hello@everykaptions.com" className="text-amber hover:text-cream hover:underline no-underline transition-colors duration-150">hello@everykaptions.com</a>.</li>
         <li className="mb-1.5 leading-[1.65]"><strong className="text-cream font-semibold">AI provenance marking:</strong> generated thumbnails may include an invisible, industry-standard AI provenance mark added by the AI provider. This helps platforms and tools identify AI-generated images; it does not change how the thumbnail looks.</li>
       </ul>
 
@@ -210,11 +210,11 @@ export default function PrivacyPage() {
 
       <h2 className="text-[1rem] font-semibold text-cream mt-7 mb-2.5 leading-[1.65]">Contact</h2>
       <p className="text-body text-[0.9375rem] leading-[1.65]">
-        <strong className="text-cream font-semibold">Data fiduciary / operator:</strong> Replix Captions (proprietor: Sai Santosh Kumar)
+        <strong className="text-cream font-semibold">Data fiduciary / operator:</strong> EveryKaptions (operator: Kuldeep)
         <br />
         <strong className="text-cream font-semibold">Email:</strong>{" "}
-        <a href="mailto:hello@replixcaptions.com" className="text-amber hover:text-cream hover:underline no-underline transition-colors duration-150">
-          hello@replixcaptions.com
+        <a href="mailto:hello@everykaptions.com" className="text-amber hover:text-cream hover:underline no-underline transition-colors duration-150">
+          hello@everykaptions.com
         </a>
         <br />
         <strong className="text-cream font-semibold">Support:</strong>{" "}

@@ -35,7 +35,7 @@ export function LandingWorkflowSteps() {
                 src="/media/step-upload.webp"
                 width={640}
                 height={360}
-                alt="Upload screen in Replix Captions"
+                alt="Upload screen in EveryKaptions"
               />
             </div>
           </article>
@@ -69,7 +69,7 @@ export function LandingWorkflowSteps() {
               Post to Instagram
             </h3>
             <p className="text-sm text-body leading-[1.5] mb-4.5">
-              Finish your captioned Reel, then post it to Instagram from Replix. Creator posts now; Studio can schedule up to 30 days ahead.
+              Finish your captioned Reel, then post it to Instagram from EveryKaptions. Creator posts now; Studio can schedule up to 30 days ahead.
             </p>
             <div
               className="relative min-h-[230px] max-[640px]:min-h-[210px] max-[640px]:mt-1 grid place-items-center mt-auto"
@@ -163,40 +163,47 @@ export function LandingWorkflowSteps() {
         </div>
       </section>
 
-      {/* Thumbnail Studio Section */}
       <section
         className="py-[clamp(40px,4vw,80px)] border-t border-[var(--hairline)]"
         aria-labelledby="thumbStudioHeading"
       >
         <div className="max-w-[760px] mx-auto mb-8 text-center">
           <div className="inline-block text-[clamp(10px,0.45vw+8px,13px)] font-semibold tracking-[0.85px] uppercase text-amber mb-3.5 [text-shadow:0_0_18px_rgba(246,196,83,0.18)]">
-            Creator + Studio
+            Coming soon
           </div>
           <h2
             id="thumbStudioHeading"
             className="font-display text-[clamp(1.5rem,0.5rem+2vw,2.75rem)] font-bold text-cream mb-4 tracking-[-0.02em] leading-[1.55]"
           >
-            A thumbnail ready to use.
+            Your face, ready for every cover.
           </h2>
           <p className="text-[clamp(15px,2vw,17px)] text-body leading-[1.65] max-w-[58ch] mx-auto">
-            Vertical thumbnails generated from your video and your photo. Creator gets one option; Studio gets two.
+            Personalized vertical thumbnails are being built next. Your supplied profile photo now previews the direction across every sample.
           </p>
         </div>
-        <div
-          className="overflow-hidden [mask-image:linear-gradient(90deg,transparent,#000_6%,#000_94%,transparent)] group"
-          aria-hidden="true"
-        >
-          <div className="flex gap-4 w-max animate-[thumbMarquee_65s_linear_infinite] group-hover:[animation-play-state:paused] group-focus-within:[animation-play-state:paused]">
-            {allThumbs.map((thumbSrc, i) => (
-              <Image
-                key={`thumb-${i}`}
-                className="block w-[160px] max-[480px]:w-[130px] aspect-[9/16] object-cover rounded-[14px] border border-[var(--hairline-strong)] shadow-[0_12px_28px_rgba(0,0,0,0.35)] shrink-0"
-                src={thumbSrc}
-                width={160}
-                height={284}
-                alt=""
-              />
-            ))}
+        <div className="relative group" aria-label="Personalized thumbnail preview">
+          <div className="overflow-hidden [mask-image:linear-gradient(90deg,transparent,#000_6%,#000_94%,transparent)] max-[899px]:overflow-x-auto max-[899px]:[mask-image:none]">
+            <div className="flex w-max gap-4 animate-[thumbMarquee_65s_linear_infinite] group-hover:[animation-play-state:paused] max-[899px]:animate-none max-[899px]:px-1">
+              {allThumbs.map((thumbSrc, i) => (
+                <div key={`thumb-${i}`} className="relative aspect-[9/16] w-[160px] shrink-0 overflow-hidden rounded-[14px] border border-[var(--hairline-strong)] bg-surface shadow-[0_12px_28px_rgba(0,0,0,0.35)] max-[480px]:w-[130px]">
+                  <Image
+                    className="h-full w-full object-cover object-center sepia-[.08]"
+                    src={thumbSrc}
+                    width={160}
+                    height={284}
+                    alt=""
+                  />
+                  <span className="absolute inset-x-2 bottom-2 rounded-full border border-white/15 bg-[#0c0b0ad9] px-2 py-1 text-center text-[9px] font-bold uppercase tracking-[.08em] text-cream">
+                    Cover preview
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="pointer-events-none absolute inset-0 grid place-items-center">
+            <span className="rounded-full border border-amber/35 bg-[#0c0b0af2] px-5 py-2.5 text-sm font-bold text-amber shadow-[var(--gold-glow)]">
+              Thumbnail tools coming soon
+            </span>
           </div>
         </div>
       </section>

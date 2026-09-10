@@ -27,7 +27,7 @@ export function RoadmapPage() {
             What we ship and what is next
           </h1>
           <p className="text-body text-[1.05rem] max-w-[560px] mx-auto">
-            Replix Captions is built from creator pain points. Tell us what you like, what you want, and what we should build next.
+            EveryKaptions is built from creator pain points. Tell us what you like, what you want, and what we should build next.
           </p>
         </section>
 

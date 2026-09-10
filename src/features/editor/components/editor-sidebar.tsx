@@ -9,7 +9,7 @@ const sidebarLinks = [
   { label: "My reels", icon: Film, href: "" },
   { label: "Thumbnails", icon: ImageIcon, href: "", comingSoon: true },
   { label: "Help & support", icon: CircleHelp, href: "/support" },
-  { label: "Share feedback", icon: MessageSquare, href: "mailto:hello@replixcaptions.com" },
+  { label: "Share feedback", icon: MessageSquare, href: "mailto:hello@everykaptions.com" },
 ];
 
 type Props = {

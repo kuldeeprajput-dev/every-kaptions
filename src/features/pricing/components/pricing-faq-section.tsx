@@ -24,12 +24,12 @@ export function PricingFaqSection() {
                   Gradient Fill, Frosted Glass), premium fonts, keyword emphasis,
                   caption animation, saved exports, Content Pack (AI YouTube
                   titles, IG caption, and hashtags from your transcript),
-                  limited AI vertical thumbnails (1 per generation, 1K, 15
-                  credits/mo), and posting Reels to Instagram after export.{" "}
+                  priority support, with personalized thumbnails marked as
+                  coming soon, and posting Reels to Instagram after export.{" "}
                   <strong>Studio (₹999/mo)</strong> includes everything in
                   Creator plus Neon Pop, Gold Luxe, 45 minutes of captioning per
-                  month, 2 thumbnail options per generation, up to 4K, 60
-                  credits/mo, and scheduling Instagram posts up to 30 days ahead.
+                  month, more caption styles, and scheduling Instagram posts up
+                  to 30 days ahead. Thumbnail tools remain in preview for now.
                 </>
               ) : "hasRefundLink" in item && item.hasRefundLink ? (
                 <>
@@ -92,13 +92,13 @@ export function PricingFaqSection() {
           We are here to help. Reach out directly and we typically reply within a few hours.
         </p>
         <a
-          href="mailto:hello@replixcaptions.com"
+          href="mailto:hello@everykaptions.com"
           className="inline-flex items-center gap-2 text-[13px] font-semibold text-[#f6c453] hover:text-[#f4ecdc] transition-colors"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
-          hello@replixcaptions.com
+          hello@everykaptions.com
         </a>
       </div>
     </>

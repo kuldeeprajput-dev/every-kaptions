@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Contact Us | Replix Captions",
-  description: "Contact Replix Captions support: hello@replixcaptions.com and support form.",
+  title: "Contact Us | EveryKaptions",
+  description: "Contact EveryKaptions support at hello@everykaptions.com or through the support form.",
 };
 
 export default function ContactPage() {
@@ -15,7 +15,7 @@ export default function ContactPage() {
       <p className="text-dim text-[0.875rem] mb-7 leading-[1.65]">Last updated: 19 August 2026</p>
 
       <p className="text-body text-[0.9375rem] leading-[1.65]">
-        Replix Captions is a subscription software service that generates and burns word-by-word
+        EveryKaptions is a subscription software service that generates and burns word-by-word
         Telugu captions into short videos. It is a sole proprietorship of Sai Santosh Kumar, registered in India.
       </p>
 
@@ -24,10 +24,10 @@ export default function ContactPage() {
         <li className="mb-1.5 leading-[1.65]">
           <strong className="text-cream font-semibold">Email:</strong>{" "}
           <a
-            href="mailto:hello@replixcaptions.com"
+            href="mailto:hello@everykaptions.com"
             className="text-amber hover:text-cream hover:underline no-underline transition-colors duration-150"
           >
-            hello@replixcaptions.com
+            hello@everykaptions.com
           </a>
         </li>
         <li className="mb-1.5 leading-[1.65]">

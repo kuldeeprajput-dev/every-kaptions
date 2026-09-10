@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { brand } from "@/shared/config/brand";
 
 export function SiteFooter() {
   return (
@@ -12,24 +13,24 @@ export function SiteFooter() {
         <Link href="/roadmap" className="text-dim no-underline transition-colors duration-150 hover:text-cream">Roadmap</Link>
         <Link href="/support" className="text-dim no-underline transition-colors duration-150 hover:text-cream">Support</Link>
         <a
-          href="https://www.instagram.com/replixcaptions/"
+          href={brand.socialUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="text-dim no-underline transition-colors duration-150 hover:text-cream"
         >
-          Instagram
+          {brand.socialLabel}
         </a>
       </nav>
       <div className="flex flex-col items-end max-[719px]:items-start max-[719px]:text-left max-[719px]:w-full gap-1 text-right text-[12px] text-dim">
         <span>
           Made by{" "}
           <a
-            href="https://www.instagram.com/ssktechy/"
+            href={brand.socialUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="text-dim no-underline transition-colors duration-150 hover:text-cream"
           >
-            @ssktechy
+            {brand.founderHandle}
           </a>
         </span>
       </div>

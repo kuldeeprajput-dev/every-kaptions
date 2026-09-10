@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Refund Policy | Replix Captions",
-  description: "Refund Policy for Replix Captions subscriptions and minute purchases.",
+  title: "Refund Policy | EveryKaptions",
+  description: "Refund Policy for EveryKaptions subscriptions and minute purchases.",
 };
 
 export default function RefundPage() {
@@ -15,7 +15,7 @@ export default function RefundPage() {
       <p className="text-dim text-[0.875rem] mb-7 leading-[1.65]">Last updated: 9 July 2026</p>
 
       <p className="text-body text-[0.9375rem] leading-[1.65]">
-        This policy applies to all paid access on Replix Captions, including monthly subscriptions,
+        This policy applies to all paid access on EveryKaptions, including monthly subscriptions,
         yearly one-time payments, and one-time export packs. It supplements our{" "}
         <Link href="/legal/terms" className="text-amber hover:text-cream hover:underline no-underline transition-colors duration-150">
           Terms of Service
@@ -93,8 +93,8 @@ export default function RefundPage() {
           support form
         </Link>{" "}
         or email{" "}
-        <a href="mailto:hello@replixcaptions.com" className="text-amber hover:text-cream hover:underline no-underline transition-colors duration-150">
-          hello@replixcaptions.com
+        <a href="mailto:hello@everykaptions.com" className="text-amber hover:text-cream hover:underline no-underline transition-colors duration-150">
+          hello@everykaptions.com
         </a>{" "}
         with the email on your account and your payment receipt or transaction reference.
       </p>

@@ -3,8 +3,8 @@ import Link from "next/link";
 import { LegalNav } from "@/features/legal/components/legal-nav";
 
 export const metadata: Metadata = {
-  title: "Data Deletion | Replix Captions",
-  description: "How to delete your Replix Captions account and data, and what gets removed.",
+  title: "Data Deletion | EveryKaptions",
+  description: "How to delete your EveryKaptions account and data, and what gets removed.",
 };
 
 export default function DataDeletionPage() {
@@ -16,7 +16,7 @@ export default function DataDeletionPage() {
       <p className="text-dim text-[0.875rem] mb-7 leading-[1.65]">Last updated: 19 August 2026</p>
 
       <p className="text-body text-[0.9375rem] leading-[1.65]">
-        This page explains how to delete your data from Replix Captions, what gets removed, and how
+        This page explains how to delete your data from EveryKaptions, what gets removed, and how
         long it takes. It supplements our{" "}
         <Link href="/legal/privacy" className="text-amber hover:text-cream hover:underline no-underline transition-colors duration-150">
           Privacy Policy
@@ -29,8 +29,8 @@ export default function DataDeletionPage() {
       <ul className="list-disc pl-5 mb-3 text-body text-[0.9375rem]">
         <li className="mb-1.5 leading-[1.65]">
           <strong className="text-cream font-semibold">Email:</strong> write to{" "}
-          <a href="mailto:hello@replixcaptions.com" className="text-amber hover:text-cream hover:underline no-underline transition-colors duration-150">
-            hello@replixcaptions.com
+          <a href="mailto:hello@everykaptions.com" className="text-amber hover:text-cream hover:underline no-underline transition-colors duration-150">
+            hello@everykaptions.com
           </a>{" "}
           from the email address on your account, with the subject line <strong className="text-cream font-semibold">Delete my account</strong>.
         </li>
@@ -92,8 +92,8 @@ export default function DataDeletionPage() {
       <h2 className="text-[1rem] font-semibold text-cream mt-7 mb-2.5 leading-[1.65]">Questions</h2>
       <p className="text-body text-[0.9375rem] leading-[1.65]">
         If you are unsure what data we hold, email{" "}
-        <a href="mailto:hello@replixcaptions.com" className="text-amber hover:text-cream hover:underline no-underline transition-colors duration-150">
-          hello@replixcaptions.com
+        <a href="mailto:hello@everykaptions.com" className="text-amber hover:text-cream hover:underline no-underline transition-colors duration-150">
+          hello@everykaptions.com
         </a>{" "}
         and ask for a copy before you request deletion. You may also lodge a complaint with the relevant data
         protection authority under India&apos;s Digital Personal Data Protection Act, 2023.

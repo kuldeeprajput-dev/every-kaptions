@@ -128,7 +128,7 @@ export function AuthModal() {
         >
           {authModalMode === "forgot"
             ? "Reset your password"
-            : "Sign in to Replix Captions"}
+            : "Sign in to EveryKaptions"}
         </h2>
         <p className="text-[13px] sm:text-[14px] text-[#8a8478] text-center mb-5">
           {authModalMode === "forgot"

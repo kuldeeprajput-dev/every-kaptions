@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Terms of Service | Replix Captions",
-  description: "Terms of Service for Replix Captions: Telugu caption tool for Reels and Shorts.",
+  title: "Terms of Service | EveryKaptions",
+  description: "Terms of Service for EveryKaptions, a multilingual caption tool for Reels and Shorts.",
 };
 
 export default function TermsPage() {
@@ -15,8 +15,8 @@ export default function TermsPage() {
       <p className="text-dim text-[0.875rem] mb-7 leading-[1.65]">Last updated: 31 August 2026</p>
 
       <p className="text-body text-[0.9375rem] leading-[1.65]">
-        These terms govern your use of Replix Captions (&quot;Service&quot;), a sole proprietorship of
-        Sai Santosh Kumar registered in India (&quot;we&quot;, &quot;us&quot;). By accessing or using the
+        These terms govern your use of EveryKaptions (&quot;Service&quot;), a creator-led software service operated by
+        Kuldeep, based in India (&quot;we&quot;, &quot;us&quot;). By accessing or using the
         Service, you agree to these terms and our{" "}
         <Link href="/legal/privacy" className="text-amber hover:text-cream hover:underline no-underline transition-colors duration-150">
           Privacy Policy
@@ -46,13 +46,13 @@ export default function TermsPage() {
       </p>
       <p className="text-body text-[0.9375rem] leading-[1.65]">
         You are responsible for your content and must not upload material that is illegal, infringing,
-        harmful, or violates others&apos; rights. You agree to indemnify Replix Captions against claims arising
+        harmful, or violates others&apos; rights. You agree to indemnify EveryKaptions against claims arising
         from content you upload without proper rights.
       </p>
 
       <h2 className="text-[1rem] font-semibold text-cream mt-7 mb-2.5 leading-[1.65]">Instagram posting</h2>
       <p className="text-body text-[0.9375rem] leading-[1.65]">
-        Posting to Instagram from Replix Captions is optional. We only post or schedule a Reel when
+        Posting to Instagram from EveryKaptions is optional. We only post or schedule a Reel when
         you tap Post now or Schedule for later. You need an Instagram professional account (Business
         or Creator). We do not post to personal profiles. You are responsible for the caption and
         video you send, and for following Instagram&apos;s rules.
@@ -113,7 +113,7 @@ export default function TermsPage() {
       <h2 id="free-plan" className="text-[1rem] font-semibold text-cream mt-7 mb-2.5 leading-[1.65] scroll-mt-6">Free plan limits</h2>
       <p className="text-body text-[0.9375rem] leading-[1.65]">
         Free accounts include 3 minutes of captioning and 3 exports each calendar month, and up to 5 uploads per day.
-        Free exports include a small Replix Captions watermark. Uploads are limited to 3 minutes per video, 1080p, and 300 MB.
+        Free exports include a small EveryKaptions watermark. Uploads are limited to 3 minutes per video, 1080p, and 300 MB.
         Minutes and exports reset on the 1st of each month and do not roll over.
       </p>
 
@@ -173,7 +173,7 @@ export default function TermsPage() {
 
       <h2 id="delivery" className="text-[1rem] font-semibold text-cream mt-7 mb-2.5 leading-[1.65] scroll-mt-6">Delivery of service</h2>
       <p className="text-body text-[0.9375rem] leading-[1.65]">
-        Replix Captions is a digital software service. There is no physical product or physical
+        EveryKaptions is a digital software service. There is no physical product or physical
         shipment. Minutes and subscriptions are delivered electronically to your account after a
         successful payment, and caption exports are available for download after processing completes.
         If minutes or exports are not delivered as expected, contact us and we will resolve it or
@@ -191,13 +191,13 @@ export default function TermsPage() {
         <li className="mb-1.5 leading-[1.65]"><strong className="text-cream font-semibold">Licence:</strong> you grant us a limited licence to store and process your photo solely to provide the thumbnail feature. That licence ends when you delete the photo or when we delete it after account closure.</li>
         <li className="mb-1.5 leading-[1.65]"><strong className="text-cream font-semibold">AI output:</strong> generated images may be inaccurate or imperfect. You are responsible for reviewing them before you publish. We do not guarantee that any platform (including YouTube or Instagram) will accept the thumbnail or that it will perform well.</li>
         <li className="mb-1.5 leading-[1.65]"><strong className="text-cream font-semibold">Credits:</strong> thumbnail credits are included with eligible paid plans (such as Studio). They reset each billing month, do not roll over, and have no cash value. Failed generations are not charged.</li>
-        <li className="mb-1.5 leading-[1.65]"><strong className="text-cream font-semibold">Indemnity:</strong> you are responsible for the consequences of uploading a photo you had no right to use, and you agree to indemnify Replix Captions against claims arising from that upload.</li>
+        <li className="mb-1.5 leading-[1.65]"><strong className="text-cream font-semibold">Indemnity:</strong> you are responsible for the consequences of uploading a photo you had no right to use, and you agree to indemnify EveryKaptions against claims arising from that upload.</li>
         <li className="mb-1.5 leading-[1.65]">We may refuse or block a generation that violates these terms or our AI providers&apos; policies.</li>
       </ul>
 
       <h2 className="text-[1rem] font-semibold text-cream mt-7 mb-2.5 leading-[1.65]">Limitation of liability</h2>
       <p className="text-body text-[0.9375rem] leading-[1.65]">
-        To the maximum extent permitted by law, Replix Captions will not be liable for indirect,
+        To the maximum extent permitted by law, EveryKaptions will not be liable for indirect,
         incidental, special, consequential, or punitive damages, or for loss of profits, data, or
         goodwill. Our total liability for any claim relating to the Service is limited to the
         amount you paid us in the twelve (12) months before the claim, or ₹1,000, whichever is greater.
@@ -223,8 +223,8 @@ export default function TermsPage() {
         . We typically reply within 24 to 48 hours.
         <br />
         Email:{" "}
-        <a href="mailto:hello@replixcaptions.com" className="text-amber hover:text-cream hover:underline no-underline transition-colors duration-150">
-          hello@replixcaptions.com
+        <a href="mailto:hello@everykaptions.com" className="text-amber hover:text-cream hover:underline no-underline transition-colors duration-150">
+          hello@everykaptions.com
         </a>
       </p>
 

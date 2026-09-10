@@ -4,7 +4,7 @@ export interface Subprocessor {
 }
 
 export const SUBPROCESSORS: Subprocessor[] = [
-  { name: "Hostinger", description: "hosting for the servers that run Replix Captions." },
+  { name: "Hostinger", description: "hosting for the servers that run EveryKaptions." },
   { name: "Supabase", description: "authentication and account database." },
   { name: "Cloudflare R2", description: "temporary media storage during upload and processing." },
   { name: "Modal", description: "cloud computing used to render your captioned video." },
