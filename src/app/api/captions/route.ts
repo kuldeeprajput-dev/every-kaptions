@@ -47,6 +47,26 @@ type GroqTranslationResponse = {
   error?: { message?: string };
 };
 
+function parseConvertedLines(content: string, expectedCount: number) {
+  const translated = new Map<number, string>();
+  const cleaned = content
+    .replace(/^```(?:text|txt)?\s*/i, "")
+    .replace(/\s*```$/i, "")
+    .trim();
+
+  for (const rawLine of cleaned.split(/\r?\n/)) {
+    const match = rawLine.match(/^\s*(\d+)\s*(?:\t|\||::)\s*(.+?)\s*$/);
+    if (!match) continue;
+    const index = Number(match[1]);
+    const text = match[2]?.trim();
+    if (Number.isInteger(index) && index >= 0 && index < expectedCount && text) {
+      translated.set(index, text);
+    }
+  }
+
+  return translated;
+}
+
 async function convertTranscript(
   transcript: TranscriptPayload,
   outputLanguage: Exclude<CaptionOutputLanguage, "same">,
@@ -64,7 +84,9 @@ async function convertTranscript(
 
   if (sourceSegments.every((segment) => !segment.text)) return transcript;
 
-  const sourceJson = JSON.stringify({ segments: sourceSegments });
+  const sourceText = sourceSegments
+    .map((segment, index) => `${index}\t${segment.text.replace(/[\r\n\t]+/g, " ")}`)
+    .join("\n");
   const conversionResponse = await fetch(GROQ_CHAT_URL, {
     method: "POST",
     headers: {
@@ -74,14 +96,13 @@ async function convertTranscript(
     body: JSON.stringify({
       model: process.env.GROQ_TRANSLATION_MODEL ?? "openai/gpt-oss-20b",
       temperature: 0.1,
-      max_completion_tokens: Math.min(2048, Math.max(300, Math.ceil(sourceJson.length * 0.7))),
-      response_format: { type: "json_object" },
+      max_completion_tokens: Math.min(2048, Math.max(300, Math.ceil(sourceText.length * 0.8))),
       messages: [
         {
           role: "system",
-          content: OUTPUT_INSTRUCTIONS[outputLanguage] + " Keep names, numbers, product terms, and meaning accurate. Do not add explanations. Return one JSON object with a segments array. Keep every input id exactly once and in the same order. Each item must contain only id and text.",
+          content: OUTPUT_INSTRUCTIONS[outputLanguage] + " Keep names, numbers, product terms, and meaning accurate. You will receive numbered caption lines. Return exactly one translated line for every input line using the format NUMBER<TAB>CAPTION. Preserve every number and its order. Do not return JSON, markdown, code fences, notes, or explanations.",
         },
-        { role: "user", content: sourceJson },
+        { role: "user", content: sourceText },
       ],
     }),
     cache: "no-store",
@@ -95,28 +116,19 @@ async function convertTranscript(
   const content = completion?.choices?.[0]?.message?.content;
   if (!content) throw new Error("Groq returned an empty caption conversion.");
 
-  let parsed: { segments?: Array<{ id?: string | number; text?: string }> };
-  try {
-    parsed = JSON.parse(content) as typeof parsed;
-  } catch {
-    throw new Error("Groq returned an invalid caption conversion. Please try again.");
-  }
-
-  const translatedById = new Map(
-    (parsed.segments ?? []).map((segment) => [String(segment.id ?? ""), (segment.text ?? "").trim()]),
-  );
-  if (sourceSegments.some((segment) => !translatedById.get(segment.id))) {
+  const translatedByIndex = parseConvertedLines(content, sourceSegments.length);
+  if (translatedByIndex.size !== sourceSegments.length) {
     throw new Error("Groq returned an incomplete caption conversion. Please try again.");
   }
 
   const translatedSegments = originalSegments.map((segment, index) => ({
     ...segment,
-    text: translatedById.get(String(segment.id ?? index)) || segment.text,
+    text: translatedByIndex.get(index) || segment.text,
     words: [],
   }));
 
   if (translatedSegments.length === 0) {
-    const text = translatedById.get("full") || transcript.text || "";
+    const text = translatedByIndex.get(0) || transcript.text || "";
     return {
       ...transcript,
       text,
