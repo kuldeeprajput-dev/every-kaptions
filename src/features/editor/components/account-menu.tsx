@@ -1,7 +1,9 @@
 import { AnimatePresence, motion } from "motion/react";
 import { ChevronDown } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { cn } from "@/shared/lib/cn";
+import { useAuth } from "@/features/auth/store/auth-store";
 
 const accountLinks = [
   { label: "Home", href: "/" },
@@ -16,6 +18,8 @@ const accountLinks = [
 ] as const;
 
 export function AccountMenu({ open, onToggle }: { open: boolean; onToggle: () => void }) {
+  const { user, signOut } = useAuth();
+  const router = useRouter();
   return (
     <div className="relative">
       <button
@@ -33,7 +37,9 @@ export function AccountMenu({ open, onToggle }: { open: boolean; onToggle: () =>
             exit={{ opacity: 0, y: -8 }}
             className="absolute right-0 top-12 w-[278px] rounded-xl border border-white/15 bg-[#151515] p-4 shadow-2xl"
           >
-            <p className="truncate text-sm">benjamin2mi.lle.r.50.84@gmail.com</p>
+            <p className="truncate text-sm font-medium text-[#f4ecdc]">
+              {user?.email || "Signed in"}
+            </p>
             <span className="mt-4 inline-block rounded-full border border-white/12 bg-white/8 px-3 py-1 text-[11px]">FREE</span>
             <p className="mt-3 text-sm font-bold text-cream">3 min available</p>
             <p className="mt-1 text-xs text-[#8b8b8b]">Exports: 0 of 3 used this month</p>
@@ -51,7 +57,16 @@ export function AccountMenu({ open, onToggle }: { open: boolean; onToggle: () =>
                 {item.label}
               </Link>
             ))}
-            <button type="button" className="mt-1 block px-1 py-2 text-sm text-red-400">Sign out</button>
+            <button
+              type="button"
+              onClick={async () => {
+                await signOut();
+                router.push("/");
+              }}
+              className="mt-1 block w-full text-left px-1 py-2 text-sm text-red-400 hover:text-red-300 transition-colors cursor-pointer"
+            >
+              Sign out
+            </button>
           </motion.div>
         ) : null}
       </AnimatePresence>

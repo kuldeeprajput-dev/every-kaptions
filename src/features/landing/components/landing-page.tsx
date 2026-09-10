@@ -3,10 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { SiteHeader } from "@/shared/components/site-header";
+import { useAuth } from "@/features/auth/store/auth-store";
 import { LandingCreatorReviews } from "./landing-creator-reviews";
 import { LandingWorkflowSteps } from "./landing-workflow-steps";
 
 export function LandingPage() {
+  const { user, openAuthModal } = useAuth();
+
   return (
     <>
       <SiteHeader />
@@ -34,13 +37,24 @@ export function LandingPage() {
             <p className="text-[clamp(16px,1.4vw+13px,25px)] text-dim leading-[1.55] max-w-[46ch] mx-auto mb-5">
               Editable word-by-word captions, plus a title, caption, hashtags, and thumbnail, ready to post.
             </p>
-            <Link
-              href="/editor"
-              id="heroCta"
-              className="btn-primary btn-open-app inline-flex items-center justify-center box-border no-underline min-h-[52px] px-[28px] bg-cream !text-[#0c0b0a] text-[clamp(15px,0.6vw+12px,18px)] font-semibold rounded-full cursor-pointer shadow-[var(--gold-glow)] hover:-translate-y-px hover:shadow-[var(--gold-glow-hover)] transition-[transform,box-shadow] duration-150 active:translate-y-0"
-            >
-              Open app
-            </Link>
+            {user ? (
+              <Link
+                href="/editor"
+                id="heroCta"
+                className="btn-primary btn-open-app inline-flex items-center justify-center box-border no-underline min-h-[52px] px-[28px] bg-cream !text-[#0c0b0a] text-[clamp(15px,0.6vw+12px,18px)] font-semibold rounded-full cursor-pointer shadow-[var(--gold-glow)] hover:-translate-y-px hover:shadow-[var(--gold-glow-hover)] transition-[transform,box-shadow] duration-150 active:translate-y-0"
+              >
+                Open app
+              </Link>
+            ) : (
+              <button
+                type="button"
+                id="heroCta"
+                onClick={() => openAuthModal("signin")}
+                className="btn-primary btn-open-app inline-flex items-center justify-center box-border no-underline min-h-[52px] px-[28px] bg-cream !text-[#0c0b0a] text-[clamp(15px,0.6vw+12px,18px)] font-semibold rounded-full cursor-pointer shadow-[var(--gold-glow)] hover:-translate-y-px hover:shadow-[var(--gold-glow-hover)] transition-[transform,box-shadow] duration-150 active:translate-y-0"
+              >
+                Get started
+              </button>
+            )}
           </div>
         </section>
 
@@ -93,13 +107,24 @@ export function LandingPage() {
             <p className="text-[clamp(15px,0.9vw+12px,19px)] text-body max-w-[42ch] mx-auto mb-6 leading-[1.55]">
               Paid plans include editable captions, a title, caption, and hashtags. Creator and Studio also include thumbnails, with more options on Studio.
             </p>
-            <Link
-              href="/editor"
-              id="accessCta"
-              className="btn-primary btn-open-app inline-flex items-center justify-center box-border no-underline min-h-[52px] px-[28px] bg-cream !text-[#0c0b0a] text-[clamp(15px,0.6vw+12px,18px)] font-semibold rounded-full cursor-pointer shadow-[var(--gold-glow)] hover:-translate-y-px hover:shadow-[var(--gold-glow-hover)] transition-[transform,box-shadow] duration-150 active:translate-y-0"
-            >
-              Open app
-            </Link>
+            {user ? (
+              <Link
+                href="/editor"
+                id="accessCta"
+                className="btn-primary btn-open-app inline-flex items-center justify-center box-border no-underline min-h-[52px] px-[28px] bg-cream !text-[#0c0b0a] text-[clamp(15px,0.6vw+12px,18px)] font-semibold rounded-full cursor-pointer shadow-[var(--gold-glow)] hover:-translate-y-px hover:shadow-[var(--gold-glow-hover)] transition-[transform,box-shadow] duration-150 active:translate-y-0"
+              >
+                Open app
+              </Link>
+            ) : (
+              <button
+                type="button"
+                id="accessCta"
+                onClick={() => openAuthModal("signin")}
+                className="btn-primary btn-open-app inline-flex items-center justify-center box-border no-underline min-h-[52px] px-[28px] bg-cream !text-[#0c0b0a] text-[clamp(15px,0.6vw+12px,18px)] font-semibold rounded-full cursor-pointer shadow-[var(--gold-glow)] hover:-translate-y-px hover:shadow-[var(--gold-glow-hover)] transition-[transform,box-shadow] duration-150 active:translate-y-0"
+              >
+                Get started
+              </button>
+            )}
           </div>
         </section>
 

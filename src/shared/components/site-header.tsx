@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/shared/lib/cn";
+import { UserMenu } from "@/features/auth/components/user-menu";
 
 export function SiteHeader() {
   const pathname = usePathname();
@@ -143,12 +144,7 @@ export function SiteHeader() {
             >
               Support
             </Link>
-            <Link
-              href="/editor"
-              className="btn-open-app inline-flex items-center justify-center box-border no-underline bg-cream !text-[#0c0b0a] text-[13px] font-semibold rounded-full cursor-pointer px-[18px] min-h-[44px] shadow-[var(--gold-glow)] hover:-translate-y-px hover:shadow-[var(--gold-glow-hover)] transition-[transform,box-shadow] duration-150 whitespace-nowrap max-[420px]:min-h-[40px] max-[420px]:px-3.5 max-[420px]:text-xs max-[360px]:px-2.5"
-            >
-              Open app
-            </Link>
+            <UserMenu />
           </nav>
         </div>
       </header>
