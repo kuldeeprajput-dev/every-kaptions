@@ -62,5 +62,5 @@ export const compactReviews: CompactReview[] = [
 
 export const thumbnailSamples: string[] = Array.from(
   { length: 9 },
-  () => "/media/kuldeep-profile.png",
+  (_, index) => `/media/thumbs/thumb-${index + 1}.webp`,
 );
