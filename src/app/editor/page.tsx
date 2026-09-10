@@ -1,5 +1,5 @@
-import { EditorPage } from "@/features/editor/components/editor-page";
+import { redirect } from "next/navigation";
 
 export default function Page() {
-  return <EditorPage />;
+  redirect("/studio");
 }
