@@ -84,7 +84,10 @@ export function usePlanSummary() {
   const refreshPeriod = usePlanStore((state) => state.refreshPeriod);
 
   useEffect(() => {
-    void usePlanStore.persist.rehydrate().then(refreshPeriod);
+    void (async () => {
+      await usePlanStore.persist.rehydrate();
+      refreshPeriod();
+    })();
   }, [refreshPeriod]);
 
   const totalSeconds = freePlan.transcriptionMinutes * 60;

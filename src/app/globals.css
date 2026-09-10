@@ -103,12 +103,12 @@ h6 {
 
 a:link,
 a:visited {
-  color: var(--amber);
+  color: inherit;
   text-decoration: none;
 }
 
 a:hover {
-  color: var(--cream);
+  text-decoration: none;
 }
 
 footer a,

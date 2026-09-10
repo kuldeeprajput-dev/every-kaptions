@@ -12,7 +12,7 @@ export function SupportPage() {
     <main className="min-h-screen bg-[#080808] px-5 py-16 text-[#ded5c5] sm:py-24 lg:pb-16 lg:pt-44">
       <section className="mx-auto w-full max-w-[820px]">
         <h1 className="text-5xl font-semibold tracking-tight text-[#ded5c5] sm:text-6xl">Support</h1>
-        <p className="mt-14 text-lg leading-7 sm:text-xl">Replix Captions is run by a small team. We read every message and typically reply within <strong>24 to 48 hours.</strong></p>
+        <p className="mt-14 text-lg leading-7 sm:text-xl">EveryKaptions is run by a small creator-led team. We read every message and typically reply within <strong>24 to 48 hours.</strong></p>
         {submitted ? (
           <div className="mt-12 rounded-2xl border border-amber/30 bg-[#171717] p-8 sm:p-12">
             <CheckCircle2 className="text-amber" size={34} />
