@@ -23,6 +23,45 @@ export function EditorProjectPage({ mediaId }: { mediaId: string }) {
         if (cancelled) return;
 
         if (!stored) {
+          if (mediaId === "demo") {
+            const resp = await fetch("/media/hero-glow.mp4");
+            const blob = await resp.blob();
+            const demoProject = {
+              id: "demo",
+              name: "Demo Reel - Kuldeep Rajput",
+              fileBlob: blob,
+              fileType: "video/mp4",
+              fileSize: blob.size,
+              language: "en",
+              outputMode: "same" as const,
+              status: "ready" as const,
+              createdAt: Date.now(),
+              updatedAt: Date.now(),
+              segments: [
+                {
+                  id: "demo-seg-1",
+                  text: "Hey, welcome to the Kuldeep Rajput Mac",
+                  start: 0.0,
+                  end: 1.9,
+                  words: [],
+                },
+                {
+                  id: "demo-seg-2",
+                  text: "voice synced captions showcase.",
+                  start: 2.1,
+                  end: 3.9,
+                  words: [],
+                },
+              ],
+              duration: 4.0,
+              styleId: "yellow",
+            };
+            await saveProject(demoProject);
+            editor.loadStoredProject(demoProject);
+            setLoading(false);
+            return;
+          }
+
           setNotFound(true);
           setLoading(false);
           return;

@@ -1,4 +1,5 @@
 import type { CaptionSegment } from "../types/captions";
+import { ensureSegmentWords } from "./captions";
 
 export type RenderVideoOptions = {
   videoElement: HTMLVideoElement;
@@ -46,10 +47,15 @@ export async function renderAndExportVideo({
 
       let audioTrack: MediaStreamTrack | null = null;
       try {
-        const stream = (videoElement as any).captureStream
-          ? (videoElement as any).captureStream()
-          : (videoElement as any).mozCaptureStream
-          ? (videoElement as any).mozCaptureStream()
+        type VideoWithCapture = HTMLVideoElement & {
+          captureStream?: () => MediaStream;
+          mozCaptureStream?: () => MediaStream;
+        };
+        const v = videoElement as VideoWithCapture;
+        const stream = typeof v.captureStream === "function"
+          ? v.captureStream()
+          : typeof v.mozCaptureStream === "function"
+          ? v.mozCaptureStream()
           : null;
 
         if (stream && stream.getAudioTracks().length > 0) {
@@ -151,8 +157,6 @@ export async function renderAndExportVideo({
         );
 
         if (activeSeg && activeSeg.text.trim()) {
-          const text = formatText(activeSeg.text);
-
           let yPct = 82;
           if (position === "top") yPct = 14;
           else if (position === "center") yPct = 50;
@@ -167,16 +171,36 @@ export async function renderAndExportVideo({
           else if (fontSize === "xl") fontSizePx = Math.round(height * 0.068);
 
           ctx.font = `bold ${fontSizePx}px Inter, system-ui, -apple-system, sans-serif`;
-          ctx.textAlign = textAlign as CanvasTextAlign;
           ctx.textBaseline = "middle";
+
+          const words = ensureSegmentWords(activeSeg);
+          const spaceWidth = ctx.measureText(" ").width;
+          const measuredWords = words.map((w) => {
+            const formatted = formatText(w.text);
+            const wWidth = ctx.measureText(formatted).width;
+            return { word: w, formatted, width: wWidth };
+          });
+
+          const totalContentWidth = measuredWords.reduce(
+            (sum, item, idx) => sum + item.width + (idx < measuredWords.length - 1 ? spaceWidth : 0),
+            0,
+          );
 
           let xPos = width / 2;
           if (textAlign === "left") xPos = width * 0.08;
           if (textAlign === "right") xPos = width * 0.92;
 
-          const metrics = ctx.measureText(text);
+          let startX = xPos - totalContentWidth / 2;
+          if (textAlign === "left") startX = xPos;
+          if (textAlign === "right") startX = xPos - totalContentWidth;
+
           const padX = Math.round(fontSizePx * 0.6);
           const padY = Math.round(fontSizePx * 0.35);
+
+          type ContextWithRoundRect = CanvasRenderingContext2D & {
+            roundRect?: (x: number, y: number, w: number, h: number, r: number) => void;
+          };
+          const ctxWithRoundRect = ctx as ContextWithRoundRect;
 
           if (
             styleId === "yellow" ||
@@ -195,17 +219,15 @@ export async function renderAndExportVideo({
                 ? "#ffe600"
                 : "rgba(0, 0, 0, 0.85)";
 
-            const boxWidth = metrics.width + padX * 2;
+            const boxWidth = totalContentWidth + padX * 2;
             const boxHeight = fontSizePx + padY * 2;
-            let boxX = xPos - boxWidth / 2;
-            if (textAlign === "left") boxX = xPos - padX;
-            if (textAlign === "right") boxX = xPos - boxWidth + padX;
+            const boxX = startX - padX;
             const boxY = yPos - boxHeight / 2;
 
             ctx.beginPath();
             const rx = 12;
-            if (typeof (ctx as any).roundRect === "function") {
-              (ctx as any).roundRect(boxX, boxY, boxWidth, boxHeight, rx);
+            if (typeof ctxWithRoundRect.roundRect === "function") {
+              ctxWithRoundRect.roundRect(boxX, boxY, boxWidth, boxHeight, rx);
             } else {
               ctx.rect(boxX, boxY, boxWidth, boxHeight);
             }
@@ -217,15 +239,41 @@ export async function renderAndExportVideo({
               ctx.stroke();
             }
 
-            ctx.fillStyle =
-              styleId === "classic"
-                ? "#000000"
-                : styleId === "hormozi"
-                ? "#000000"
-                : styleId === "yellow"
-                ? highlightHex
-                : "#ffffff";
-            ctx.fillText(text, xPos, yPos);
+            ctx.textAlign = "left";
+            let curX = startX;
+            for (const item of measuredWords) {
+              const isCurrent = currentTime >= item.word.start - 0.04 && currentTime <= item.word.end + 0.08;
+
+              if (isCurrent) {
+                if (styleId === "hormozi") {
+                  ctx.fillStyle = highlightHex || "#ffe600";
+                  ctx.beginPath();
+                  const badgePad = 4;
+                  if (typeof ctxWithRoundRect.roundRect === "function") {
+                    ctxWithRoundRect.roundRect(curX - badgePad, yPos - fontSizePx * 0.55, item.width + badgePad * 2, fontSizePx * 1.1, 6);
+                  } else {
+                    ctx.rect(curX - badgePad, yPos - fontSizePx * 0.55, item.width + badgePad * 2, fontSizePx * 1.1);
+                  }
+                  ctx.fill();
+                  ctx.fillStyle = "#000000";
+                  ctx.fillText(item.formatted, curX, yPos);
+                } else if (styleId === "yellow") {
+                  ctx.fillStyle = highlightHex || "#f6c453";
+                  ctx.fillText(item.formatted, curX, yPos);
+                } else if (styleId === "classic") {
+                  ctx.fillStyle = "#000000";
+                  ctx.fillText(item.formatted, curX, yPos);
+                } else {
+                  ctx.fillStyle = highlightHex || "#f6c453";
+                  ctx.fillText(item.formatted, curX, yPos);
+                }
+              } else {
+                ctx.fillStyle = styleId === "classic" || styleId === "hormozi" ? "#000000" : "#ffffff";
+                ctx.fillText(item.formatted, curX, yPos);
+              }
+
+              curX += item.width + spaceWidth;
+            }
             ctx.restore();
           } else {
             ctx.save();
@@ -233,17 +281,51 @@ export async function renderAndExportVideo({
             ctx.shadowBlur = 12;
             ctx.shadowOffsetY = 4;
 
-            ctx.strokeStyle = "rgba(0, 0, 0, 0.85)";
-            ctx.lineWidth = Math.max(3, Math.round(fontSizePx * 0.12));
-            ctx.strokeText(text, xPos, yPos);
+            ctx.textAlign = "left";
+            let curX = startX;
+            for (const item of measuredWords) {
+              const isCurrent = currentTime >= item.word.start - 0.04 && currentTime <= item.word.end + 0.08;
+              const strokeWidth = Math.max(3, Math.round(fontSizePx * 0.12));
 
-            ctx.fillStyle =
-              styleId === "viral_alex"
-                ? "#22c55e"
-                : styleId === "neon"
-                ? "#06b6d4"
-                : highlightHex || "#f6c453";
-            ctx.fillText(text, xPos, yPos);
+              ctx.save();
+              if (isCurrent) {
+                // Apply subtle active word scale & glow highlight on canvas
+                const wordCenterX = curX + item.width / 2;
+                ctx.translate(wordCenterX, yPos);
+                ctx.scale(1.08, 1.08);
+                ctx.translate(-wordCenterX, -yPos);
+
+                const activeGlowColor =
+                  styleId === "viral_alex"
+                    ? (highlightHex === "#f6c453" ? "#22c55e" : highlightHex)
+                    : styleId === "neon"
+                    ? (highlightHex === "#f6c453" ? "#ec4899" : highlightHex)
+                    : (highlightHex || "#f6c453");
+
+                ctx.shadowColor = activeGlowColor;
+                ctx.shadowBlur = 16;
+              }
+
+              ctx.strokeStyle = "rgba(0, 0, 0, 0.85)";
+              ctx.lineWidth = strokeWidth;
+              ctx.strokeText(item.formatted, curX, yPos);
+
+              if (isCurrent) {
+                ctx.fillStyle =
+                  styleId === "viral_alex"
+                    ? (highlightHex === "#f6c453" ? "#22c55e" : highlightHex)
+                    : styleId === "neon"
+                    ? (highlightHex === "#f6c453" ? "#ec4899" : highlightHex)
+                    : (highlightHex || "#f6c453");
+              } else {
+                ctx.fillStyle = "rgba(255, 255, 255, 0.88)";
+              }
+
+              ctx.fillText(item.formatted, curX, yPos);
+              ctx.restore();
+
+              curX += item.width + spaceWidth;
+            }
             ctx.restore();
           }
         }
