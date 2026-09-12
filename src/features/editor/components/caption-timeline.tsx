@@ -52,11 +52,14 @@ export function CaptionTimeline({
 }: Props) {
   const [zoom, setZoom] = useState(1);
 
-  const activeSegmentId = editor.selectedSegmentId || editor.activeSegment?.id || editor.segments[0]?.id;
+  const currentVoiceId = editor.activeSegment?.id;
+  const activeSegmentId = isPlaying
+    ? (currentVoiceId || editor.selectedSegmentId)
+    : (currentVoiceId || editor.selectedSegmentId || editor.segments[0]?.id);
 
   const selectedIndex = useMemo(
-    () => editor.segments.findIndex((segment) => segment.id === activeSegmentId),
-    [editor.segments, activeSegmentId],
+    () => editor.segments.findIndex((segment) => segment.id === (editor.selectedSegmentId || activeSegmentId)),
+    [editor.segments, editor.selectedSegmentId, activeSegmentId],
   );
 
   const hasSelection = selectedIndex >= 0;
@@ -109,6 +112,29 @@ export function CaptionTimeline({
             danger
             onClick={() => editor.deleteSegment(editor.selectedSegmentId)}
           />
+
+          <div className="h-4 w-px bg-white/10 hidden sm:block" />
+
+          {/* Timing Nudge Controls */}
+          <div className="flex items-center gap-0.5 rounded-xl border border-white/10 bg-black/40 p-0.5">
+            <button
+              type="button"
+              onClick={() => editor.nudgeTiming(-0.1)}
+              className="rounded px-2 py-1 text-[10px] font-bold text-[#b0b0b0] hover:bg-[#f6c453]/20 hover:text-[#f6c453] transition cursor-pointer"
+              title="Shift all captions 0.1s earlier"
+            >
+              -0.1s
+            </button>
+            <span className="text-[10px] font-bold text-[#666] px-0.5 uppercase">Sync</span>
+            <button
+              type="button"
+              onClick={() => editor.nudgeTiming(0.1)}
+              className="rounded px-2 py-1 text-[10px] font-bold text-[#b0b0b0] hover:bg-[#f6c453]/20 hover:text-[#f6c453] transition cursor-pointer"
+              title="Shift all captions 0.1s later"
+            >
+              +0.1s
+            </button>
+          </div>
         </div>
 
         {/* Center: Formatting Settings (Ratio, Align, Position, Size) */}
@@ -273,7 +299,8 @@ export function CaptionTimeline({
             {editor.segments.map((segment, index) => {
               const left = (segment.start / timelineDuration) * 100;
               const width = Math.max(0.8, ((segment.end - segment.start) / timelineDuration) * 100);
-              const selected = segment.id === activeSegmentId;
+              const isSpeaking = segment.id === currentVoiceId;
+              const isSelected = segment.id === (editor.selectedSegmentId || activeSegmentId);
               const durationSec = (segment.end - segment.start).toFixed(1);
 
               return (
@@ -287,8 +314,10 @@ export function CaptionTimeline({
                   }}
                   className={cn(
                     "absolute inset-y-1 overflow-hidden rounded-lg border px-2 text-left text-[11px] font-semibold transition-all duration-150 cursor-pointer",
-                    selected
-                      ? "z-10 border-[#f6c453] bg-[#f6c453]/25 text-white shadow-[0_0_14px_rgba(246,196,83,0.3)] ring-1 ring-[#f6c453]/60"
+                    isSpeaking
+                      ? "z-20 border-[#f6c453] bg-[#f6c453]/35 text-white shadow-[0_0_18px_rgba(246,196,83,0.4)] ring-2 ring-[#f6c453]"
+                      : isSelected
+                      ? "z-10 border-[#f6c453]/80 bg-[#f6c453]/15 text-white ring-1 ring-[#f6c453]/50"
                       : "border-white/12 bg-[#1b1c1e] text-[#b8bebd] hover:border-white/30 hover:bg-[#25272a] hover:text-white",
                   )}
                   style={{ left: `${left}%`, width: `${width}%` }}

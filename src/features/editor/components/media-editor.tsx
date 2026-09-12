@@ -34,7 +34,7 @@ import { LogoWordmark } from "@/shared/components/logo-wordmark";
 import { cn } from "@/shared/lib/cn";
 import { captionStyles } from "../data/editor-config";
 import type { useCaptionEditor } from "../hooks/use-caption-editor";
-import { formatClockTime } from "../lib/captions";
+import { ensureSegmentWords, formatClockTimeWithMs } from "../lib/captions";
 import { renderAndExportVideo } from "../lib/export-video";
 import { usePlanSummary } from "../store/plan-store";
 import { CaptionTimeline } from "./caption-timeline";
@@ -282,8 +282,29 @@ export function MediaEditor({ editor, onBack }: Props) {
     return text;
   };
 
-  const activeSegmentId = editor.selectedSegmentId || editor.activeSegment?.id || editor.segments[0]?.id;
-  const activeSeg = editor.segments.find((segment) => segment.id === activeSegmentId) || editor.segments[0];
+  const currentVoiceSeg = editor.activeSegment;
+  // During playback or scrubbing, active segment strictly tracks the speaker's voice.
+  // When paused, fall back to selected segment or the first segment.
+  const activeSegmentId = isPlaying
+    ? (currentVoiceSeg?.id || editor.selectedSegmentId)
+    : (currentVoiceSeg?.id || editor.selectedSegmentId || editor.segments[0]?.id);
+
+  // For displaying on video canvas:
+  // - During playback: strictly show what is currently spoken. When silent, show nothing.
+  // - When paused: show what is spoken at current playhead. If playhead is in silence,
+  //   show selected segment ONLY if the user is explicitly editing it on canvas.
+  const displaySeg = isPlaying
+    ? currentVoiceSeg
+    : (currentVoiceSeg || (isEditingCanvasText && editor.selectedSegmentId ? editor.segments.find((s) => s.id === editor.selectedSegmentId) : null));
+
+  // Auto-scroll left sidebar to follow the spoken voice in real time
+  useEffect(() => {
+    if (!isPlaying || !currentVoiceSeg) return;
+    const card = document.getElementById(`caption-card-${currentVoiceSeg.id}`);
+    if (card) {
+      card.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [currentVoiceSeg, isPlaying]);
 
   const filteredSegments = useMemo(() => {
     if (!searchQuery.trim()) return editor.segments;
@@ -452,6 +473,47 @@ export function MediaEditor({ editor, onBack }: Props) {
                 </button>
               ) : null}
             </div>
+
+            {/* Voice Sync Nudge Controls */}
+            <div className="flex items-center justify-between gap-1 rounded-xl border border-white/8 bg-black/40 px-2.5 py-1.5 text-[11px]">
+              <span className="font-semibold text-[#888] flex items-center gap-1.5">
+                <Sliders size={12} className="text-[#f6c453]" /> Voice Sync
+              </span>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => editor.nudgeTiming(-0.2)}
+                  className="rounded px-1.5 py-0.5 bg-white/5 hover:bg-[#f6c453]/20 hover:text-[#f6c453] text-[10px] font-bold text-[#bbb] transition cursor-pointer"
+                  title="Shift all captions 0.2s earlier (if captions appear late)"
+                >
+                  -0.2s
+                </button>
+                <button
+                  type="button"
+                  onClick={() => editor.nudgeTiming(-0.1)}
+                  className="rounded px-1.5 py-0.5 bg-white/5 hover:bg-[#f6c453]/20 hover:text-[#f6c453] text-[10px] font-bold text-[#bbb] transition cursor-pointer"
+                  title="Shift all captions 0.1s earlier"
+                >
+                  -0.1s
+                </button>
+                <button
+                  type="button"
+                  onClick={() => editor.nudgeTiming(0.1)}
+                  className="rounded px-1.5 py-0.5 bg-white/5 hover:bg-[#f6c453]/20 hover:text-[#f6c453] text-[10px] font-bold text-[#bbb] transition cursor-pointer"
+                  title="Shift all captions 0.1s later"
+                >
+                  +0.1s
+                </button>
+                <button
+                  type="button"
+                  onClick={() => editor.nudgeTiming(0.2)}
+                  className="rounded px-1.5 py-0.5 bg-white/5 hover:bg-[#f6c453]/20 hover:text-[#f6c453] text-[10px] font-bold text-[#bbb] transition cursor-pointer"
+                  title="Shift all captions 0.2s later (if captions appear early)"
+                >
+                  +0.2s
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Captions List */}
@@ -464,18 +526,23 @@ export function MediaEditor({ editor, onBack }: Props) {
 
             {filteredSegments.map((segment) => {
               const index = editor.segments.findIndex((s) => s.id === segment.id);
-              const active = segment.id === activeSegmentId;
+              const isVoiceSpeaking = currentVoiceSeg?.id === segment.id;
+              const isSelected = segment.id === activeSegmentId;
+              const durationSec = (segment.end - segment.start).toFixed(1);
               return (
                 <article
                   key={segment.id}
+                  id={`caption-card-${segment.id}`}
                   className={cn(
                     "group relative rounded-xl border p-3 transition-all duration-150",
-                    active
-                      ? "border-[#f6c453] bg-[#f6c453]/10 shadow-[0_0_18px_rgba(246,196,83,0.12)]"
+                    isVoiceSpeaking
+                      ? "border-[#f6c453] bg-[#f6c453]/15 shadow-[0_0_20px_rgba(246,196,83,0.2)] ring-1 ring-[#f6c453]/50"
+                      : isSelected
+                      ? "border-[#f6c453]/60 bg-[#f6c453]/5 shadow-[0_0_12px_rgba(246,196,83,0.1)]"
                       : "border-white/8 bg-[#111213] hover:border-white/20 hover:bg-[#161719]",
                   )}
                 >
-                  {active ? (
+                  {isVoiceSpeaking ? (
                     <span className="absolute left-0 top-3 bottom-3 w-1 rounded-r-full bg-[#f6c453]" />
                   ) : null}
 
@@ -488,11 +555,16 @@ export function MediaEditor({ editor, onBack }: Props) {
                       }}
                       className="flex items-center gap-2 cursor-pointer group/time"
                     >
-                      <span className="inline-flex items-center gap-1 rounded-md bg-black/40 border border-white/10 px-2 py-0.5 text-[11px] font-bold text-[#f6c453] group-hover/time:border-[#f6c453]/50 transition">
-                        <Play size={10} className="fill-[#f6c453]" />
-                        {formatClockTime(segment.start)}
+                      <span className={cn(
+                        "inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[11px] font-bold transition",
+                        isVoiceSpeaking
+                          ? "bg-[#f6c453] text-black border-[#f6c453]"
+                          : "bg-black/40 border-white/10 text-[#f6c453] group-hover/time:border-[#f6c453]/50"
+                      )}>
+                        <Play size={10} className={isVoiceSpeaking ? "fill-black" : "fill-[#f6c453]"} />
+                        {formatClockTimeWithMs(segment.start)}
                       </span>
-                      <span className="text-[10px] font-medium text-[#727a7e]">Line {index + 1}</span>
+                      <span className="text-[10px] font-medium text-[#727a7e]">Line {index + 1} ({durationSec}s)</span>
                     </button>
 
                     <div className="flex items-center gap-1 text-[10px] text-[#888]">
@@ -599,7 +671,7 @@ export function MediaEditor({ editor, onBack }: Props) {
                 </button>
               ) : null}
 
-              {activeSeg ? (
+              {displaySeg ? (
                 <div
                   style={
                     position === "custom"
@@ -607,18 +679,18 @@ export function MediaEditor({ editor, onBack }: Props) {
                       : undefined
                   }
                   className={cn(
-                    "absolute inset-x-3 flex justify-center text-center transition-all duration-100 z-20",
+                    "absolute inset-x-3 flex justify-center text-center transition-all duration-100 z-20 pointer-events-none",
                     position === "top" && "top-[12%]",
                     position === "center" && "top-1/2 -translate-y-1/2",
                     position === "bottom" && "bottom-[14%]",
                   )}
                 >
                   {isEditingCanvasText ? (
-                    <div className="w-full max-w-[95%] bg-black/95 p-3 rounded-2xl border border-[#f6c453] shadow-2xl backdrop-blur-md">
+                    <div className="w-full max-w-[95%] bg-black/95 p-3 rounded-2xl border border-[#f6c453] shadow-2xl backdrop-blur-md pointer-events-auto">
                       <textarea
                         autoFocus
-                        value={activeSeg.text}
-                        onChange={(e) => editor.updateSegment(activeSeg.id, e.target.value)}
+                        value={displaySeg.text}
+                        onChange={(e) => editor.updateSegment(displaySeg.id, e.target.value)}
                         onBlur={() => setIsEditingCanvasText(false)}
                         onKeyDown={(e) => {
                           if (e.key === "Enter" && !e.shiftKey) {
@@ -642,27 +714,69 @@ export function MediaEditor({ editor, onBack }: Props) {
                       onPointerDown={handlePointerDown}
                       onDoubleClick={() => setIsEditingCanvasText(true)}
                       className={cn(
-                        "group/cap relative max-w-[94%] touch-none cursor-grab transition-transform hover:scale-[1.02] active:cursor-grabbing",
+                        "group/cap relative max-w-[94%] touch-none cursor-grab transition-transform hover:scale-[1.02] active:cursor-grabbing pointer-events-auto",
                         isDraggingCaption && "scale-[1.03] ring-2 ring-[#f6c453]/60 rounded-xl",
                       )}
                       title="Drag up/down to position, double-click to edit text"
                     >
-                      <p
+                      <div
                         className={cn(
-                          "px-3.5 py-1.5 transition-all",
+                          "px-3.5 py-1.5 transition-all flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1.5",
                           selectedStyle?.previewClass,
                           selectedStyle?.textClass,
                           fontSizeClasses[fontSize],
-                          textAlign === "left" && "text-left",
-                          textAlign === "center" && "text-center",
-                          textAlign === "right" && "text-right",
+                          textAlign === "left" && "justify-start text-left",
+                          textAlign === "center" && "justify-center text-center",
+                          textAlign === "right" && "justify-end text-right",
                         )}
-                        style={{
-                          color: selectedStyle?.id === "yellow" ? activeHighlightHex : undefined,
-                        }}
                       >
-                        {formatText(activeSeg.text)}
-                      </p>
+                        {(() => {
+                          const wordsList =
+                            displaySeg.words && displaySeg.words.length > 0
+                              ? displaySeg.words
+                              : ensureSegmentWords(displaySeg);
+
+                          const activeWordIndex = wordsList.findIndex(
+                            (w) => editor.currentTime >= w.start && editor.currentTime < w.end,
+                          );
+
+                          return wordsList.map((word, wIdx) => {
+                            const isCurrentWord = wIdx === activeWordIndex;
+                            const isPastWord = editor.currentTime >= word.end;
+
+                            let wordStyle: React.CSSProperties | undefined = undefined;
+                            if (isCurrentWord) {
+                              if (selectedStyle?.id === "yellow") {
+                                wordStyle = { color: activeHighlightHex };
+                              } else if (selectedStyle?.id === "hormozi") {
+                                wordStyle = { backgroundColor: activeHighlightHex || "#ffe600", color: "#000000" };
+                              } else if (selectedStyle?.id === "viral_alex") {
+                                wordStyle = { color: activeHighlightHex === "#f6c453" ? "#22c55e" : activeHighlightHex };
+                              } else if (selectedStyle?.id === "neon") {
+                                wordStyle = { color: activeHighlightHex === "#f6c453" ? "#ec4899" : activeHighlightHex };
+                              }
+                            }
+
+                            return (
+                              <span
+                                key={word.id || wIdx}
+                                style={wordStyle}
+                                className={cn(
+                                  "transition-all duration-75 inline-block",
+                                  isCurrentWord && cn(
+                                    "scale-110 font-black",
+                                    selectedStyle?.activeWordClass,
+                                  ),
+                                  !isCurrentWord && isPastWord && "opacity-95",
+                                  !isCurrentWord && !isPastWord && "opacity-80",
+                                )}
+                              >
+                                {formatText(word.text)}
+                              </span>
+                            );
+                          });
+                        })()}
+                      </div>
 
                       <div className="absolute -top-8 left-1/2 hidden -translate-x-1/2 items-center gap-1.5 opacity-0 group-hover/cap:opacity-100 sm:flex rounded-full bg-black/90 px-3 py-1 text-[10px] font-semibold text-[#f6c453] border border-[#f6c453]/40 shadow-xl pointer-events-none whitespace-nowrap">
                         <Move size={11} /> Drag to move · Double click to edit
