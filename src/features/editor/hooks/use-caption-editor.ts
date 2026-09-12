@@ -9,7 +9,7 @@ import {
   translateCaptionTranscript,
   uploadCaptionMedia,
 } from "../lib/caption-api";
-import { buildSrt, buildVtt, normalizeTranscript } from "../lib/captions";
+import { buildSrt, buildVtt, ensureSegmentWords, normalizeTranscript, shiftCaptionsTiming } from "../lib/captions";
 import { usePlanSummary } from "../store/plan-store";
 import {
   isCaptionOutputLanguage,
@@ -113,13 +113,17 @@ export function useCaptionEditor() {
       setStatus("preparing");
       const result = normalizeTranscript(payload);
       if (result.segments.length === 0) throw new Error("No speech was found. Try a video with clearer audio.");
-      setSegments(result.segments);
+      const sanitizedSegments = result.segments.map((seg) => ({
+        ...seg,
+        words: ensureSegmentWords(seg),
+      }));
+      setSegments(sanitizedSegments);
       setPast([]);
       setFuture([]);
       lastTextEditRef.current = null;
       setDuration(result.duration);
       setCurrentTime(0);
-      setSelectedSegmentId(result.segments[0]?.id ?? "");
+      setSelectedSegmentId(sanitizedSegments[0]?.id ?? "");
       plan.recordTranscription(result.duration);
       await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
       setStatus("ready");
@@ -131,7 +135,7 @@ export function useCaptionEditor() {
   }, [file, language, outputLanguage, plan]);
 
   const activeSegment = useMemo(
-    () => segments.find((segment) => currentTime >= segment.start && currentTime < segment.end) ?? null,
+    () => segments.find((segment) => currentTime >= segment.start - 0.04 && currentTime <= segment.end + 0.04) ?? null,
     [currentTime, segments],
   );
 
@@ -177,9 +181,34 @@ export function useCaptionEditor() {
     setFuture([]);
     lastTextEditRef.current = { segmentId, updatedAt: now };
     setSegments((current) =>
-      current.map((segment) => (segment.id === segmentId ? { ...segment, text } : segment)),
+      current.map((segment) => {
+        if (segment.id !== segmentId) return segment;
+        const updated = { ...segment, text };
+        updated.words = ensureSegmentWords(updated);
+        return updated;
+      }),
     );
   }, [segments]);
+
+  const updateSegmentTiming = useCallback((segmentId: string, newStart: number, newEnd: number) => {
+    const safeStart = Math.max(0, Number(newStart.toFixed(2)));
+    const safeEnd = Math.max(safeStart + 0.2, Number(newEnd.toFixed(2)));
+
+    const next = segments.map((seg) => {
+      if (seg.id !== segmentId) return seg;
+      const updated = { ...seg, start: safeStart, end: safeEnd };
+      updated.words = ensureSegmentWords(updated);
+      return updated;
+    });
+
+    pushHistory(next);
+  }, [pushHistory, segments]);
+
+  const nudgeTiming = useCallback((deltaSeconds: number) => {
+    if (segments.length === 0) return;
+    const next = shiftCaptionsTiming(segments, deltaSeconds);
+    pushHistory(next);
+  }, [pushHistory, segments]);
 
   const splitSegment = useCallback((segmentId: string) => {
     const index = segments.findIndex((segment) => segment.id === segmentId);
@@ -307,14 +336,18 @@ export function useCaptionEditor() {
     setMediaUrl(nextUrl);
     setLanguage(stored.language || "en");
     setOutputLanguage(isCaptionOutputLanguage(stored.outputMode) ? stored.outputMode : "same");
-    setSegments(stored.segments || []);
+    const sanitizedSegments = (stored.segments || []).map((seg) => ({
+      ...seg,
+      words: ensureSegmentWords(seg),
+    }));
+    setSegments(sanitizedSegments);
     setPast([]);
     setFuture([]);
     lastTextEditRef.current = null;
     setDuration(stored.duration || 0);
     setCurrentTime(0);
     if (stored.styleId) setStyleId(stored.styleId as CaptionStyleId);
-    setSelectedSegmentId(stored.segments?.[0]?.id ?? "");
+    setSelectedSegmentId(sanitizedSegments[0]?.id ?? "");
     setStatus("ready");
     setError("");
   }, []);
@@ -342,6 +375,8 @@ export function useCaptionEditor() {
     reset,
     loadStoredProject,
     updateSegment,
+    updateSegmentTiming,
+    nudgeTiming,
     splitSegment,
     mergeWithNext,
     deleteSegment,

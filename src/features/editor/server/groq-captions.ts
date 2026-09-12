@@ -84,6 +84,7 @@ export async function transcribeMedia(
   providerBody.append("response_format", "verbose_json");
   providerBody.append("temperature", "0");
   providerBody.append("timestamp_granularities[]", "word");
+  providerBody.append("timestamp_granularities[]", "segment");
   providerBody.append(
     "prompt",
     "Transcribe faithfully in the selected spoken language. Do not translate the speech into another language.",
