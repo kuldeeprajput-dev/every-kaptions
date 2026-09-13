@@ -315,9 +315,9 @@ export function CaptionTimeline({
                   className={cn(
                     "absolute inset-y-1 overflow-hidden rounded-lg border px-2 text-left text-[11px] font-semibold transition-all duration-150 cursor-pointer",
                     isSpeaking
-                      ? "z-20 border-[#f6c453] bg-[#f6c453]/35 text-white shadow-[0_0_18px_rgba(246,196,83,0.4)] ring-2 ring-[#f6c453]"
+                      ? "z-20 border-[#f6c453] bg-[#f6c453]/35 text-white shadow-[0_0_18px_rgba(246,196,83,0.4)]"
                       : isSelected
-                      ? "z-10 border-[#f6c453]/80 bg-[#f6c453]/15 text-white ring-1 ring-[#f6c453]/50"
+                      ? "z-10 border-[#f6c453]/80 bg-[#f6c453]/15 text-white"
                       : "border-white/12 bg-[#1b1c1e] text-[#b8bebd] hover:border-white/30 hover:bg-[#25272a] hover:text-white",
                   )}
                   style={{ left: `${left}%`, width: `${width}%` }}

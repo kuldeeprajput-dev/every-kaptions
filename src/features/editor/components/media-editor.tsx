@@ -536,7 +536,7 @@ export function MediaEditor({ editor, onBack }: Props) {
                   className={cn(
                     "group relative rounded-xl border p-3 transition-all duration-150",
                     isVoiceSpeaking
-                      ? "border-[#f6c453] bg-[#f6c453]/15 shadow-[0_0_20px_rgba(246,196,83,0.2)] ring-1 ring-[#f6c453]/50"
+                      ? "border-[#f6c453] bg-[#f6c453]/15 shadow-[0_0_20px_rgba(246,196,83,0.25)]"
                       : isSelected
                       ? "border-[#f6c453]/60 bg-[#f6c453]/5 shadow-[0_0_12px_rgba(246,196,83,0.1)]"
                       : "border-white/8 bg-[#111213] hover:border-white/20 hover:bg-[#161719]",
@@ -603,7 +603,7 @@ export function MediaEditor({ editor, onBack }: Props) {
                     onChange={(event) => editor.updateSegment(segment.id, event.target.value)}
                     rows={2}
                     aria-label={`Caption ${index + 1} text`}
-                    className="mt-2.5 w-full resize-none rounded-lg bg-black/30 border border-transparent p-2 text-sm leading-6 text-cream outline-none focus:border-[#f6c453]/40 focus:bg-black/60 placeholder:text-[#596064] transition"
+                    className="mt-2.5 w-full resize-none rounded-lg bg-black/30 border-0 p-2 text-sm leading-6 text-cream outline-none focus:outline-none focus:ring-0 focus:border-0 focus:bg-black/50 placeholder:text-[#596064] transition"
                   />
                 </article>
               );
@@ -699,7 +699,7 @@ export function MediaEditor({ editor, onBack }: Props) {
                           }
                         }}
                         rows={2}
-                        className="w-full resize-none bg-transparent text-center text-base font-bold text-white outline-none"
+                        className="w-full resize-none bg-transparent text-center text-base font-bold text-white outline-none border-0 focus:border-0 focus:outline-none focus:ring-0 shadow-none"
                       />
                       <button
                         type="button"
