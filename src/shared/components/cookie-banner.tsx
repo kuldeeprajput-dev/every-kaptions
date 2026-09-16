@@ -34,7 +34,7 @@ export function CookieBanner() {
     <aside
       role="region"
       aria-label="Cookie consent banner"
-      className="fixed bottom-0 inset-x-0 z-[90] bg-[#0c0b0a]/96 border-t border-[rgba(244,236,220,0.14)] backdrop-blur-md px-4 sm:px-6 py-3.5 flex flex-row items-center justify-between gap-4 animate-[fadeUp_0.3s_ease_both]"
+      className="fixed bottom-0 inset-x-0 z-[90] w-full max-w-full overflow-hidden bg-[#0c0b0a]/96 border-t border-[rgba(244,236,220,0.14)] backdrop-blur-md px-4 sm:px-6 py-3 sm:py-3.5 flex flex-row items-center justify-between gap-3 sm:gap-4 animate-[fadeUp_0.3s_ease_both]"
     >
       <p className="text-[12px] sm:text-[13px] text-[#a8a195] m-0 leading-[1.5]">
         We use cookies to keep you signed in and tools that measure usage and help

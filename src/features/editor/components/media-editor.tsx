@@ -115,6 +115,7 @@ export function MediaEditor({ editor, onBack }: Props) {
   const [isEditingCanvasText, setIsEditingCanvasText] = useState(false);
   const [showShortcutsModal, setShowShortcutsModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
+  const [mobileDrawer, setMobileDrawer] = useState<null | "captions" | "styles">(null);
   const [isDraggingCaption, setIsDraggingCaption] = useState(false);
   const [activeRightTab, setActiveRightTab] = useState<ActiveRightTab>("styles");
   const [searchQuery, setSearchQuery] = useState("");
@@ -389,6 +390,34 @@ export function MediaEditor({ editor, onBack }: Props) {
         </div>
 
         <div className="header-actions ml-auto flex min-w-0 items-center gap-1.5 text-[#c8c2b6] sm:gap-2">
+          {/* Mobile panel toggles */}
+          <button
+            type="button"
+            onClick={() => setMobileDrawer((curr) => (curr === "captions" ? null : "captions"))}
+            className={cn(
+              "flex h-9 items-center gap-1.5 rounded-full border px-2.5 text-xs font-semibold transition lg:hidden cursor-pointer",
+              mobileDrawer === "captions"
+                ? "bg-[#f6c453] text-black border-[#f6c453]"
+                : "border-white/15 text-white hover:border-white/30",
+            )}
+            title="Toggle Captions List"
+          >
+            <Layers size={13} /> <span className="hidden sm:inline">Captions</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobileDrawer((curr) => (curr === "styles" ? null : "styles"))}
+            className={cn(
+              "flex h-9 items-center gap-1.5 rounded-full border px-2.5 text-xs font-semibold transition lg:hidden cursor-pointer",
+              mobileDrawer === "styles"
+                ? "bg-[#f6c453] text-black border-[#f6c453]"
+                : "border-white/15 text-white hover:border-white/30",
+            )}
+            title="Toggle Styles"
+          >
+            <Sparkles size={13} /> <span className="hidden sm:inline">Styles</span>
+          </button>
+
           <button
             type="button"
             onClick={() => setShowShortcutsModal(true)}
@@ -1263,6 +1292,121 @@ export function MediaEditor({ editor, onBack }: Props) {
             >
               Got it
             </button>
+          </div>
+        </div>
+      ) : null}
+
+      {/* Mobile Drawer Modal for Captions & Styles */}
+      {mobileDrawer ? (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 p-0 backdrop-blur-sm lg:hidden">
+          <div className="relative flex max-h-[85dvh] w-full flex-col rounded-t-3xl border-t border-white/10 bg-[#0c0d0d] p-4 font-sans text-white shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-3">
+              <h3 className="flex items-center gap-2 text-sm font-bold text-cream">
+                {mobileDrawer === "captions" ? (
+                  <>
+                    <Layers size={16} className="text-[#f6c453]" /> Captions Review & Edit
+                  </>
+                ) : (
+                  <>
+                    <Sparkles size={16} className="text-[#f6c453]" /> Styles & Customization
+                  </>
+                )}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setMobileDrawer(null)}
+                className="grid size-8 place-items-center rounded-full text-[#888] hover:bg-white/10 hover:text-white transition cursor-pointer"
+                aria-label="Close mobile panel"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Mobile Captions List */}
+            {mobileDrawer === "captions" ? (
+              <div className="flex-1 overflow-y-auto space-y-3 custom-scrollbar pr-1">
+                {filteredSegments.map((segment, index) => {
+                  const isVoiceSpeaking =
+                    editor.currentTime >= segment.start && editor.currentTime <= segment.end;
+                  const isSelected = segment.id === activeSegmentId;
+                  const durationSec = (segment.end - segment.start).toFixed(1);
+                  return (
+                    <article
+                      key={segment.id}
+                      className={cn(
+                        "group relative rounded-xl border p-3 transition-all duration-150",
+                        isVoiceSpeaking
+                          ? "border-[#f6c453] bg-[#f6c453]/15 shadow-[0_0_20px_rgba(246,196,83,0.25)]"
+                          : isSelected
+                          ? "border-[#f6c453]/60 bg-[#f6c453]/5 shadow-[0_0_12px_rgba(246,196,83,0.1)]"
+                          : "border-white/8 bg-[#111213]",
+                      )}
+                    >
+                      <div className="flex items-center justify-between gap-3 text-left pl-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            editor.setSelectedSegmentId(segment.id);
+                            seekTo(segment.start);
+                            setMobileDrawer(null);
+                          }}
+                          className="flex items-center gap-2 cursor-pointer"
+                        >
+                          <span className={cn(
+                            "inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[11px] font-bold transition",
+                            isVoiceSpeaking ? "bg-[#f6c453] text-black border-[#f6c453]" : "bg-black/40 border-white/10 text-[#f6c453]"
+                          )}>
+                            <Play size={10} className={isVoiceSpeaking ? "fill-black" : "fill-[#f6c453]"} />
+                            {formatClockTimeWithMs(segment.start)}
+                          </span>
+                          <span className="text-[10px] font-medium text-[#727a7e]">Line {index + 1} ({durationSec}s)</span>
+                        </button>
+                      </div>
+
+                      <textarea
+                        value={segment.text}
+                        onFocus={() => editor.setSelectedSegmentId(segment.id)}
+                        onChange={(event) => editor.updateSegment(segment.id, event.target.value)}
+                        rows={2}
+                        className="mt-2.5 w-full resize-none rounded-lg bg-black/30 border-0 p-2 text-sm leading-6 text-cream outline-none focus:outline-none focus:ring-0 focus:border-0 placeholder:text-[#596064] transition"
+                      />
+                    </article>
+                  );
+                })}
+              </div>
+            ) : (
+              /* Mobile Styles Selection */
+              <div className="flex-1 overflow-y-auto space-y-4 custom-scrollbar pr-1">
+                <div className="grid grid-cols-2 gap-2.5">
+                  {captionStyles.map((style) => {
+                    const isSelected = selectedStyle?.id === style.id;
+                    return (
+                      <button
+                        key={style.id}
+                        type="button"
+                        onClick={() => {
+                          editor.setStyleId(style.id);
+                          setMobileDrawer(null);
+                        }}
+                        className={cn(
+                          "group relative flex flex-col items-center justify-center rounded-xl border p-3 transition text-center cursor-pointer min-h-[70px]",
+                          isSelected
+                            ? "border-[#f6c453] bg-[#f6c453]/15 shadow-[0_0_16px_rgba(246,196,83,0.25)]"
+                            : "border-white/10 bg-[#121314] hover:border-white/20",
+                        )}
+                      >
+                        <span className={cn("text-xs font-bold", style.previewClass)}>{style.name}</span>
+                        {isSelected ? (
+                          <span className="mt-1 rounded-full bg-[#f6c453] px-2 py-0.5 text-[9px] font-bold text-black">
+                            ACTIVE
+                          </span>
+                        ) : null}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       ) : null}

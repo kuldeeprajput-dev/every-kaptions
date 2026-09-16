@@ -28,15 +28,18 @@ export function EditorSidebar({ open, onClose, onUpload }: Props) {
         open ? "translate-x-0" : "-translate-x-full",
       )}
     >
-      {/* Mobile close button */}
-      <button
-        type="button"
-        className="absolute right-3 top-3 grid size-8 place-items-center rounded-full text-[#888] hover:bg-white/10 hover:text-white transition md:hidden cursor-pointer"
-        onClick={onClose}
-        aria-label="Close sidebar"
-      >
-        <X size={18} />
-      </button>
+      {/* Mobile close button header */}
+      <div className="flex items-center justify-between pb-2 md:hidden">
+        <span className="text-xs font-bold uppercase tracking-wider text-[#788187]">Menu</span>
+        <button
+          type="button"
+          className="grid size-8 place-items-center rounded-full text-[#888] hover:bg-white/10 hover:text-white transition cursor-pointer"
+          onClick={onClose}
+          aria-label="Close sidebar"
+        >
+          <X size={18} />
+        </button>
+      </div>
 
       {/* New Caption Action Button */}
       <button

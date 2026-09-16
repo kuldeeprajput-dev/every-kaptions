@@ -35,11 +35,11 @@ function StoredReelCard({
   }, [project.fileBlob]);
 
   return (
-    <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#141311] p-3.5 transition hover:border-[#f6c453]/40 hover:bg-[#191815] font-sans">
+    <div className="group relative flex w-full flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-[#141311] p-3.5 transition hover:border-[#f6c453]/40 hover:bg-[#191815] font-sans">
       {/* Thumbnail */}
       <div
         onClick={() => router.push(`/editor/${project.id}`)}
-        className="relative aspect-[9/16] max-h-[220px] w-full cursor-pointer overflow-hidden rounded-xl bg-black flex items-center justify-center border border-white/5"
+        className="relative aspect-video sm:aspect-[9/16] max-h-[260px] sm:max-h-[220px] w-full cursor-pointer overflow-hidden rounded-xl bg-black flex items-center justify-center border border-white/5"
       >
         {videoUrl ? (
           project.fileType?.startsWith("audio/") ? (
@@ -157,23 +157,23 @@ export function EditorPage() {
   return (
     <main className="min-h-screen bg-[#080808] text-[#d5d5d5] font-sans">
       {/* Top Header */}
-      <div className="app-header relative z-40 flex h-[56px] items-center justify-between border-b border-white/8 bg-[#0c0b0ad1] px-4 py-[8px] sm:px-6 md:px-[48px] text-[#c8c2b6]">
+      <div className="app-header relative z-40 flex h-[56px] items-center justify-between border-b border-white/8 bg-[#0c0b0ad1] px-3 sm:px-6 md:px-[48px] text-[#c8c2b6]">
         <button
           type="button"
-          className="mr-3 grid size-9 place-items-center text-[#888] md:hidden"
+          className="mr-2 sm:mr-3 grid size-8 sm:size-9 place-items-center text-[#888] md:hidden cursor-pointer"
           onClick={() => setSidebarOpen(true)}
           aria-label="Open sidebar"
         >
-          <Menu size={20} />
+          <Menu size={19} className="sm:size-5" />
         </button>
         <Link href="/studio" className="inline-flex shrink-0 items-center">
-          <LogoWordmark className="w-[210.57px] h-[26.7px]" />
+          <LogoWordmark className="text-[18px] sm:text-[22px] md:text-[26px] md:w-[210.57px] md:h-[26.7px]" />
         </Link>
-        <div className="header-actions ml-auto flex items-center gap-3 text-[#c8c2b6]">
+        <div className="header-actions ml-auto flex items-center gap-1.5 sm:gap-2 md:gap-3 text-[#c8c2b6]">
           <AccountMenu open={menuOpen} onToggle={() => setMenuOpen((value) => !value)} />
           <Link
             href="/pricing"
-            className="flex h-8 items-center rounded-full border border-white/20 px-3.5 text-xs font-semibold text-white transition hover:border-white/40"
+            className="flex h-7 sm:h-8 items-center rounded-full border border-white/20 px-2.5 sm:px-3.5 text-[11px] sm:text-xs font-semibold text-white transition hover:border-white/40 shrink-0"
           >
             Upgrade
           </Link>
@@ -194,19 +194,19 @@ export function EditorPage() {
       ) : null}
 
       {/* Main Content */}
-      <section className="px-6 py-5 md:ml-[266px]">
+      <section className="w-full max-w-full min-w-0 px-4 py-5 sm:px-6 md:ml-[266px] md:px-6 md:py-5">
         {/* Header Row */}
-        <div className="flex items-center justify-between gap-4">
-          <h1 className="text-2xl font-bold tracking-tight text-white sm:text-[28px]">Your reels</h1>
+        <div className="flex items-center justify-between gap-3 sm:gap-4">
+          <h1 className="text-xl font-bold tracking-tight text-white sm:text-2xl md:text-[28px]">Your reels</h1>
 
-          <div className="flex items-center rounded-full border border-white/5 bg-[#161616] p-0.5">
+          <div className="flex items-center rounded-full border border-white/5 bg-[#161616] p-0.5 shrink-0">
             {(["In progress", "Finished"] as const).map((item) => (
               <button
                 key={item}
                 type="button"
                 onClick={() => setTab(item)}
                 className={cn(
-                  "rounded-full px-3.5 py-1.5 text-xs font-semibold transition cursor-pointer",
+                  "rounded-full px-3 py-1 sm:px-3.5 sm:py-1.5 text-[11px] sm:text-xs font-semibold transition cursor-pointer",
                   tab === item ? "bg-[#f6c453] text-black" : "text-[#777] hover:text-white",
                 )}
               >

@@ -33,10 +33,10 @@ export function AccountMenu({ open, onToggle }: { open: boolean; onToggle: () =>
       <button
         type="button"
         onClick={onToggle}
-        className="flex h-8 items-center gap-1.5 rounded-full bg-[#181818] hover:bg-[#222222] border border-white/10 px-3.5 py-1 text-xs font-semibold text-white transition cursor-pointer"
+        className="flex h-7 sm:h-8 items-center gap-1 sm:gap-1.5 rounded-full bg-[#181818] hover:bg-[#222222] border border-white/10 px-2.5 sm:px-3.5 py-1 text-[11px] sm:text-xs font-semibold text-white transition cursor-pointer shrink-0"
       >
         <span>My account</span>
-        <span className="text-[9px] text-[#999]">▼</span>
+        <span className="text-[8px] sm:text-[9px] text-[#999]">▼</span>
       </button>
 
       <AnimatePresence>
@@ -46,7 +46,7 @@ export function AccountMenu({ open, onToggle }: { open: boolean; onToggle: () =>
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.15 }}
-            className="absolute right-0 top-11 z-50 w-[276px] rounded-2xl border border-[#262626] bg-[#141414] p-5 shadow-2xl font-sans"
+            className="absolute right-0 top-10 sm:top-11 z-50 w-[276px] max-w-[calc(100vw-24px)] rounded-2xl border border-[#262626] bg-[#141414] p-4 sm:p-5 shadow-2xl font-sans"
           >
             {/* Email */}
             <p className="truncate text-sm font-normal text-[#cccccc]">
