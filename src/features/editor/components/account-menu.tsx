@@ -14,13 +14,12 @@ const accountLinks = [
   { label: "Terms of Service", href: "/legal/terms", policy: true },
   { label: "Privacy Policy", href: "/legal/privacy", policy: true },
   { label: "Refund Policy", href: "/legal/refund", policy: true },
-  { label: "Take tour", href: "#" },
-  { label: "Keyboard shortcuts", href: "#" },
+  { label: "Try the caption editor", href: "/editor/demo" },
   { label: "Upgrade", href: "/pricing" },
 ] as const;
 
 export function AccountMenu({ open, onToggle }: { open: boolean; onToggle: () => void }) {
-  const { user, signOut } = useAuth();
+  const { user, signOut, openAuthModal } = useAuth();
   const plan = usePlanSummary();
   const router = useRouter();
 
@@ -33,10 +32,10 @@ export function AccountMenu({ open, onToggle }: { open: boolean; onToggle: () =>
       <button
         type="button"
         onClick={onToggle}
-        className="flex h-7 sm:h-8 items-center gap-1 sm:gap-1.5 rounded-full bg-[#181818] hover:bg-[#222222] border border-white/10 px-2.5 sm:px-3.5 py-1 text-[11px] sm:text-xs font-semibold text-white transition cursor-pointer shrink-0"
+        className="flex h-7 sm:h-8 items-center gap-1 sm:gap-1.5 rounded-lg bg-surface hover:bg-surface border border-hairline px-2.5 sm:px-3.5 py-1 text-[11px] sm:text-xs font-semibold text-cream transition cursor-pointer shrink-0"
       >
         <span>My account</span>
-        <span className="text-[8px] sm:text-[9px] text-[#999]">▼</span>
+        <span className="text-[8px] sm:text-[9px] text-body">▼</span>
       </button>
 
       <AnimatePresence>
@@ -46,37 +45,37 @@ export function AccountMenu({ open, onToggle }: { open: boolean; onToggle: () =>
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.15 }}
-            className="absolute right-0 top-10 sm:top-11 z-50 w-[276px] max-w-[calc(100vw-24px)] rounded-2xl border border-[#262626] bg-[#141414] p-4 sm:p-5 shadow-2xl font-sans"
+            className="absolute right-0 top-10 sm:top-11 z-50 w-[276px] max-w-[calc(100vw-24px)] rounded-2xl border border-hairline bg-surface p-4 sm:p-5 shadow-sm font-sans"
           >
             {/* Email */}
-            <p className="truncate text-sm font-normal text-[#cccccc]">
-              {user?.email || "Signed in"}
+            <p className="truncate text-sm font-normal text-cream">
+              {user?.email || "Guest workspace"}
             </p>
 
             {/* Plan Badge */}
             <div className="mt-3.5">
-              <span className="inline-block rounded-full border border-[#383838] bg-[#222222] px-3 py-0.5 text-[11px] font-bold tracking-wider text-[#999999] uppercase">
+              <span className="inline-block rounded-lg border border-hairline bg-surface px-3 py-0.5 text-[11px] font-bold tracking-wider text-body uppercase">
                 {plan.planName || "FREE"}
               </span>
             </div>
 
             {/* Minutes available */}
-            <p className="mt-3 text-base font-bold text-white">
+            <p className="mt-3 text-base font-bold text-cream">
               {plan.remainingMinutes.toFixed(2)} min available
             </p>
 
             {/* Exports used */}
-            <p className="mt-1 text-xs text-[#888888]">
+            <p className="mt-1 text-xs text-body">
               Exports: {3 - plan.remainingExports} of 3 used this month
             </p>
 
             {/* Refresh date */}
-            <p className="mt-1 text-xs text-[#555555]">
+            <p className="mt-1 text-xs text-dim">
               Refreshes on {resetDateString}
             </p>
 
             {/* Divider line */}
-            <div className="my-3.5 h-px bg-[#262626]" />
+            <div className="my-3.5 h-px bg-surface" />
 
             {/* Navigation links */}
             <div className="space-y-2">
@@ -88,8 +87,8 @@ export function AccountMenu({ open, onToggle }: { open: boolean; onToggle: () =>
                   className={cn(
                     "block text-sm font-normal transition-colors py-0.5",
                     "policy" in item && item.policy
-                      ? "!text-[#f6c453] hover:!text-[#fbe09b]"
-                      : "!text-[#cccccc] hover:!text-white",
+                      ? "!text-amber hover:!text-amber"
+                      : "!text-cream hover:!text-cream",
                   )}
                 >
                   {item.label}
@@ -101,12 +100,11 @@ export function AccountMenu({ open, onToggle }: { open: boolean; onToggle: () =>
                 type="button"
                 onClick={async () => {
                   onToggle();
-                  await signOut();
-                  router.push("/");
+                  if (user) { await signOut(); router.push("/"); } else { openAuthModal("signin"); }
                 }}
-                className="mt-1 block w-full text-left py-0.5 text-sm font-normal !text-[#f87171] hover:!text-red-300 transition-colors cursor-pointer"
+                className="mt-1 block w-full text-left py-0.5 text-sm font-normal !text-[#f87171] hover:!text-red-700 transition-colors cursor-pointer"
               >
-                Sign out
+                {user ? "Sign out" : "Sign in"}
               </button>
             </div>
           </motion.div>
