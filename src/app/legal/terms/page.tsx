@@ -180,21 +180,6 @@ export default function TermsPage() {
         refund the charge per our Refund Policy.
       </p>
 
-      <h2 className="text-[1rem] font-semibold text-cream mt-7 mb-2.5 leading-[1.65]">AI thumbnail generation</h2>
-      <p className="text-body text-[0.9375rem] leading-[1.65]">
-        Some plans include an optional AI thumbnail feature. You may save a profile photo and
-        generate vertical thumbnail images for your videos. The following rules apply.
-      </p>
-      <ul className="list-disc pl-5 mb-3 text-body text-[0.9375rem]">
-        <li className="mb-1.5 leading-[1.65]"><strong className="text-cream font-semibold">Eligibility:</strong> you must be 18 or older to use the headshot (saved photo) feature.</li>
-        <li className="mb-1.5 leading-[1.65]"><strong className="text-cream font-semibold">Your own face only:</strong> you may only upload a photo of yourself. You must not upload photos of any other person, celebrities or public figures, minors, or any photo you do not have the rights to use. Violation may result in loss of the feature or termination of your account.</li>
-        <li className="mb-1.5 leading-[1.65]"><strong className="text-cream font-semibold">Licence:</strong> you grant us a limited licence to store and process your photo solely to provide the thumbnail feature. That licence ends when you delete the photo or when we delete it after account closure.</li>
-        <li className="mb-1.5 leading-[1.65]"><strong className="text-cream font-semibold">AI output:</strong> generated images may be inaccurate or imperfect. You are responsible for reviewing them before you publish. We do not guarantee that any platform (including YouTube or Instagram) will accept the thumbnail or that it will perform well.</li>
-        <li className="mb-1.5 leading-[1.65]"><strong className="text-cream font-semibold">Credits:</strong> thumbnail credits are included with eligible paid plans (such as Studio). They reset each billing month, do not roll over, and have no cash value. Failed generations are not charged.</li>
-        <li className="mb-1.5 leading-[1.65]"><strong className="text-cream font-semibold">Indemnity:</strong> you are responsible for the consequences of uploading a photo you had no right to use, and you agree to indemnify EveryKaptions against claims arising from that upload.</li>
-        <li className="mb-1.5 leading-[1.65]">We may refuse or block a generation that violates these terms or our AI providers&apos; policies.</li>
-      </ul>
-
       <h2 className="text-[1rem] font-semibold text-cream mt-7 mb-2.5 leading-[1.65]">Limitation of liability</h2>
       <p className="text-body text-[0.9375rem] leading-[1.65]">
         To the maximum extent permitted by law, EveryKaptions will not be liable for indirect,

@@ -52,7 +52,6 @@ export default function DataDeletionPage() {
       <ul className="list-disc pl-5 mb-3 text-body text-[0.9375rem]">
         <li className="mb-1.5 leading-[1.65]">Your account, email address, and sign-in identifiers.</li>
         <li className="mb-1.5 leading-[1.65]">Any videos, audio, transcripts, and exported files still held for your account.</li>
-        <li className="mb-1.5 leading-[1.65]">Your saved profile photo and any thumbnails generated from it.</li>
         <li className="mb-1.5 leading-[1.65]">Your personal caption dictionary entries.</li>
         <li className="mb-1.5 leading-[1.65]">Phone verification records, where phone verification was used.</li>
       </ul>
@@ -64,10 +63,6 @@ export default function DataDeletionPage() {
 
       <h2 className="text-[1rem] font-semibold text-cream mt-7 mb-2.5 leading-[1.65]">Delete individual items yourself</h2>
       <ul className="list-disc pl-5 mb-3 text-body text-[0.9375rem]">
-        <li className="mb-1.5 leading-[1.65]">
-          <strong className="text-cream font-semibold">Saved photo:</strong> you can delete your saved profile photo in the product at any
-          time. Deletion removes it from our storage right away.
-        </li>
         <li className="mb-1.5 leading-[1.65]">
           <strong className="text-cream font-semibold">Projects:</strong> you can delete an individual project from the editor, which
           removes its uploaded media and any export still held for it.

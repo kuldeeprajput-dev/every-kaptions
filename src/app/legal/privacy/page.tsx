@@ -37,7 +37,7 @@ export default function PrivacyPage() {
       <h2 className="text-[1rem] font-semibold text-cream mt-7 mb-2.5 leading-[1.65]">How we use information</h2>
       <p className="text-body text-[0.9375rem] leading-[1.65]">We use personal information to:</p>
       <ul className="list-disc pl-5 mb-3 text-body text-[0.9375rem]">
-        <li className="mb-1.5 leading-[1.65]">Provide transcription, caption editing, video export, and optional AI thumbnail generation.</li>
+        <li className="mb-1.5 leading-[1.65]">Provide transcription, caption editing, and video export.</li>
         <li className="mb-1.5 leading-[1.65]">Authenticate you, manage your account, and apply usage limits or minutes.</li>
         <li className="mb-1.5 leading-[1.65]">Process payments and respond to billing or refund requests.</li>
         <li className="mb-1.5 leading-[1.65]">Operate, maintain, and improve the service, including troubleshooting and abuse prevention.</li>
@@ -178,21 +178,6 @@ export default function PrivacyPage() {
         India within 72 hours of becoming aware of the breach, as required under India&apos;s Digital
         Personal Data Protection Act, 2023.
       </p>
-
-      <h2 className="text-[1rem] font-semibold text-cream mt-7 mb-2.5 leading-[1.65]">Saved photos and AI thumbnails</h2>
-      <p className="text-body text-[0.9375rem] leading-[1.65]">
-        If you use the thumbnail feature, you may optionally save a profile photo (headshot) and
-        generate thumbnail images from it. This section explains how that works.
-      </p>
-      <ul className="list-disc pl-5 mb-3 text-body text-[0.9375rem]">
-        <li className="mb-1.5 leading-[1.65]"><strong className="text-cream font-semibold">What we collect:</strong> an optional profile photo you choose to save, and thumbnail images generated when you request them.</li>
-        <li className="mb-1.5 leading-[1.65]"><strong className="text-cream font-semibold">Purpose:</strong> solely to generate video thumbnails you request. We do not use your photo for advertising, we do not sell it, and we do not use it to train our own models.</li>
-        <li className="mb-1.5 leading-[1.65]"><strong className="text-cream font-semibold">Processing:</strong> when you generate a thumbnail, your photo (if you chose one) and text from your video&apos;s transcript are sent to third-party AI image providers (currently <strong className="text-cream font-semibold">kie.ai</strong> and <strong className="text-cream font-semibold">Google&apos;s Gemini API</strong>) so they can create the image. Your photo is shared as a short-lived, time-limited private link rather than a permanent public URL. Neither provider is authorised to use your photo to train their own models, and both process the data to fulfil your request under their own policies.</li>
-        <li className="mb-1.5 leading-[1.65]"><strong className="text-cream font-semibold">Storage:</strong> your saved photo and generated thumbnails are stored in our cloud storage. We keep them until you delete the photo or delete your account. Deleting your account also removes your saved photo and generated thumbnails.</li>
-        <li className="mb-1.5 leading-[1.65]"><strong className="text-cream font-semibold">Deletion:</strong> you can delete your saved photo in the product at any time. Deletion permanently removes the photo from our storage right away.</li>
-        <li className="mb-1.5 leading-[1.65]"><strong className="text-cream font-semibold">Your rights (DPDP Act 2023):</strong> you may request access, correction, or erasure of this data, and you may withdraw consent. Withdrawing consent means we delete your saved photo and the thumbnail feature that needs it becomes unavailable. For grievances, use our <Link href="/legal/contact" className="text-amber hover:text-cream hover:underline no-underline transition-colors duration-150">contact page</Link> or email <a href="mailto:hello@everykaptions.com" className="text-amber hover:text-cream hover:underline no-underline transition-colors duration-150">hello@everykaptions.com</a>.</li>
-        <li className="mb-1.5 leading-[1.65]"><strong className="text-cream font-semibold">AI provenance marking:</strong> generated thumbnails may include an invisible, industry-standard AI provenance mark added by the AI provider. This helps platforms and tools identify AI-generated images; it does not change how the thumbnail looks.</li>
-      </ul>
 
       <h2 className="text-[1rem] font-semibold text-cream mt-7 mb-2.5 leading-[1.65]">Children</h2>
       <p className="text-body text-[0.9375rem] leading-[1.65]">

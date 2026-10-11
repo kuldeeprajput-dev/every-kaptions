@@ -106,12 +106,6 @@ export default function RefundPage() {
         bank or card issuer.
       </p>
 
-      <h2 className="text-[1rem] font-semibold text-cream mt-7 mb-2.5 leading-[1.65]">Thumbnail credits</h2>
-      <p className="text-body text-[0.9375rem] leading-[1.65]">
-        Thumbnail credits are consumed on successful generation and are non-refundable once images
-        are delivered. Failed generations automatically refund credits.
-      </p>
-
       <h2 className="text-[1rem] font-semibold text-cream mt-7 mb-2.5 leading-[1.65]">Non-refundable cases</h2>
       <ul className="list-disc pl-5 mb-3 text-body text-[0.9375rem]">
         <li className="mb-1.5 leading-[1.65]">Any one-time purchase (export pack or yearly plan) after one or more captioning minutes have been used.</li>
@@ -120,7 +114,6 @@ export default function RefundPage() {
         <li className="mb-1.5 leading-[1.65]">Requests made after the applicable refund window unless required by law.</li>
         <li className="mb-1.5 leading-[1.65]">Partial-month usage after the refund window on recurring monthly subscription charges.</li>
         <li className="mb-1.5 leading-[1.65]">Unused minutes or unused time remaining on a one-time purchase before expiry.</li>
-        <li className="mb-1.5 leading-[1.65]">Thumbnail credits after images were successfully delivered.</li>
       </ul>
 
       <nav className="mt-9 pt-5 border-t border-[var(--hairline)] text-[0.875rem] leading-[1.65]" aria-label="Legal">

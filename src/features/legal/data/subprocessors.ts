@@ -9,8 +9,6 @@ export const SUBPROCESSORS: Subprocessor[] = [
   { name: "Cloudflare R2", description: "temporary media storage during upload and processing." },
   { name: "Modal", description: "cloud computing used to render your captioned video." },
   { name: "Sarvam AI, ElevenLabs, OpenAI", description: "speech and language processing for transcription and caption generation." },
-  { name: "kie.ai", description: "AI image generation for the thumbnail feature. When you generate a thumbnail, your saved photo (if you chose one) is made available to kie.ai through a short-lived private link, together with the text prompt." },
-  { name: "Google (Gemini API)", description: "AI image generation for the thumbnail feature, used as a backup provider." },
   { name: "Razorpay", description: "payment processing." },
   { name: "ZeptoMail and Resend", description: "transactional email delivery for account, security, and service emails." },
   { name: "Product analytics and error monitoring providers", description: "usage measurement and crash reporting to help us improve reliability." },
