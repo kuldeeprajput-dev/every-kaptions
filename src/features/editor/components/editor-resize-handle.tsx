@@ -54,11 +54,11 @@ export function EditorResizeHandle({
       onPointerDown={(event) => onPointerDown(panel, event)}
       onKeyDown={handleKeyDown}
       className={cn(
-        "group hidden touch-none items-center justify-center bg-[#0a0b0a] text-[#596064] outline-none transition hover:bg-[#171713] hover:text-[#f6c453] focus-visible:bg-[#171713] focus-visible:text-[#f6c453] lg:flex",
+        "group hidden touch-none items-center justify-center bg-surface text-dim outline-none transition hover:bg-surface hover:text-amber focus-visible:bg-surface focus-visible:text-amber lg:flex",
         isVertical
           ? "h-full w-[7px] cursor-col-resize"
-          : "h-[8px] w-full cursor-row-resize border-y border-white/6",
-        active && "bg-[#211d12] text-[#f6c453]",
+          : "h-[8px] w-full cursor-row-resize border-y border-hairline",
+        active && "bg-surface text-amber",
       )}
       title={LABELS[panel] + ". Drag or use arrow keys."}
     >

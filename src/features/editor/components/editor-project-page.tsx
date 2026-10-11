@@ -24,11 +24,11 @@ export function EditorProjectPage({ mediaId }: { mediaId: string }) {
 
         if (!stored) {
           if (mediaId === "demo") {
-            const resp = await fetch("/media/hero-glow.mp4");
+            const resp = await fetch("/media/caption-demo.mp4");
             const blob = await resp.blob();
             const demoProject = {
               id: "demo",
-              name: "Demo Reel - Kuldeep Rajput",
+              name: "Sample story — caption demo",
               fileBlob: blob,
               fileType: "video/mp4",
               fileSize: blob.size,
@@ -40,20 +40,20 @@ export function EditorProjectPage({ mediaId }: { mediaId: string }) {
               segments: [
                 {
                   id: "demo-seg-1",
-                  text: "Hey, welcome to the Kuldeep Rajput Mac",
+                  text: "Every word matters.",
                   start: 0.0,
-                  end: 1.9,
+                  end: 3.9,
                   words: [],
                 },
                 {
                   id: "demo-seg-2",
-                  text: "voice synced captions showcase.",
-                  start: 2.1,
-                  end: 3.9,
+                  text: "Let your story speak for itself.",
+                  start: 4.0,
+                  end: 8.0,
                   words: [],
                 },
               ],
-              duration: 4.0,
+              duration: 8.0,
               styleId: "yellow",
             };
             await saveProject(demoProject);
@@ -112,21 +112,21 @@ export function EditorProjectPage({ mediaId }: { mediaId: string }) {
 
   if (loading) {
     return (
-      <div className="flex h-screen w-screen flex-col items-center justify-center bg-[#070808] text-white font-sans">
-        <LoaderCircle size={32} className="animate-spin text-[#f6c453]" />
-        <p className="mt-4 text-xs font-semibold text-[#888]">Loading video from IndexedDB...</p>
+      <div className="flex h-screen w-screen flex-col items-center justify-center bg-surface text-cream font-sans">
+        <LoaderCircle size={32} className="animate-spin text-amber" />
+        <p className="mt-4 text-xs font-semibold text-body">Opening your story…</p>
       </div>
     );
   }
 
   if (notFound) {
     return (
-      <div className="flex h-screen w-screen flex-col items-center justify-center bg-[#070808] text-white font-sans">
-        <h2 className="text-xl font-bold text-white">Reel not found</h2>
-        <p className="mt-2 text-xs text-[#777]">This project could not be loaded from local browser storage.</p>
+      <div className="flex h-screen w-screen flex-col items-center justify-center bg-surface text-cream font-sans">
+        <h2 className="text-xl font-bold text-cream">Project not found</h2>
+        <p className="mt-2 text-xs text-dim">This project isn’t available in this browser. Try opening it where you created it.</p>
         <Link
           href="/studio"
-          className="mt-5 rounded-full bg-[#f6c453] px-5 py-2.5 text-xs font-bold text-black hover:brightness-105"
+          className="mt-5 rounded-lg bg-amber px-5 py-2.5 text-xs font-bold text-white hover:brightness-105"
         >
           Return to Studio
         </Link>

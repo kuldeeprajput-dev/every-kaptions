@@ -58,7 +58,12 @@ export function usePlanSummary() {
   const user = useAuthStore((state) => state.user);
   const userKey = getUserKey(user);
 
-  const [usage, setUsage] = useState<UserPlanUsage>(() => getUsageForUser(userKey));
+  // Read browser usage after hydration so the server and first client render agree.
+  const [usage, setUsage] = useState<UserPlanUsage>({
+    transcriptionSecondsUsed: 0,
+    exportsUsed: 0,
+    periodStartedAt: 0,
+  });
 
   // Sync state whenever logged-in user changes (e.g. new Gmail ID logs in)
   useEffect(() => {
