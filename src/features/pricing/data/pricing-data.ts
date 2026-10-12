@@ -83,13 +83,6 @@ export const comparisons = [
     creator: "Post now",
     studio: "Post now plus schedule",
   },
-  {
-    feature: "AI thumbnails",
-    free: "Not included",
-    onetime: "Not included",
-    creator: "Coming soon",
-    studio: "Coming soon",
-  },
 ] as const;
 
 export const faqs = [
@@ -106,13 +99,13 @@ export const faqs = [
   {
     question: "What is Creator vs Studio?",
     answer:
-      "Creator (₹399/mo) removes the watermark, unlocks Creator presets (Punch, Cove, Spotlight, Reel, Noir, Gradient Fill, Frosted Glass), premium fonts, keyword emphasis, caption animation, saved exports, Content Pack (AI YouTube titles, IG caption, and hashtags from your transcript), and posting Reels to Instagram after export. Studio (₹999/mo) includes everything in Creator plus Neon Pop, Gold Luxe, 45 minutes of captioning per month, and scheduling Instagram posts up to 30 days ahead. Personalized thumbnail tools are coming soon.",
+      "Creator (₹399/mo) removes the watermark, unlocks Creator presets (Punch, Cove, Spotlight, Reel, Noir, Gradient Fill, Frosted Glass), premium fonts, keyword emphasis, caption animation, saved exports, Content Pack (AI YouTube titles, IG caption, and hashtags from your transcript), and posting Reels to Instagram after export. Studio (₹999/mo) includes everything in Creator plus Neon Pop, Gold Luxe, 45 minutes of captioning per month, and scheduling Instagram posts up to 30 days ahead.",
     hasHtml: true,
   },
   {
     question: "What do I get with a monthly subscription?",
     answer:
-      "Creator includes 30 minutes of captioning every month, up to 30 watermark-free exports per day, unlimited uploads, saved exports (your last 50), Content Pack (AI YouTube titles, IG caption, and hashtags from your transcript), Creator style presets, premium fonts, keyword emphasis, caption animation, posting Reels to Instagram after export, and priority support. Studio includes everything in Creator plus Neon Pop, Gold Luxe, 45 minutes of captioning per month, and scheduling Instagram posts up to 30 days ahead. Personalized thumbnail tools are coming soon and are not included in current billing. You are billed each month until you cancel.",
+      "Creator includes 30 minutes of captioning every month, up to 30 watermark-free exports per day, unlimited uploads, saved exports (your last 50), Content Pack (AI YouTube titles, IG caption, and hashtags from your transcript), Creator style presets, premium fonts, keyword emphasis, caption animation, posting Reels to Instagram after export, and priority support. Studio includes everything in Creator plus Neon Pop, Gold Luxe, 45 minutes of captioning per month, and scheduling Instagram posts up to 30 days ahead. You are billed each month until you cancel.",
   },
   {
     question: "How does monthly billing work with UPI?",
@@ -234,7 +227,6 @@ export const subscriptionTiers: SubscriptionTier[] = [
       "Saved exports; re-download anytime",
       "Creator presets, premium fonts, keyword emphasis, caption animation",
       "Content Pack: AI titles, IG caption, hashtags",
-      "Personalized thumbnails (coming soon)",
       "Priority support",
     ],
   },
@@ -255,7 +247,6 @@ export const subscriptionTiers: SubscriptionTier[] = [
       "Unlimited uploads",
       "Saved exports; re-download anytime",
       "Everything in Creator, plus Neon Pop and Gold Luxe",
-      "Personalized thumbnails (coming soon)",
       "Scheduling Instagram posts up to 30 days ahead",
       "Priority support",
     ],
