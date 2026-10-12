@@ -23,7 +23,7 @@ export function RoadmapItemCard({
   const negativeLabel = isComingSoon ? "No" : "Not for me";
   const promptText = isComingSoon ? "Want this?" : "Do you like this?";
   const voteBtnClass =
-    "font-body text-[11px] leading-none font-bold tracking-[0.03em] uppercase rounded-full h-6 px-2.5 inline-flex items-center justify-center cursor-pointer transition-[border-color,background,color] duration-150 hover:border-amber/45 hover:text-amber";
+    "font-body text-[11px] leading-none font-bold tracking-[0.03em] uppercase rounded-lg h-6 px-2.5 inline-flex items-center justify-center cursor-pointer transition-[border-color,background,color] duration-150 hover:border-amber/45 hover:text-amber";
 
   return (
     <div className="grid grid-cols-[1fr_auto_1fr] max-[719px]:grid-cols-[32px_1fr] gap-x-5 max-[719px]:gap-x-3 items-start relative z-[1]">
@@ -31,12 +31,12 @@ export function RoadmapItemCard({
       <div className="col-start-2 row-start-1 max-[719px]:col-start-1 flex items-center justify-center pt-5 max-[719px]:pt-4 max-[719px]:w-8">
         {isComingSoon ? (
           <span
-            className="relative w-4 h-4 rounded-full shrink-0 z-[2] flex items-center justify-center bg-canvas border-2 border-amber/70 shadow-[0_0_0_4px_rgba(246,196,83,0.1)]"
+            className="relative w-4 h-4 rounded-lg shrink-0 z-[2] flex items-center justify-center bg-canvas border-2 border-amber/70 shadow-sm"
             aria-hidden="true"
           />
         ) : (
           <span
-            className="relative w-4 h-4 rounded-full shrink-0 z-[2] flex items-center justify-center bg-[#6ee7a0] shadow-[0_0_0_4px_rgba(110,231,160,0.16)]"
+            className="relative w-4 h-4 rounded-lg shrink-0 z-[2] flex items-center justify-center bg-surface shadow-sm"
             aria-hidden="true"
           >
             <svg className="block shrink-0" viewBox="0 0 16 16" width="9" height="9" aria-hidden="true">
@@ -48,7 +48,7 @@ export function RoadmapItemCard({
 
       {/* Card with speech pointer */}
       <article
-        className={`relative min-w-0 bg-surface border border-[var(--hairline)] hover:border-[rgba(244,236,220,0.2)] rounded-xl pt-3.5 px-4 pb-3 shadow-[var(--card-shadow)] opacity-100 transition-[opacity,transform,border-color] duration-400 ${
+        className={`relative min-w-0 bg-surface border border-[var(--hairline)] hover:border-hairline rounded-xl pt-3.5 px-4 pb-3 shadow-sm opacity-100 transition-[opacity,transform,border-color] duration-400 ${
           isLeft
             ? "col-start-1 row-start-1 max-[719px]:col-start-2 max-[719px]:transform-none"
             : "col-start-3 row-start-1 max-[719px]:col-start-2 max-[719px]:transform-none"
@@ -64,7 +64,7 @@ export function RoadmapItemCard({
         />
         <div className="mb-2.5">
           <div className="flex flex-wrap items-center gap-2 mb-1.5">
-            <span className="text-[10px] font-semibold tracking-[0.05em] uppercase text-amber bg-amber/[0.08] border border-amber/[0.18] rounded-full px-2 py-0.5">
+            <span className="text-[10px] font-semibold tracking-[0.05em] uppercase text-amber bg-amber/[0.08] border border-amber/[0.18] rounded-lg px-2 py-0.5">
               {item.category}
             </span>
             <time className="text-[11px] text-dim mono">{item.date}</time>

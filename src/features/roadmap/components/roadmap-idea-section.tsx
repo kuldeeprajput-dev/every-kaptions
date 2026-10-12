@@ -57,7 +57,7 @@ export function RoadmapIdeaSection() {
         className="max-w-[640px] mx-auto mt-10 mb-0 max-[719px]:mb-6 px-[var(--page-gutter)] pb-6 max-[719px]:pb-[max(24px,env(safe-area-inset-bottom,0px))] text-center"
         aria-labelledby="roadmap-ideas-title"
       >
-        <div className="font-body text-[clamp(10px,0.45vw+8px,13px)] font-semibold tracking-[0.85px] uppercase text-amber mb-3.5 [text-shadow:0_0_18px_rgba(246,196,83,0.18)]">
+        <div className="font-body text-[clamp(10px,0.45vw+8px,13px)] font-semibold tracking-[0.85px] uppercase text-amber mb-3.5 ">
           YOUR TURN
         </div>
         <h2
@@ -71,7 +71,7 @@ export function RoadmapIdeaSection() {
         </p>
 
         <form
-          className="text-left border border-[var(--hairline)] rounded-xl bg-surface p-3.5 shadow-[var(--card-shadow)]"
+          className="text-left border border-[var(--hairline)] rounded-xl bg-surface p-3.5 shadow-sm"
           noValidate
           onSubmit={handleSubmit}
         >
@@ -84,9 +84,9 @@ export function RoadmapIdeaSection() {
                   key={topic}
                   type="button"
                   onClick={() => handleTopicClick(topic)}
-                  className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border transition-colors cursor-pointer ${
+                  className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-lg border transition-colors cursor-pointer ${
                     isActive
-                      ? "bg-amber text-[#0c0b0a] border-amber"
+                      ? "bg-amber text-white border-amber"
                       : "bg-surface-raised text-body border-[var(--hairline)] hover:border-amber/40 hover:text-cream"
                   }`}
                   aria-pressed={isActive}
@@ -122,7 +122,7 @@ export function RoadmapIdeaSection() {
             </span>
             <button
               type="submit"
-              className="font-body text-[13px] font-semibold text-[#0c0b0a] bg-amber border-none rounded-full py-2.5 px-4.5 cursor-pointer transition-[filter,opacity] duration-150 hover:not-disabled:brightness-105"
+              className="font-body text-[13px] font-semibold text-dim bg-amber border-none rounded-lg py-2.5 px-4.5 cursor-pointer transition-[filter,opacity] duration-150 hover:not-disabled:brightness-105"
             >
               Submit idea
             </button>
@@ -169,7 +169,7 @@ export function RoadmapIdeaSection() {
           aria-labelledby="roadmapIdeaModalTitle"
         >
           <div
-            className="w-12 h-12 rounded-full bg-[#6ee7a0]/[0.14] border border-[#6ee7a0]/[0.35] flex items-center justify-center mx-auto mb-4"
+            className="w-12 h-12 rounded-lg bg-surface/[0.14] border border-hairline flex items-center justify-center mx-auto mb-4"
             aria-hidden="true"
           >
             <svg viewBox="0 0 24 24" width="28" height="28" className="block">

@@ -9,7 +9,6 @@ export type RoadmapItem = {
 export const roadmapItems: RoadmapItem[] = [
   { category: "Publishing", date: "Aug 2026", title: "Post Reels to Instagram from EveryKaptions", description: "After you export, post the Reel to Instagram from the editor. Creator posts now; Studio can schedule up to 30 days ahead.", status: "shipped" },
   { category: "Editor", date: "Jul 2026", title: "Hindi and English captions", description: "Word-by-word captions in Hindi and English, on top of Telugu, for Creator and Studio creators.", status: "shipped" },
-  { category: "Editor", date: "Coming soon", title: "Personalized video thumbnails", description: "Create vertical covers from your video and your own photo after the thumbnail preview launches.", status: "next" },
   { category: "Editor", date: "Jul 2026", title: "Bigger font library", description: "A wide range of Telugu and English fonts to match your style.", status: "shipped" },
   { category: "Editor", date: "Jul 2026", title: "Content Pack", description: "Get title options, an Instagram caption, and hashtags for your video, generated from what you actually said.", status: "shipped" },
   { category: "Plans", date: "Jul 2026", title: "Watermark-free exports", description: "Free videos carry a small watermark. A paid plan removes it and unlocks premium styles.", status: "shipped" },
