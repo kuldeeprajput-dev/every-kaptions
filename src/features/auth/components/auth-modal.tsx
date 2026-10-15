@@ -1,7 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { X } from "lucide-react";
+import { LogoWordmark } from "@/shared/components/logo-wordmark";
+import { useDialogFocus } from "@/shared/hooks/use-dialog-focus";
 import { cn } from "@/shared/lib/cn";
 import { useAuth } from "../store/auth-store";
 
@@ -24,6 +27,9 @@ export function AuthModal() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useDialogFocus(dialogRef, isAuthModalOpen);
 
   // Clear messages on modal open / mode switch
   useEffect(() => {
@@ -112,7 +118,7 @@ export function AuthModal() {
 
   return (
     <div
-      className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+      className="auth-overlay"
       role="dialog"
       aria-modal="true"
       aria-labelledby="authModalTitle"
@@ -120,17 +126,20 @@ export function AuthModal() {
         if (e.target === e.currentTarget) closeAuthModal();
       }}
     >
-      <div className="w-full max-w-[420px] bg-[#14120f] border border-[rgba(244,236,220,0.14)] rounded-[24px] p-6 sm:p-7 shadow-[0_24px_80px_rgba(0,0,0,0.85)] flex flex-col my-auto relative animate-[fadeUp_0.2s_ease_both]">
+      <div ref={dialogRef} className="auth-card">
+        <aside className="auth-story"><LogoWordmark /><div><h2>Your words.<br />Worth watching.</h2><p>Clean, expressive captions.<br />Made for the way you speak.</p><div className="auth-caption-samples"><span lang="te">మీ కథ</span><span lang="hi">आपकी आवाज़</span><span>Your story.</span></div></div><small>Every language. Every little detail.</small></aside>
+        <div className="auth-form-panel">
+        <button type="button" aria-label="Close sign in" onClick={closeAuthModal} className="auth-close"><X size={18} /></button>
         {/* Title & Subtitle */}
         <h2
           id="authModalTitle"
-          className="text-[24px] sm:text-[26px] font-bold text-[#f4ecdc] tracking-[-0.02em] text-center mb-1 font-display"
+          className="text-[24px] sm:text-[26px] font-bold text-cream tracking-[-0.02em] text-center mb-1 font-display"
         >
           {authModalMode === "forgot"
             ? "Reset your password"
-            : "Sign in to EveryKaptions"}
+            : authModalMode === "signup" ? "Make yourself at home." : "Welcome back."}
         </h2>
-        <p className="text-[13px] sm:text-[14px] text-[#8a8478] text-center mb-5">
+        <p className="text-[13px] sm:text-[14px] text-body text-center mb-5">
           {authModalMode === "forgot"
             ? "Enter your email to receive a password reset link."
             : "Sign in or create your free account."}
@@ -142,7 +151,7 @@ export function AuthModal() {
             <button
               type="button"
               onClick={handleGoogleSignIn}
-              className="w-full min-h-[46px] sm:min-h-[48px] bg-white hover:bg-[#f0ece1] text-[#0c0b0a] font-semibold text-[14px] rounded-full flex items-center justify-center gap-3 transition-colors cursor-pointer shadow-sm"
+              className="w-full min-h-[46px] sm:min-h-[48px] bg-surface hover:bg-surface text-dim font-semibold text-[14px] rounded-lg flex items-center justify-center gap-3 transition-colors cursor-pointer shadow-sm"
             >
               <svg className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" viewBox="0 0 24 24">
                 <path
@@ -165,20 +174,20 @@ export function AuthModal() {
               <span>Continue with Google</span>
             </button>
 
-            <div className="my-4 flex items-center justify-center text-[12px] text-[#8a8478]">
+            <div className="my-4 flex items-center justify-center text-[12px] text-body">
               <span className="px-2">or</span>
             </div>
 
             {/* Segmented Switcher [Sign in | Create account] */}
-            <div className="flex p-1 bg-[#1a1714] border border-[rgba(244,236,220,0.08)] rounded-full mb-4">
+            <div className="flex p-1 bg-surface border border-hairline rounded-lg mb-4">
               <button
                 type="button"
                 onClick={() => setAuthModalMode("signin")}
                 className={cn(
-                  "flex-1 py-2 text-[13px] font-semibold rounded-full transition-colors cursor-pointer",
+                  "flex-1 py-2 text-[13px] font-semibold rounded-lg transition-colors cursor-pointer",
                   authModalMode === "signin"
-                    ? "bg-[#f4ecdc] text-[#0c0b0a]"
-                    : "text-[#8a8478] hover:text-[#f4ecdc]"
+                    ? "bg-amber text-white"
+                    : "text-body hover:text-cream"
                 )}
               >
                 Sign in
@@ -187,10 +196,10 @@ export function AuthModal() {
                 type="button"
                 onClick={() => setAuthModalMode("signup")}
                 className={cn(
-                  "flex-1 py-2 text-[13px] font-semibold rounded-full transition-colors cursor-pointer",
+                  "flex-1 py-2 text-[13px] font-semibold rounded-lg transition-colors cursor-pointer",
                   authModalMode === "signup"
-                    ? "bg-[#f4ecdc] text-[#0c0b0a]"
-                    : "text-[#8a8478] hover:text-[#f4ecdc]"
+                    ? "bg-amber text-white"
+                    : "text-body hover:text-cream"
                 )}
               >
                 Create account
@@ -201,12 +210,12 @@ export function AuthModal() {
 
         {/* Error / Success feedback */}
         {errorMsg && (
-          <div className="mb-3 px-3 py-2 rounded-lg bg-red-950/60 border border-red-500/30 text-red-300 text-xs text-center">
+          <div className="mb-3 px-3 py-2 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs text-center">
             {errorMsg}
           </div>
         )}
         {successMsg && (
-          <div className="mb-3 px-3 py-2 rounded-lg bg-emerald-950/60 border border-emerald-500/30 text-emerald-300 text-xs text-center">
+          <div className="mb-3 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs text-center">
             {successMsg}
           </div>
         )}
@@ -222,7 +231,7 @@ export function AuthModal() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
               required
-              className="w-full bg-[#0d0c0a] border border-[rgba(244,236,220,0.14)] hover:border-[#cfa663]/70 focus:border-[#cfa663] focus:ring-1 focus:ring-[#cfa663]/40 focus:shadow-[0_0_14px_rgba(207,166,99,0.22)] focus:outline-none rounded-xl px-4 py-3 text-[14px] text-[#f4ecdc] placeholder-[#554f44] transition-all"
+              className="w-full bg-surface border border-hairline hover:border-hairline focus:border-hairline focus:ring-1 focus:ring-hairline focus:shadow-sm focus:outline-none rounded-xl px-4 py-3 text-[14px] text-cream placeholder-dim transition-all"
             />
           </div>
 
@@ -236,7 +245,7 @@ export function AuthModal() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password"
                 required
-                className="w-full bg-[#0d0c0a] border border-[rgba(244,236,220,0.14)] hover:border-[#cfa663]/70 focus:border-[#cfa663] focus:ring-1 focus:ring-[#cfa663]/40 focus:shadow-[0_0_14px_rgba(207,166,99,0.22)] focus:outline-none rounded-xl px-4 py-3 text-[14px] text-[#f4ecdc] placeholder-[#554f44] transition-all"
+                className="w-full bg-surface border border-hairline hover:border-hairline focus:border-hairline focus:ring-1 focus:ring-hairline focus:shadow-sm focus:outline-none rounded-xl px-4 py-3 text-[14px] text-cream placeholder-dim transition-all"
               />
             </div>
           )}
@@ -248,8 +257,8 @@ export function AuthModal() {
                 className={cn(
                   "w-[18px] h-[18px] rounded-full flex items-center justify-center shrink-0 transition-colors",
                   password.length >= 8
-                    ? "bg-[#22c55e] text-black"
-                    : "border-2 border-[#5c5850] text-transparent"
+                    ? "bg-surface text-cream"
+                    : "border-2 border-hairline text-transparent"
                 )}
               >
                 {password.length >= 8 && (
@@ -269,7 +278,7 @@ export function AuthModal() {
               <span
                 className={cn(
                   "transition-colors font-medium",
-                  password.length >= 8 ? "text-[#22c55e]" : "text-[#8a8478]"
+                  password.length >= 8 ? "text-[#22c55e]" : "text-body"
                 )}
               >
                 At least 8 characters
@@ -296,8 +305,8 @@ export function AuthModal() {
                   className={cn(
                     "w-[18px] h-[18px] rounded-[5px] flex items-center justify-center shrink-0 transition-all mt-0.5 cursor-pointer",
                     agreeTerms
-                      ? "bg-white text-black shadow-sm"
-                      : "bg-transparent border-2 border-[#5c5850] group-hover:border-[#8a8478]"
+                      ? "bg-surface text-cream shadow-sm"
+                      : "bg-transparent border-2 border-hairline group-hover:border-hairline"
                   )}
                 >
                   {agreeTerms && (
@@ -314,12 +323,12 @@ export function AuthModal() {
                     </svg>
                   )}
                 </div>
-                <span className="text-[12px] sm:text-[13px] text-[#a8a195] leading-[1.45]">
+                <span className="text-[12px] sm:text-[13px] text-body leading-[1.45]">
                   I agree to the{" "}
                   <Link
                     href="/legal/terms"
                     target="_blank"
-                    className="text-[#f4ecdc] hover:underline"
+                    className="text-cream hover:underline"
                     onClick={(e) => e.stopPropagation()}
                   >
                     Terms of Service
@@ -328,7 +337,7 @@ export function AuthModal() {
                   <Link
                     href="/legal/privacy"
                     target="_blank"
-                    className="text-[#f4ecdc] hover:underline"
+                    className="text-cream hover:underline"
                     onClick={(e) => e.stopPropagation()}
                   >
                     Privacy Policy
@@ -354,8 +363,8 @@ export function AuthModal() {
                   className={cn(
                     "w-[18px] h-[18px] rounded-[5px] flex items-center justify-center shrink-0 transition-all cursor-pointer",
                     emailUpdates
-                      ? "bg-white text-black shadow-sm"
-                      : "bg-transparent border-2 border-[#5c5850] group-hover:border-[#8a8478]"
+                      ? "bg-surface text-cream shadow-sm"
+                      : "bg-transparent border-2 border-hairline group-hover:border-hairline"
                   )}
                 >
                   {emailUpdates && (
@@ -372,7 +381,7 @@ export function AuthModal() {
                     </svg>
                   )}
                 </div>
-                <span className="text-[12px] sm:text-[13px] text-[#a8a195]">
+                <span className="text-[12px] sm:text-[13px] text-body">
                   Email me product updates and offers.
                 </span>
               </label>
@@ -394,7 +403,7 @@ export function AuthModal() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full min-h-[46px] sm:min-h-[48px] bg-[#f4ecdc] hover:bg-[#ede3ce] disabled:opacity-50 text-[#0c0b0a] font-bold text-[14px] sm:text-[15px] rounded-full transition-all mt-1 cursor-pointer"
+            className="w-full min-h-[46px] sm:min-h-[48px] bg-amber hover:bg-amber/90 disabled:opacity-50 text-white font-bold text-[14px] sm:text-[15px] rounded-lg transition-all mt-1 cursor-pointer"
           >
             {isSubmitting
               ? "Please wait..."
@@ -419,7 +428,7 @@ export function AuthModal() {
           <button
             type="button"
             onClick={closeAuthModal}
-            className="mt-3 text-[13px] text-[#8a8478] hover:text-[#f4ecdc] transition-colors self-center cursor-pointer"
+            className="mt-3 text-[13px] text-body hover:text-cream transition-colors self-center cursor-pointer"
           >
             Cancel
           </button>
@@ -427,7 +436,7 @@ export function AuthModal() {
 
         {/* Terms & Privacy disclaimer */}
         {authModalMode !== "signup" && (
-          <p className="text-[11px] text-[#8a8478] text-center mt-4 leading-relaxed">
+          <p className="text-[11px] text-body text-center mt-4 leading-relaxed">
             By continuing, you agree to the{" "}
             <Link
               href="/legal/terms"
@@ -447,6 +456,7 @@ export function AuthModal() {
             .
           </p>
         )}
+        </div>
       </div>
     </div>
   );
