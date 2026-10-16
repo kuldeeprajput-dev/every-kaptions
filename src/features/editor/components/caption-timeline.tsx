@@ -10,6 +10,8 @@ import {
   Pause,
   Play,
   Plus,
+  RotateCcw,
+  RotateCw,
   Scissors,
   Trash2,
   Type,
@@ -68,26 +70,48 @@ export function CaptionTimeline({
   const playheadPercent = Math.min(100, Math.max(0, (editor.currentTime / timelineDuration) * 100));
 
   return (
-    <section className="bg-[#0a0b0b] font-sans h-full flex flex-col overflow-hidden">
+    <section className="caption-timeline bg-surface font-sans h-full flex flex-col overflow-hidden">
       {/* Studio Action Toolbar */}
-      <div className="flex min-h-12 flex-wrap items-center justify-between gap-2.5 border-b border-white/8 bg-[#0d0e0e] px-3 py-2 sm:px-5">
+      <div className="flex min-h-12 flex-wrap items-center justify-between gap-2.5 border-b border-hairline bg-surface px-3 py-2 sm:px-5">
         {/* Left: Playback & Edit Actions (Split, Merge next, Delete) */}
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={onTogglePlayback}
-            className="grid size-8 shrink-0 place-items-center rounded-full bg-[#f6c453] text-black hover:scale-105 transition cursor-pointer shadow-[0_0_10px_rgba(246,196,83,0.3)]"
+            className="grid size-8 shrink-0 place-items-center rounded-lg bg-amber text-white hover:scale-105 transition cursor-pointer shadow-sm"
             aria-label={isPlaying ? "Pause video" : "Play video"}
+            aria-keyshortcuts="Space"
+            title={isPlaying ? "Pause (Space)" : "Play (Space)"}
           >
             {isPlaying ? <Pause size={14} fill="currentColor" /> : <Play size={14} className="ml-0.5 fill-currentColor" />}
           </button>
 
+          <button
+            type="button"
+            onClick={() => editor.setCurrentTime(Math.max(0, editor.currentTime - 2))}
+            className="grid size-7 shrink-0 place-items-center rounded-lg text-body hover:bg-surface-raised hover:text-cream transition cursor-pointer"
+            aria-label="Skip back 2 seconds"
+            title="Back 2s"
+          >
+            <RotateCcw size={13} />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => editor.setCurrentTime(Math.min(timelineDuration, editor.currentTime + 2))}
+            className="grid size-7 shrink-0 place-items-center rounded-lg text-body hover:bg-surface-raised hover:text-cream transition cursor-pointer"
+            aria-label="Skip forward 2 seconds"
+            title="Forward 2s"
+          >
+            <RotateCw size={13} />
+          </button>
+
           <div className="flex items-center gap-1 text-xs font-bold tabular-nums text-cream pr-1">
             <span>{formatClockTime(editor.currentTime)}</span>
-            <span className="text-[#626a6e]">/ {formatClockTime(timelineDuration)}</span>
+            <span className="text-dim">/ {formatClockTime(timelineDuration)}</span>
           </div>
 
-          <div className="h-4 w-px bg-white/10" />
+          <div className="h-4 w-px bg-surface-raised" />
 
           {/* Edit Actions: Split, Merge next, Delete */}
           <TimelineAction
@@ -113,23 +137,23 @@ export function CaptionTimeline({
             onClick={() => editor.deleteSegment(editor.selectedSegmentId)}
           />
 
-          <div className="h-4 w-px bg-white/10 hidden sm:block" />
+          <div className="h-4 w-px bg-surface-raised hidden sm:block" />
 
           {/* Timing Nudge Controls */}
-          <div className="flex items-center gap-0.5 rounded-xl border border-white/10 bg-black/40 p-0.5">
+          <div className="flex items-center gap-0.5 rounded-xl border border-hairline bg-surface-raised p-0.5">
             <button
               type="button"
               onClick={() => editor.nudgeTiming(-0.1)}
-              className="rounded px-2 py-1 text-[10px] font-bold text-[#b0b0b0] hover:bg-[#f6c453]/20 hover:text-[#f6c453] transition cursor-pointer"
+              className="rounded px-2 py-1 text-[10px] font-bold text-body hover:bg-amber/20 hover:text-amber transition cursor-pointer"
               title="Shift all captions 0.1s earlier"
             >
               -0.1s
             </button>
-            <span className="text-[10px] font-bold text-[#666] px-0.5 uppercase">Sync</span>
+            <span className="text-[10px] font-bold text-dim px-0.5 uppercase">Sync</span>
             <button
               type="button"
               onClick={() => editor.nudgeTiming(0.1)}
-              className="rounded px-2 py-1 text-[10px] font-bold text-[#b0b0b0] hover:bg-[#f6c453]/20 hover:text-[#f6c453] transition cursor-pointer"
+              className="rounded px-2 py-1 text-[10px] font-bold text-body hover:bg-amber/20 hover:text-amber transition cursor-pointer"
               title="Shift all captions 0.1s later"
             >
               +0.1s
@@ -140,8 +164,8 @@ export function CaptionTimeline({
         {/* Center: Formatting Settings (Ratio, Align, Position, Size) */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Ratio */}
-          <div className="flex shrink-0 items-center gap-1 rounded-xl border border-white/10 bg-black/50 p-1">
-            <span className="text-[10px] font-bold text-[#777] px-1 uppercase">Ratio</span>
+          <div className="flex shrink-0 items-center gap-1 rounded-xl border border-hairline bg-surface-raised p-1">
+            <span className="text-[10px] font-bold text-dim px-1 uppercase">Ratio</span>
             {(["9:16", "1:1", "16:9"] as const).map((r) => (
               <button
                 key={r}
@@ -150,7 +174,7 @@ export function CaptionTimeline({
                 aria-pressed={aspectRatio === r}
                 className={cn(
                   "min-h-7 rounded-lg px-2 py-0.5 text-[10px] font-bold transition cursor-pointer",
-                  aspectRatio === r ? "bg-[#f6c453] text-black" : "text-[#888] hover:text-white",
+                  aspectRatio === r ? "bg-amber text-white" : "text-body hover:text-cream",
                 )}
               >
                 {r}
@@ -159,13 +183,13 @@ export function CaptionTimeline({
           </div>
 
           {/* Alignment */}
-          <div className="flex shrink-0 items-center gap-0.5 rounded-xl border border-white/10 bg-black/50 p-1">
+          <div className="flex shrink-0 items-center gap-0.5 rounded-xl border border-hairline bg-surface-raised p-1">
             <button
               type="button"
               onClick={() => setTextAlign("left")}
               className={cn(
                 "grid size-7 place-items-center rounded-lg transition cursor-pointer",
-                textAlign === "left" ? "bg-[#f6c453] text-black" : "text-[#888] hover:text-white",
+                textAlign === "left" ? "bg-amber text-white" : "text-body hover:text-cream",
               )}
               title="Align Left"
             >
@@ -176,7 +200,7 @@ export function CaptionTimeline({
               onClick={() => setTextAlign("center")}
               className={cn(
                 "grid size-7 place-items-center rounded-lg transition cursor-pointer",
-                textAlign === "center" ? "bg-[#f6c453] text-black" : "text-[#888] hover:text-white",
+                textAlign === "center" ? "bg-amber text-white" : "text-body hover:text-cream",
               )}
               title="Align Center"
             >
@@ -187,7 +211,7 @@ export function CaptionTimeline({
               onClick={() => setTextAlign("right")}
               className={cn(
                 "grid size-7 place-items-center rounded-lg transition cursor-pointer",
-                textAlign === "right" ? "bg-[#f6c453] text-black" : "text-[#888] hover:text-white",
+                textAlign === "right" ? "bg-amber text-white" : "text-body hover:text-cream",
               )}
               title="Align Right"
             >
@@ -196,8 +220,8 @@ export function CaptionTimeline({
           </div>
 
           {/* Position */}
-          <div className="flex shrink-0 items-center gap-1 rounded-xl border border-white/10 bg-black/50 p-1">
-            <span className="text-[10px] font-bold text-[#777] px-1 uppercase flex items-center gap-1">
+          <div className="flex shrink-0 items-center gap-1 rounded-xl border border-hairline bg-surface-raised p-1">
+            <span className="text-[10px] font-bold text-dim px-1 uppercase flex items-center gap-1">
               <Move size={11} /> Pos
             </span>
             {(["top", "center", "bottom"] as const).map((p) => (
@@ -207,7 +231,7 @@ export function CaptionTimeline({
                 onClick={() => setPosition(p)}
                 className={cn(
                   "min-h-7 rounded-lg px-2 py-0.5 text-[10px] font-bold capitalize transition cursor-pointer",
-                  position === p ? "bg-[#f6c453] text-black" : "text-[#888] hover:text-white",
+                  position === p ? "bg-amber text-white" : "text-body hover:text-cream",
                 )}
               >
                 {p}
@@ -216,8 +240,8 @@ export function CaptionTimeline({
           </div>
 
           {/* Size */}
-          <div className="flex shrink-0 items-center gap-1 rounded-xl border border-white/10 bg-black/50 p-1">
-            <span className="text-[10px] font-bold text-[#777] px-1 uppercase flex items-center gap-1">
+          <div className="flex shrink-0 items-center gap-1 rounded-xl border border-hairline bg-surface-raised p-1">
+            <span className="text-[10px] font-bold text-dim px-1 uppercase flex items-center gap-1">
               <Type size={11} /> Size
             </span>
             {(["sm", "md", "lg", "xl"] as const).map((sz) => (
@@ -227,7 +251,7 @@ export function CaptionTimeline({
                 onClick={() => setFontSize(sz)}
                 className={cn(
                   "min-h-7 rounded-lg px-2 py-0.5 text-[10px] font-bold uppercase transition cursor-pointer",
-                  fontSize === sz ? "bg-[#f6c453] text-black" : "text-[#888] hover:text-white",
+                  fontSize === sz ? "bg-amber text-white" : "text-body hover:text-cream",
                 )}
               >
                 {sz}
@@ -237,12 +261,12 @@ export function CaptionTimeline({
         </div>
 
         {/* Right: Zoom controls */}
-        <div className="flex items-center gap-1 rounded-xl border border-white/10 bg-black/40 p-1">
+        <div className="flex items-center gap-1 rounded-xl border border-hairline bg-surface-raised p-1">
           <button
             type="button"
             onClick={() => setZoom((value) => Math.max(1, value - 0.5))}
             disabled={zoom === 1}
-            className="grid size-7 place-items-center rounded-lg text-[#949b9e] hover:bg-white/10 hover:text-white disabled:opacity-30 transition cursor-pointer"
+            className="grid size-7 place-items-center rounded-lg text-body hover:bg-surface-raised hover:text-cream disabled:opacity-30 transition cursor-pointer"
             aria-label="Zoom timeline out"
             title="Zoom Out"
           >
@@ -251,7 +275,7 @@ export function CaptionTimeline({
           <button
             type="button"
             onClick={() => setZoom(1)}
-            className="w-9 text-center text-[10px] font-bold text-[#f6c453] hover:underline cursor-pointer"
+            className="w-9 text-center text-[10px] font-bold text-amber hover:underline cursor-pointer"
             aria-label="Reset timeline zoom"
             title="Reset Zoom to 100%"
           >
@@ -261,7 +285,7 @@ export function CaptionTimeline({
             type="button"
             onClick={() => setZoom((value) => Math.min(3, value + 0.5))}
             disabled={zoom === 3}
-            className="grid size-7 place-items-center rounded-lg text-[#949b9e] hover:bg-white/10 hover:text-white disabled:opacity-30 transition cursor-pointer"
+            className="grid size-7 place-items-center rounded-lg text-body hover:bg-surface-raised hover:text-cream disabled:opacity-30 transition cursor-pointer"
             aria-label="Zoom timeline in"
             title="Zoom In"
           >
@@ -271,7 +295,7 @@ export function CaptionTimeline({
       </div>
 
       {/* Video Seek Slider Bar */}
-      <div className="border-b border-white/8 bg-[#0a0b0b] px-3 py-1.5 sm:px-5">
+      <div className="border-b border-hairline bg-surface px-3 py-1.5 sm:px-5">
         <input
           type="range"
           min={0}
@@ -280,14 +304,14 @@ export function CaptionTimeline({
           value={Math.min(editor.currentTime, editor.duration || 0)}
           onChange={(event) => onSeek(Number(event.target.value))}
           aria-label="Video seek position"
-          className="w-full accent-[#f6c453] cursor-pointer h-1.5 rounded-lg"
+          className="w-full accent-amber cursor-pointer h-1.5 rounded-lg"
         />
       </div>
 
       {/* Interactive Timeline Track */}
       <div className="flex-1 min-h-0 overflow-x-auto custom-scrollbar p-2 flex flex-col justify-center">
         <div
-          className="relative h-full min-h-[92px] max-h-[110px] min-w-[760px] cursor-crosshair overflow-hidden rounded-xl border border-white/10 bg-[#080808] shadow-inner select-none"
+          className="relative h-full min-h-[92px] max-h-[110px] min-w-[760px] cursor-crosshair overflow-hidden rounded-xl border border-hairline bg-surface shadow-sm select-none"
           style={{ width: `${zoom * 100}%` }}
           onClick={(event) => {
             const bounds = event.currentTarget.getBoundingClientRect();
@@ -295,7 +319,7 @@ export function CaptionTimeline({
           }}
         >
           {/* Top ruler track */}
-          <div className="absolute inset-x-0 top-0 h-12 border-b border-white/8 bg-[#111213]">
+          <div className="absolute inset-x-0 top-0 h-12 border-b border-hairline bg-surface">
             {editor.segments.map((segment, index) => {
               const left = (segment.start / timelineDuration) * 100;
               const width = Math.max(0.8, ((segment.end - segment.start) / timelineDuration) * 100);
@@ -315,10 +339,10 @@ export function CaptionTimeline({
                   className={cn(
                     "absolute inset-y-1 overflow-hidden rounded-lg border px-2 text-left text-[11px] font-semibold transition-all duration-150 cursor-pointer",
                     isSpeaking
-                      ? "z-20 border-[#f6c453] bg-[#f6c453]/35 text-white shadow-[0_0_18px_rgba(246,196,83,0.4)]"
+                      ? "z-20 border-amber bg-amber/35 text-cream shadow-sm"
                       : isSelected
-                      ? "z-10 border-[#f6c453]/80 bg-[#f6c453]/15 text-white"
-                      : "border-white/12 bg-[#1b1c1e] text-[#b8bebd] hover:border-white/30 hover:bg-[#25272a] hover:text-white",
+                      ? "z-10 border-amber/80 bg-amber/15 text-cream"
+                      : "border-hairline bg-surface text-cream hover:border-hairline hover:bg-surface hover:text-cream",
                   )}
                   style={{ left: `${left}%`, width: `${width}%` }}
                   aria-label={`Select caption ${index + 1}: ${segment.text}`}
@@ -326,7 +350,7 @@ export function CaptionTimeline({
                 >
                   <div className="flex items-center justify-between gap-1 h-full">
                     <span className="truncate">{segment.text}</span>
-                    <span className="hidden sm:inline-block shrink-0 rounded bg-black/40 px-1 py-0.2 text-[9px] font-mono text-[#f6c453]">
+                    <span className="hidden sm:inline-block shrink-0 rounded bg-surface-raised px-1 py-0.2 text-[9px] font-mono text-amber">
                       {durationSec}s
                     </span>
                   </div>
@@ -345,7 +369,7 @@ export function CaptionTimeline({
                   key={index}
                   className={cn(
                     "min-w-[2.5px] flex-1 rounded-t-sm transition-colors duration-75",
-                    isPast ? "bg-[#f6c453]" : "bg-white/15",
+                    isPast ? "bg-amber" : "bg-surface-raised",
                   )}
                   style={{ height: `${height}%` }}
                 />
@@ -355,10 +379,10 @@ export function CaptionTimeline({
 
           {/* Playhead Needle */}
           <div
-            className="pointer-events-none absolute inset-y-0 z-30 w-0.5 bg-[#f6c453] shadow-[0_0_10px_#f6c453]"
+            className="pointer-events-none absolute inset-y-0 z-30 w-0.5 bg-amber shadow-sm"
             style={{ left: `${playheadPercent}%` }}
           >
-            <div className="absolute -left-2.5 -top-1 flex h-4 items-center justify-center rounded bg-[#f6c453] px-1 text-[9px] font-black text-black shadow-md">
+            <div className="absolute -left-2.5 -top-1 flex h-4 items-center justify-center rounded bg-amber px-1 text-[9px] font-black text-white shadow-sm">
               {formatClockTime(editor.currentTime)}
             </div>
           </div>
@@ -387,11 +411,11 @@ function TimelineAction({ icon: Icon, label, hint, disabled, danger, onClick }: 
       className={cn(
         "flex min-h-8 items-center gap-1.5 rounded-lg border px-2.5 text-[11px] font-semibold transition cursor-pointer disabled:cursor-not-allowed disabled:opacity-30",
         danger
-          ? "border-red-500/30 bg-red-500/10 text-red-300 hover:bg-red-500/20 hover:border-red-400"
-          : "border-white/12 bg-white/5 text-[#c4c9cc] hover:border-[#f6c453]/50 hover:bg-[#f6c453]/10 hover:text-white",
+          ? "border-red-500/30 bg-red-500/10 text-red-700 hover:bg-red-500/20 hover:border-red-400"
+          : "border-hairline bg-surface-raised text-cream hover:border-amber/50 hover:bg-amber/10 hover:text-cream",
       )}
     >
-      <Icon size={13} className={danger ? "text-red-400" : "text-[#f6c453]"} /> {label}
+      <Icon size={13} className={danger ? "text-red-400" : "text-amber"} /> {label}
     </button>
   );
 }
