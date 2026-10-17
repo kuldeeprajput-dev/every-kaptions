@@ -1,98 +1,208 @@
 "use client";
 
-import { Menu, X } from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { UserMenu } from "@/features/auth/components/user-menu";
-import { cn } from "@/shared/lib/cn";
+import { useEffect, useRef, useState } from "react";
+import { useAuth } from "@/features/auth/store/auth-store";
+import { LogoWordmark } from "./logo-wordmark";
 
-const navigation = [
-  { href: "/pricing", label: "Pricing" },
-  { href: "/roadmap", label: "Roadmap" },
-  { href: "/support", label: "Support" },
-] as const;
+const groups = [
+  {
+    id: "features",
+    label: "Features",
+    links: [
+      { label: "Auto captions", description: "Turn speech into editable captions", href: "/#features" },
+      { label: "Caption styles", description: "Find the look that feels like you", href: "/#presets" },
+      { label: "Word-level timing", description: "Keep every word in sync", href: "/#word-timing" },
+      { label: "Video & subtitle exports", description: "Finish your video or download the words", href: "/#how-it-works" },
+    ],
+  },
+  {
+    id: "languages",
+    label: "Languages",
+    links: [
+      { label: "Telugu captions", description: "For your words in తెలుగు", href: "/#languages" },
+      { label: "Hindi captions", description: "Create captions in हिन्दी", href: "/#languages" },
+      { label: "English & more", description: "See supported spoken languages", href: "/#languages" },
+    ],
+  },
+  {
+    id: "resources",
+    label: "Resources",
+    links: [
+      { label: "How it works", description: "From upload to ready-to-post", href: "/#how-it-works" },
+      { label: "Roadmap", description: "See what’s coming next", href: "/roadmap" },
+      { label: "Help & support", description: "Get a little help from the team", href: "/support" },
+      { label: "Frequently asked questions", description: "A few helpful answers", href: "/#faq" },
+    ],
+  },
+];
 
 export function SiteHeader() {
-  const pathname = usePathname();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const { user, openAuthModal } = useAuth();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [activeGroup, setActiveGroup] = useState<string | null>(null);
+  const headerRef = useRef<HTMLElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const clearHoverTimeout = () => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
+    }
+  };
+
+  const handleMouseEnter = (groupId: string) => { clearHoverTimeout(); setActiveGroup(groupId); };
+  const handleMouseLeave = () => {
+    clearHoverTimeout();
+    hoverTimeoutRef.current = setTimeout(() => setActiveGroup(null), 150);
+  };
+  const closeAll = () => { clearHoverTimeout(); setActiveGroup(null); setMobileOpen(false); };
+
+  useEffect(() => () => clearHoverTimeout(), []);
 
   useEffect(() => {
-    if (!menuOpen) return;
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setMenuOpen(false);
+    if (!mobileOpen && !activeGroup) return;
+    const outside = (event: PointerEvent) => {
+      if (!headerRef.current?.contains(event.target as Node)) {
+        setMobileOpen(false);
+        setActiveGroup(null);
+      }
     };
-    window.addEventListener("keydown", closeOnEscape);
-    return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [menuOpen]);
+    const escape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      if (activeGroup) {
+        document
+          .getElementById(
+            `${mobileOpen ? "mobile" : "desktop"}-${activeGroup}-trigger`,
+          )
+          ?.focus();
+        setActiveGroup(null);
+      } else {
+        setMobileOpen(false);
+        toggleRef.current?.focus();
+      }
+    };
+    document.addEventListener("pointerdown", outside);
+    document.addEventListener("keydown", escape);
+    return () => {
+      document.removeEventListener("pointerdown", outside);
+      document.removeEventListener("keydown", escape);
+    };
+  }, [mobileOpen, activeGroup]);
 
+  const signIn = () => {
+    closeAll();
+    openAuthModal("signin");
+  };
   return (
     <>
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[200] focus:rounded-full focus:bg-amber focus:px-4 focus:py-2 focus:font-semibold focus:text-[#0c0b0a] focus:shadow-lg focus:outline-none"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[300] focus:bg-surface focus:p-3"
       >
         Skip to content
       </a>
-      <header className="sticky top-0 z-[100] overflow-visible border-b border-[var(--hairline)] bg-[#0c0b0ad9] backdrop-blur-xl">
-        <div className="flex min-h-16 w-full items-center gap-2 px-[var(--page-gutter)] sm:gap-4">
-          <Link
-            href="/"
-            className="inline-flex shrink-0 items-center whitespace-nowrap font-display text-[clamp(1.15rem,2.1vw,1.65rem)] font-bold leading-none tracking-[-0.055em]"
-            aria-label="EveryKaptions homepage"
-            title="EveryKaptions home"
-          >
-            <span className="text-cream">Every</span>
-            <span className="text-amber">Kaptions</span>
+      <header className="site-header" ref={headerRef}>
+        <div className="site-header-inner">
+          <Link href="/" aria-label="EveryKaptions homepage" onClick={closeAll}>
+            <LogoWordmark />
           </Link>
-
-          <nav className="ml-auto flex shrink-0 items-center gap-1" aria-label="Main navigation">
-            <div className="hidden items-center min-[641px]:flex">
-              {navigation.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  aria-current={pathname === item.href ? "page" : undefined}
-                  className={cn(
-                    "inline-flex min-h-11 items-center px-3 text-[13px] font-semibold transition-colors",
-                    pathname === item.href ? "text-cream" : "text-amber hover:text-cream",
-                  )}
+          <nav className="site-nav" aria-label="Main navigation">
+            {groups.map((group) => (
+              <div
+                className="site-nav-group"
+                key={group.id}
+                onMouseEnter={() => handleMouseEnter(group.id)}
+                onMouseLeave={handleMouseLeave}
+              >
+                <button
+                  id={`desktop-${group.id}-trigger`}
+                  type="button"
+                  aria-expanded={activeGroup === group.id}
+                  aria-controls={`desktop-${group.id}-menu`}
+                  onClick={() => {
+                    clearHoverTimeout();
+                    setActiveGroup(activeGroup === group.id ? null : group.id);
+                  }}
                 >
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-            <UserMenu />
+                  {group.label}
+                  <ChevronDown size={13} />
+                </button>
+                {activeGroup === group.id && (
+                  <div
+                    className="site-dropdown"
+                    id={`desktop-${group.id}-menu`}
+                    onMouseEnter={() => handleMouseEnter(group.id)}
+                    onMouseLeave={handleMouseLeave}
+                  >
+                    {group.links.map((item) => (
+                      <Link key={item.label} href={item.href} onClick={closeAll}>
+                        <strong>{item.label}</strong>
+                        <span>{item.description}</span>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+            <Link href="/pricing" onClick={closeAll}>Pricing</Link>
+          </nav>
+          <div className="site-header-actions">
+            {!user && <button type="button" className="header-signin" onClick={signIn}>Sign in</button>}
+            <Link href="/studio" className="header-studio-link" onClick={closeAll}>Open studio</Link>
             <button
               type="button"
-              onClick={() => setMenuOpen((current) => !current)}
-              className="grid size-10 place-items-center rounded-full border border-[var(--hairline-strong)] text-cream min-[641px]:hidden"
-              aria-expanded={menuOpen}
+              ref={toggleRef}
+              className="header-menu-toggle"
+              aria-label={mobileOpen ? "Close navigation" : "Open navigation"}
+              aria-expanded={mobileOpen}
               aria-controls="mobile-navigation"
-              aria-label={menuOpen ? "Close navigation" : "Open navigation"}
+              onClick={() => {
+                setMobileOpen(!mobileOpen);
+                setActiveGroup(null);
+              }}
             >
-              {menuOpen ? <X size={18} /> : <Menu size={18} />}
+              {mobileOpen ? <X size={21} /> : <Menu size={21} />}
             </button>
-          </nav>
+          </div>
         </div>
-        {menuOpen ? (
-          <nav id="mobile-navigation" className="absolute inset-x-0 top-full border-b border-[var(--hairline)] bg-[#0c0b0af7] p-3 shadow-2xl min-[641px]:hidden" aria-label="Mobile navigation">
-            {navigation.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setMenuOpen(false)}
-                aria-current={pathname === item.href ? "page" : undefined}
-                className={cn(
-                  "flex min-h-12 items-center rounded-xl px-4 text-sm font-semibold",
-                  pathname === item.href ? "bg-amber/10 text-cream" : "text-amber hover:bg-white/5 hover:text-cream",
+        {mobileOpen && (
+          <nav
+            id="mobile-navigation"
+            className="mobile-site-nav"
+            aria-label="Mobile navigation"
+          >
+            {groups.map((group) => (
+              <div className="mobile-nav-group" key={group.id}>
+                <button
+                  id={`mobile-${group.id}-trigger`}
+                  type="button"
+                  onClick={() =>
+                    setActiveGroup(activeGroup === group.id ? null : group.id)
+                  }
+                  aria-expanded={activeGroup === group.id}
+                  aria-controls={`mobile-${group.id}-menu`}
+                >
+                  {group.label}
+                  <ChevronDown size={15} />
+                </button>
+                {activeGroup === group.id && (
+                  <div id={`mobile-${group.id}-menu`}>
+                    {group.links.map((item) => (
+                      <Link key={item.label} href={item.href} onClick={closeAll}>
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
                 )}
-              >
-                {item.label}
-              </Link>
+              </div>
             ))}
+            <Link href="/pricing" onClick={closeAll}>Pricing</Link>
+            {!user && <button type="button" onClick={signIn}>Sign in</button>}
           </nav>
-        ) : null}
+        )}
       </header>
     </>
   );
