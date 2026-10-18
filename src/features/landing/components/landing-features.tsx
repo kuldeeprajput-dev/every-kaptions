@@ -3,7 +3,7 @@ import {
   CaptionStyleFeature,
   TimingPreview,
   TranscriptPreview,
-} from "./caption-demo";
+} from "./feature-previews";
 import { CaptionCta } from "./landing-ui";
 
 const features = [
