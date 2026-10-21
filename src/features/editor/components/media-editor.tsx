@@ -20,7 +20,6 @@ import {
   Play,
   Plus,
   Redo2,
-  Search,
   Sliders,
   Sparkles,
   Type,
@@ -38,6 +37,7 @@ import { ensureSegmentWords, formatClockTimeWithMs } from "../lib/captions";
 import { renderAndExportVideo } from "../lib/export-video";
 import { usePlanSummary } from "../store/plan-store";
 import { CaptionTimeline } from "./caption-timeline";
+import { EditorCaptionList } from "./editor-caption-list";
 
 type Props = {
   editor: ReturnType<typeof useCaptionEditor>;
@@ -118,7 +118,6 @@ export function MediaEditor({ editor, onBack }: Props) {
   const [mobileDrawer, setMobileDrawer] = useState<null | "captions" | "styles">(null);
   const [isDraggingCaption, setIsDraggingCaption] = useState(false);
   const [activeRightTab, setActiveRightTab] = useState<ActiveRightTab>("styles");
-  const [searchQuery, setSearchQuery] = useState("");
 
   // Adjustable Panel Sizes
   const [leftWidth, setLeftWidth] = useState(320);
@@ -307,11 +306,6 @@ export function MediaEditor({ editor, onBack }: Props) {
     }
   }, [currentVoiceSeg, isPlaying]);
 
-  const filteredSegments = useMemo(() => {
-    if (!searchQuery.trim()) return editor.segments;
-    return editor.segments.filter((s) => s.text.toLowerCase().includes(searchQuery.toLowerCase()));
-  }, [editor.segments, searchQuery]);
-
   // Video Export Handler
   const handleExportVideo = async () => {
     setExportError("");
@@ -464,180 +458,34 @@ export function MediaEditor({ editor, onBack }: Props) {
         {/* Column 1 (Left): Captions List */}
         <section
           style={{ width: `${leftWidth}px` }}
-          className="shrink-0 border-r border-white/8 bg-[#0c0d0d] overflow-y-auto custom-scrollbar flex flex-col h-full hidden lg:flex"
+          aria-label="Captions transcript"
+          className="shrink-0 border-r border-white/8 bg-[#0c0d0d] flex-col h-full hidden lg:flex overflow-hidden"
         >
-          <div className="sticky top-0 z-10 border-b border-white/8 bg-[#0c0d0d]/95 backdrop-blur-md p-4 space-y-3 shrink-0">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <span className="grid size-7 place-items-center rounded-lg bg-[#f6c453]/10 text-[#f6c453]">
-                  <Layers size={15} />
-                </span>
-                <div>
-                  <h2 className="text-xs font-bold uppercase tracking-[.15em] text-[#81898e]">Captions</h2>
-                  <p className="text-sm font-bold text-cream">Review & Edit</p>
-                </div>
-              </div>
-              <span className="rounded-full border border-[#f6c453]/40 bg-[#f6c453]/15 px-2.5 py-0.5 text-[11px] font-bold text-[#f6c453]">
-                {editor.segments.length} lines
-              </span>
-            </div>
-
-            {/* Live Search bar */}
-            <div className="relative flex items-center">
-              <Search size={13} className="absolute left-3 text-[#646c70]" />
-              <input
-                type="text"
-                placeholder="Search caption lines..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-black/50 py-1.5 pl-8 pr-3 text-xs text-white placeholder-[#555c60] outline-none focus:border-[#f6c453]/60 transition"
-              />
-              {searchQuery ? (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-2.5 text-xs text-[#888] hover:text-white"
-                >
-                  <X size={12} />
-                </button>
-              ) : null}
-            </div>
-
-            {/* Voice Sync Nudge Controls */}
-            <div className="flex items-center justify-between gap-1 rounded-xl border border-white/8 bg-black/40 px-2.5 py-1.5 text-[11px]">
-              <span className="font-semibold text-[#888] flex items-center gap-1.5">
-                <Sliders size={12} className="text-[#f6c453]" /> Voice Sync
-              </span>
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => editor.nudgeTiming(-0.2)}
-                  className="rounded px-1.5 py-0.5 bg-white/5 hover:bg-[#f6c453]/20 hover:text-[#f6c453] text-[10px] font-bold text-[#bbb] transition cursor-pointer"
-                  title="Shift all captions 0.2s earlier (if captions appear late)"
-                >
-                  -0.2s
-                </button>
-                <button
-                  type="button"
-                  onClick={() => editor.nudgeTiming(-0.1)}
-                  className="rounded px-1.5 py-0.5 bg-white/5 hover:bg-[#f6c453]/20 hover:text-[#f6c453] text-[10px] font-bold text-[#bbb] transition cursor-pointer"
-                  title="Shift all captions 0.1s earlier"
-                >
-                  -0.1s
-                </button>
-                <button
-                  type="button"
-                  onClick={() => editor.nudgeTiming(0.1)}
-                  className="rounded px-1.5 py-0.5 bg-white/5 hover:bg-[#f6c453]/20 hover:text-[#f6c453] text-[10px] font-bold text-[#bbb] transition cursor-pointer"
-                  title="Shift all captions 0.1s later"
-                >
-                  +0.1s
-                </button>
-                <button
-                  type="button"
-                  onClick={() => editor.nudgeTiming(0.2)}
-                  className="rounded px-1.5 py-0.5 bg-white/5 hover:bg-[#f6c453]/20 hover:text-[#f6c453] text-[10px] font-bold text-[#bbb] transition cursor-pointer"
-                  title="Shift all captions 0.2s later (if captions appear early)"
-                >
-                  +0.2s
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Captions List */}
-          <div className="space-y-2.5 p-3 sm:p-4 flex-1">
-            {filteredSegments.length === 0 ? (
-              <div className="py-12 text-center text-xs text-[#626a6e]">
-                No matching captions found.
-              </div>
-            ) : null}
-
-            {filteredSegments.map((segment) => {
-              const index = editor.segments.findIndex((s) => s.id === segment.id);
-              const isVoiceSpeaking = currentVoiceSeg?.id === segment.id;
-              const isSelected = segment.id === activeSegmentId;
-              const durationSec = (segment.end - segment.start).toFixed(1);
-              return (
-                <article
-                  key={segment.id}
-                  id={`caption-card-${segment.id}`}
-                  className={cn(
-                    "group relative rounded-xl border p-3 transition-all duration-150",
-                    isVoiceSpeaking
-                      ? "border-[#f6c453] bg-[#f6c453]/15 shadow-[0_0_20px_rgba(246,196,83,0.25)]"
-                      : isSelected
-                      ? "border-[#f6c453]/60 bg-[#f6c453]/5 shadow-[0_0_12px_rgba(246,196,83,0.1)]"
-                      : "border-white/8 bg-[#111213] hover:border-white/20 hover:bg-[#161719]",
-                  )}
-                >
-                  {isVoiceSpeaking ? (
-                    <span className="absolute left-0 top-3 bottom-3 w-1 rounded-r-full bg-[#f6c453]" />
-                  ) : null}
-
-                  <div className="flex items-center justify-between gap-3 text-left pl-1">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        editor.setSelectedSegmentId(segment.id);
-                        seekTo(segment.start);
-                      }}
-                      className="flex items-center gap-2 cursor-pointer group/time"
-                    >
-                      <span className={cn(
-                        "inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[11px] font-bold transition",
-                        isVoiceSpeaking
-                          ? "bg-[#f6c453] text-black border-[#f6c453]"
-                          : "bg-black/40 border-white/10 text-[#f6c453] group-hover/time:border-[#f6c453]/50"
-                      )}>
-                        <Play size={10} className={isVoiceSpeaking ? "fill-black" : "fill-[#f6c453]"} />
-                        {formatClockTimeWithMs(segment.start)}
-                      </span>
-                      <span className="text-[10px] font-medium text-[#727a7e]">Line {index + 1} ({durationSec}s)</span>
-                    </button>
-
-                    <div className="flex items-center gap-1 text-[10px] text-[#888]">
-                      <button
-                        type="button"
-                        onClick={() => editor.splitSegment(segment.id)}
-                        className="rounded px-1.5 py-0.5 hover:bg-white/10 hover:text-[#f6c453] transition cursor-pointer font-medium"
-                        title="Split segment at playhead"
-                      >
-                        Split
-                      </button>
-                      <span className="text-white/20">·</span>
-                      <button
-                        type="button"
-                        onClick={() => editor.mergeWithNext(segment.id)}
-                        className="rounded px-1.5 py-0.5 hover:bg-white/10 hover:text-[#f6c453] transition cursor-pointer font-medium"
-                        title="Merge with next segment"
-                      >
-                        Merge
-                      </button>
-                      <span className="text-white/20">·</span>
-                      <button
-                        type="button"
-                        onClick={() => editor.deleteSegment(segment.id)}
-                        className="rounded px-1.5 py-0.5 hover:bg-red-500/20 hover:text-red-400 transition cursor-pointer font-medium"
-                        title="Delete line"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-
-                  <textarea
-                    value={segment.text}
-                    onFocus={() => editor.setSelectedSegmentId(segment.id)}
-                    onChange={(event) => editor.updateSegment(segment.id, event.target.value)}
-                    rows={2}
-                    aria-label={`Caption ${index + 1} text`}
-                    className="mt-2.5 w-full resize-none rounded-lg bg-black/30 border-0 p-2 text-sm leading-6 text-cream outline-none focus:outline-none focus:ring-0 focus:border-0 focus:bg-black/50 placeholder:text-[#596064] transition"
-                  />
-                </article>
-              );
-            })}
-          </div>
+          <EditorCaptionList
+            segments={editor.segments}
+            activeSegmentId={activeSegmentId}
+            currentVoiceSegId={currentVoiceSeg?.id}
+            onSelectSegment={(id, start) => {
+              editor.setSelectedSegmentId(id);
+              seekTo(start);
+            }}
+            onUpdateText={(id, text) => {
+              editor.updateSegment(id, text);
+            }}
+            onSplit={(id) => {
+              editor.splitSegment(id);
+            }}
+            onMergeWithNext={(id) => {
+              editor.mergeWithNext(id);
+            }}
+            onDelete={(id) => {
+              editor.deleteSegment(id);
+            }}
+            onNudgeTiming={(offset) => {
+              editor.nudgeTiming(offset);
+            }}
+            className="h-full border-0 bg-transparent"
+          />
         </section>
 
         {/* Left Drag Resize Handle */}
@@ -1325,7 +1173,7 @@ export function MediaEditor({ editor, onBack }: Props) {
             {/* Mobile Captions List */}
             {mobileDrawer === "captions" ? (
               <div className="flex-1 overflow-y-auto space-y-3 custom-scrollbar pr-1">
-                {filteredSegments.map((segment, index) => {
+                {editor.segments.map((segment, index) => {
                   const isVoiceSpeaking =
                     editor.currentTime >= segment.start && editor.currentTime <= segment.end;
                   const isSelected = segment.id === activeSegmentId;
