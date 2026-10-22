@@ -12,7 +12,6 @@ import {
   Keyboard,
   Layers,
   Layout,
-  Loader2,
   Minus,
   Move,
   Palette,
@@ -37,6 +36,7 @@ import { ensureSegmentWords, formatClockTimeWithMs } from "../lib/captions";
 import { renderAndExportVideo } from "../lib/export-video";
 import { usePlanSummary } from "../store/plan-store";
 import { CaptionTimeline } from "./caption-timeline";
+import { EditorExportModal } from "./editor-export-modal";
 import { EditorCaptionList } from "./editor-caption-list";
 
 type Props = {
@@ -305,6 +305,21 @@ export function MediaEditor({ editor, onBack }: Props) {
       card.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
   }, [currentVoiceSeg, isPlaying]);
+
+  // Keyboard shortcuts for export modal and quick dismiss
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "e") {
+        e.preventDefault();
+        setShowExportModal(true);
+      } else if (e.key === "Escape") {
+        if (!isRenderingVideo) setShowExportModal(false);
+        setMobileDrawer(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isRenderingVideo]);
 
   // Video Export Handler
   const handleExportVideo = async () => {
@@ -972,177 +987,22 @@ export function MediaEditor({ editor, onBack }: Props) {
       </div>
 
       {/* Export Studio Modal */}
-      {showExportModal ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-md">
-          <div role="dialog" aria-modal="true" className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-white/12 bg-[#121315] p-6 text-white shadow-2xl font-sans">
-            <button
-              type="button"
-              onClick={() => !isRenderingVideo && setShowExportModal(false)}
-              disabled={isRenderingVideo}
-              className="absolute right-4 top-4 grid size-9 place-items-center rounded-full text-[#888] transition hover:bg-white/10 hover:text-white cursor-pointer disabled:opacity-30"
-              aria-label="Close export dialog"
-            >
-              <X size={18} />
-            </button>
-
-            <div className="flex items-center gap-3">
-              <span className="grid size-10 place-items-center rounded-2xl bg-[#f6c453]/15 text-[#f6c453]">
-                <Download size={20} />
-              </span>
-              <div>
-                <h3 className="text-lg font-bold text-cream">Export Studio</h3>
-                <p className="text-xs text-[#81898e]">Choose video format or subtitle files to download.</p>
-              </div>
-            </div>
-
-            {/* Plan Quota Status */}
-            <div className="mt-4 flex items-center justify-between rounded-xl border border-white/10 bg-black/40 p-3 text-xs">
-              <div>
-                <span className="text-[#888]">Exports Remaining: </span>
-                <span className="font-bold text-[#f6c453]">{plan.remainingExports} remaining</span>
-              </div>
-              <Link href="/pricing" className="text-[11px] font-bold text-cream underline hover:text-[#f6c453]">
-                Upgrade Plan
-              </Link>
-            </div>
-
-            {exportError ? (
-              <div className="mt-3 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-300">
-                {exportError}
-              </div>
-            ) : null}
-
-            {/* Progress indicator during Video rendering */}
-            {isRenderingVideo ? (
-              <div className="mt-6 space-y-3 text-center py-6">
-                <Loader2 size={36} className="mx-auto text-[#f6c453] animate-spin" />
-                <h4 className="text-sm font-bold text-white">Rendering Captioned Video...</h4>
-                <div className="mx-auto max-w-xs space-y-1.5">
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-white/10">
-                    <div
-                      className="h-full bg-[#f6c453] transition-all duration-200"
-                      style={{ width: `${renderProgress}%` }}
-                    />
-                  </div>
-                  <p className="text-xs font-mono text-[#f6c453]">{renderProgress}% completed</p>
-                </div>
-                <p className="text-[11px] text-[#777]">Please keep this window open while processing.</p>
-              </div>
-            ) : (
-              <div className="mt-5 space-y-3">
-                {/* 1. Export Video Option */}
-                <button
-                  type="button"
-                  onClick={handleExportVideo}
-                  disabled={!plan.canExport}
-                  className="w-full flex items-center justify-between rounded-2xl border border-[#f6c453]/40 bg-[#f6c453]/15 p-4 transition hover:bg-[#f6c453]/25 cursor-pointer disabled:opacity-40 shadow-[0_0_15px_rgba(246,196,83,0.15)] group"
-                >
-                  <div className="flex items-center gap-3 text-left">
-                    <span className="grid size-10 place-items-center rounded-xl bg-[#f6c453] text-black">
-                      <Film size={20} />
-                    </span>
-                    <div>
-                      <h4 className="text-sm font-bold text-white group-hover:text-[#f6c453] transition">
-                        Export Video (.MP4)
-                      </h4>
-                      <p className="text-xs text-[#999]">Renders high quality video with active burned-in captions.</p>
-                    </div>
-                  </div>
-                  <span className="rounded-lg bg-[#f6c453] px-3 py-1 text-xs font-bold text-black">
-                    Render
-                  </span>
-                </button>
-
-                <div className="relative py-1">
-                  <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-white/10" /></div>
-                  <div className="relative flex justify-center text-[10px] uppercase font-bold text-[#666]"><span className="bg-[#121315] px-2">Subtitle Formats</span></div>
-                </div>
-
-                {/* Subtitle Formats Grid */}
-                <div className="grid grid-cols-3 gap-2.5">
-                  <button
-                    type="button"
-                    onClick={() => handleDownloadCaptions("srt")}
-                    disabled={!plan.canExport}
-                    className="flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-black/40 p-3 hover:border-white/25 hover:bg-black/60 transition cursor-pointer disabled:opacity-40"
-                  >
-                    <FileText size={18} className="text-[#f6c453]" />
-                    <span className="mt-1.5 text-xs font-bold text-white">.SRT</span>
-                    <span className="text-[10px] text-[#777]">SubRip</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleDownloadCaptions("vtt")}
-                    disabled={!plan.canExport}
-                    className="flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-black/40 p-3 hover:border-white/25 hover:bg-black/60 transition cursor-pointer disabled:opacity-40"
-                  >
-                    <FileText size={18} className="text-[#f6c453]" />
-                    <span className="mt-1.5 text-xs font-bold text-white">.VTT</span>
-                    <span className="text-[10px] text-[#777]">WebVTT</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleDownloadCaptions("txt")}
-                    disabled={!plan.canExport}
-                    className="flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-black/40 p-3 hover:border-white/25 hover:bg-black/60 transition cursor-pointer disabled:opacity-40"
-                  >
-                    <FileText size={18} className="text-[#f6c453]" />
-                    <span className="mt-1.5 text-xs font-bold text-white">.TXT</span>
-                    <span className="text-[10px] text-[#777]">Plain Text</span>
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      ) : null}
-
-      {/* Shortcuts Modal */}
-      {showShortcutsModal ? (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 p-0 backdrop-blur-sm sm:items-center sm:p-4">
-          <div role="dialog" aria-modal="true" aria-labelledby="shortcut-dialog-title" className="relative max-h-[calc(100dvh-1rem)] w-full max-w-md overflow-y-auto rounded-t-3xl border border-white/10 bg-[#161513] p-5 font-sans text-white shadow-2xl sm:rounded-2xl sm:p-6">
-            <button
-              type="button"
-              onClick={() => setShowShortcutsModal(false)}
-              className="absolute right-4 top-4 grid size-9 place-items-center rounded-full text-[#888] transition hover:bg-white/8 hover:text-white cursor-pointer"
-              aria-label="Close keyboard shortcuts"
-            >
-              <X size={18} />
-            </button>
-            <h3 id="shortcut-dialog-title" className="flex items-center gap-2 text-lg font-bold">
-              <Keyboard size={18} className="text-[#f6c453]" /> Keyboard Shortcuts
-            </h3>
-            <p className="mt-1 text-xs text-[#888]">Speed up your workflow with studio hotkeys.</p>
-            <div className="mt-4 space-y-2 text-xs">
-              <div className="flex items-center justify-between border-b border-white/8 py-2">
-                <span>Play / Pause Video</span>
-                <kbd className="rounded bg-white/10 px-2 py-1 font-mono text-[10px] text-[#f6c453]">Space</kbd>
-              </div>
-              <div className="flex items-center justify-between border-b border-white/8 py-2">
-                <span>Undo Last Change</span>
-                <kbd className="rounded bg-white/10 px-2 py-1 font-mono text-[10px] text-[#f6c453]">Ctrl + Z</kbd>
-              </div>
-              <div className="flex items-center justify-between border-b border-white/8 py-2">
-                <span>Redo Change</span>
-                <kbd className="rounded bg-white/10 px-2 py-1 font-mono text-[10px] text-[#f6c453]">Ctrl + Y / Ctrl + Shift + Z</kbd>
-              </div>
-              <div className="flex items-center justify-between border-b border-white/8 py-2">
-                <span>Seek Backwards / Forwards</span>
-                <kbd className="rounded bg-white/10 px-2 py-1 font-mono text-[10px] text-[#f6c453]">← / →</kbd>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowShortcutsModal(false)}
-              className="mt-6 w-full rounded-xl bg-[#f6c453] py-2.5 text-xs font-bold text-black cursor-pointer hover:brightness-105"
-            >
-              Got it
-            </button>
-          </div>
-        </div>
-      ) : null}
+      <EditorExportModal
+        isOpen={showExportModal}
+        onClose={() => {
+          setShowExportModal(false);
+        }}
+        onExportVideo={() => {
+          void handleExportVideo();
+        }}
+        onExportSubtitles={(format) => {
+          handleDownloadCaptions(format);
+        }}
+        isRenderingVideo={isRenderingVideo}
+        renderProgress={renderProgress}
+        exportError={exportError}
+        remainingExports={plan.remainingExports}
+      />
 
       {/* Mobile Drawer Modal for Captions & Styles */}
       {mobileDrawer ? (
