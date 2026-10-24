@@ -16,12 +16,11 @@ import {
   Trash2,
   Type,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { cn } from "@/shared/lib/cn";
 import { formatClockTime } from "../lib/captions";
 import type { useCaptionEditor } from "../hooks/use-caption-editor";
-
-const WAVEFORM_BARS = Array.from({ length: 120 }, (_, index) => 15 + ((index * 41 + 17) % 75));
+import { TimelineTracks } from "./timeline-tracks";
 
 type Props = {
   editor: ReturnType<typeof useCaptionEditor>;
@@ -59,109 +58,91 @@ export function CaptionTimeline({
     ? (currentVoiceId || editor.selectedSegmentId)
     : (currentVoiceId || editor.selectedSegmentId || editor.segments[0]?.id);
 
-  const selectedIndex = useMemo(
-    () => editor.segments.findIndex((segment) => segment.id === (editor.selectedSegmentId || activeSegmentId)),
-    [editor.segments, editor.selectedSegmentId, activeSegmentId],
-  );
-
-  const hasSelection = selectedIndex >= 0;
-  const canMerge = hasSelection && selectedIndex < editor.segments.length - 1;
-  const timelineDuration = Math.max(editor.duration, editor.segments.at(-1)?.end ?? 0, 0.1);
-  const playheadPercent = Math.min(100, Math.max(0, (editor.currentTime / timelineDuration) * 100));
+  const timelineDuration = Math.max(editor.duration, 0.1);
 
   return (
-    <section className="caption-timeline bg-surface font-sans h-full flex flex-col overflow-hidden">
-      {/* Studio Action Toolbar */}
-      <div className="flex min-h-12 flex-wrap items-center justify-between gap-2.5 border-b border-hairline bg-surface px-3 py-2 sm:px-5">
-        {/* Left: Playback & Edit Actions (Split, Merge next, Delete) */}
-        <div className="flex flex-wrap items-center gap-2">
+    <section
+      role="region"
+      aria-label="Caption timing and media controls"
+      className="flex flex-col border-t border-hairline bg-surface select-none font-sans shrink-0"
+    >
+      {/* Top Action & Control Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-2.5 border-b border-hairline px-3 py-2 sm:px-5">
+        {/* Left: Playback & Action Controls */}
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* Play / Pause Primary Button */}
           <button
             type="button"
             onClick={onTogglePlayback}
-            className="grid size-8 shrink-0 place-items-center rounded-lg bg-amber text-white hover:scale-105 transition cursor-pointer shadow-sm"
-            aria-label={isPlaying ? "Pause video" : "Play video"}
-            aria-keyshortcuts="Space"
-            title={isPlaying ? "Pause (Space)" : "Play (Space)"}
+            className="flex h-8 items-center gap-1.5 rounded-lg bg-amber px-3 text-xs font-bold text-white transition hover:brightness-105 cursor-pointer shadow-sm"
+            aria-label={isPlaying ? "Pause video playback" : "Start video playback"}
           >
-            {isPlaying ? <Pause size={14} fill="currentColor" /> : <Play size={14} className="ml-0.5 fill-currentColor" />}
+            {isPlaying ? (
+              <Pause size={14} className="fill-white" />
+            ) : (
+              <Play size={14} className="fill-white ml-0.5" />
+            )}
+            <span>{isPlaying ? "Pause" : "Play"}</span>
           </button>
 
-          <button
-            type="button"
-            onClick={() => editor.setCurrentTime(Math.max(0, editor.currentTime - 2))}
-            className="grid size-7 shrink-0 place-items-center rounded-lg text-body hover:bg-surface-raised hover:text-cream transition cursor-pointer"
-            aria-label="Skip back 2 seconds"
-            title="Back 2s"
-          >
-            <RotateCcw size={13} />
-          </button>
-
-          <button
-            type="button"
-            onClick={() => editor.setCurrentTime(Math.min(timelineDuration, editor.currentTime + 2))}
-            className="grid size-7 shrink-0 place-items-center rounded-lg text-body hover:bg-surface-raised hover:text-cream transition cursor-pointer"
-            aria-label="Skip forward 2 seconds"
-            title="Forward 2s"
-          >
-            <RotateCw size={13} />
-          </button>
-
-          <div className="flex items-center gap-1 text-xs font-bold tabular-nums text-cream pr-1">
-            <span>{formatClockTime(editor.currentTime)}</span>
-            <span className="text-dim">/ {formatClockTime(timelineDuration)}</span>
+          {/* Skip buttons: Jump -2s / +2s */}
+          <div className="flex items-center rounded-lg border border-hairline bg-surface-raised p-0.5">
+            <button
+              type="button"
+              onClick={() => editor.setCurrentTime(Math.max(0, editor.currentTime - 2))}
+              className="grid size-7 place-items-center rounded text-body hover:bg-surface hover:text-cream transition cursor-pointer"
+              aria-label="Skip backward 2 seconds"
+              title="Skip -2s"
+            >
+              <RotateCcw size={13} />
+            </button>
+            <button
+              type="button"
+              onClick={() => editor.setCurrentTime(Math.min(timelineDuration, editor.currentTime + 2))}
+              className="grid size-7 place-items-center rounded text-body hover:bg-surface hover:text-cream transition cursor-pointer"
+              aria-label="Skip forward 2 seconds"
+              title="Skip +2s"
+            >
+              <RotateCw size={13} />
+            </button>
           </div>
 
-          <div className="h-4 w-px bg-surface-raised" />
+          {/* Time Display */}
+          <div className="rounded-lg border border-hairline bg-surface-raised px-2.5 py-1 text-xs font-mono font-bold text-cream">
+            <span className="text-amber">{formatClockTime(editor.currentTime)}</span>
+            <span className="text-dim"> / {formatClockTime(timelineDuration)}</span>
+          </div>
 
-          {/* Edit Actions: Split, Merge next, Delete */}
-          <TimelineAction
-            icon={Scissors}
-            label="Split"
-            hint="Split line at playhead"
-            disabled={!hasSelection}
-            onClick={() => editor.splitSegment(editor.selectedSegmentId)}
-          />
-          <TimelineAction
-            icon={Merge}
-            label="Merge next"
-            hint="Combine with next line"
-            disabled={!canMerge}
-            onClick={() => editor.mergeWithNext(editor.selectedSegmentId)}
-          />
-          <TimelineAction
-            icon={Trash2}
-            label="Delete"
-            hint="Remove selected line"
-            disabled={!hasSelection}
-            danger
-            onClick={() => editor.deleteSegment(editor.selectedSegmentId)}
-          />
+          <div className="h-4 w-px bg-hairline hidden sm:block" />
 
-          <div className="h-4 w-px bg-surface-raised hidden sm:block" />
-
-          {/* Timing Nudge Controls */}
-          <div className="flex items-center gap-0.5 rounded-xl border border-hairline bg-surface-raised p-0.5">
-            <button
-              type="button"
-              onClick={() => editor.nudgeTiming(-0.1)}
-              className="rounded px-2 py-1 text-[10px] font-bold text-body hover:bg-amber/20 hover:text-amber transition cursor-pointer"
-              title="Shift all captions 0.1s earlier"
-            >
-              -0.1s
-            </button>
-            <span className="text-[10px] font-bold text-dim px-0.5 uppercase">Sync</span>
-            <button
-              type="button"
-              onClick={() => editor.nudgeTiming(0.1)}
-              className="rounded px-2 py-1 text-[10px] font-bold text-body hover:bg-amber/20 hover:text-amber transition cursor-pointer"
-              title="Shift all captions 0.1s later"
-            >
-              +0.1s
-            </button>
+          {/* Segment Edit Actions */}
+          <div className="flex items-center gap-1">
+            <TimelineAction
+              icon={Scissors}
+              label="Split"
+              hint="Split selected caption at current timecode"
+              disabled={!activeSegmentId}
+              onClick={() => activeSegmentId && editor.splitSegment(activeSegmentId)}
+            />
+            <TimelineAction
+              icon={Merge}
+              label="Merge"
+              hint="Merge caption with the next line"
+              disabled={!activeSegmentId}
+              onClick={() => activeSegmentId && editor.mergeWithNext(activeSegmentId)}
+            />
+            <TimelineAction
+              icon={Trash2}
+              label="Delete"
+              hint="Remove this caption line"
+              disabled={!activeSegmentId}
+              danger
+              onClick={() => activeSegmentId && editor.deleteSegment(activeSegmentId)}
+            />
           </div>
         </div>
 
-        {/* Center: Formatting Settings (Ratio, Align, Position, Size) */}
+        {/* Center: Formatting Quick Settings */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Ratio */}
           <div className="flex shrink-0 items-center gap-1 rounded-xl border border-hairline bg-surface-raised p-1">
@@ -308,86 +289,20 @@ export function CaptionTimeline({
         />
       </div>
 
-      {/* Interactive Timeline Track */}
-      <div className="flex-1 min-h-0 overflow-x-auto custom-scrollbar p-2 flex flex-col justify-center">
-        <div
-          className="relative h-full min-h-[92px] max-h-[110px] min-w-[760px] cursor-crosshair overflow-hidden rounded-xl border border-hairline bg-surface shadow-sm select-none"
-          style={{ width: `${zoom * 100}%` }}
-          onClick={(event) => {
-            const bounds = event.currentTarget.getBoundingClientRect();
-            onSeek(((event.clientX - bounds.left) / bounds.width) * timelineDuration);
-          }}
-        >
-          {/* Top ruler track */}
-          <div className="absolute inset-x-0 top-0 h-12 border-b border-hairline bg-surface">
-            {editor.segments.map((segment, index) => {
-              const left = (segment.start / timelineDuration) * 100;
-              const width = Math.max(0.8, ((segment.end - segment.start) / timelineDuration) * 100);
-              const isSpeaking = segment.id === currentVoiceId;
-              const isSelected = segment.id === (editor.selectedSegmentId || activeSegmentId);
-              const durationSec = (segment.end - segment.start).toFixed(1);
-
-              return (
-                <button
-                  key={segment.id}
-                  type="button"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    editor.setSelectedSegmentId(segment.id);
-                    onSeek(segment.start);
-                  }}
-                  className={cn(
-                    "absolute inset-y-1 overflow-hidden rounded-lg border px-2 text-left text-[11px] font-semibold transition-all duration-150 cursor-pointer",
-                    isSpeaking
-                      ? "z-20 border-amber bg-amber/35 text-cream shadow-sm"
-                      : isSelected
-                      ? "z-10 border-amber/80 bg-amber/15 text-cream"
-                      : "border-hairline bg-surface text-cream hover:border-hairline hover:bg-surface hover:text-cream",
-                  )}
-                  style={{ left: `${left}%`, width: `${width}%` }}
-                  aria-label={`Select caption ${index + 1}: ${segment.text}`}
-                  title={`Line ${index + 1} (${durationSec}s): ${segment.text}`}
-                >
-                  <div className="flex items-center justify-between gap-1 h-full">
-                    <span className="truncate">{segment.text}</span>
-                    <span className="hidden sm:inline-block shrink-0 rounded bg-surface-raised px-1 py-0.2 text-[9px] font-mono text-amber">
-                      {durationSec}s
-                    </span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Audio Waveform visualization */}
-          <div className="absolute inset-x-0 bottom-0 flex h-11 items-end gap-[3px] px-2 opacity-80" aria-hidden="true">
-            {WAVEFORM_BARS.map((height, index) => {
-              const barPercent = (index / WAVEFORM_BARS.length) * 100;
-              const isPast = barPercent <= playheadPercent;
-              return (
-                <span
-                  key={index}
-                  className={cn(
-                    "min-w-[2.5px] flex-1 rounded-t-sm transition-colors duration-75",
-                    isPast ? "bg-amber" : "bg-surface-raised",
-                  )}
-                  style={{ height: `${height}%` }}
-                />
-              );
-            })}
-          </div>
-
-          {/* Playhead Needle */}
-          <div
-            className="pointer-events-none absolute inset-y-0 z-30 w-0.5 bg-amber shadow-sm"
-            style={{ left: `${playheadPercent}%` }}
-          >
-            <div className="absolute -left-2.5 -top-1 flex h-4 items-center justify-center rounded bg-amber px-1 text-[9px] font-black text-white shadow-sm">
-              {formatClockTime(editor.currentTime)}
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Modular Multi-Track Timeline */}
+      <TimelineTracks
+        segments={editor.segments}
+        timelineDuration={timelineDuration}
+        currentTime={editor.currentTime}
+        currentVoiceId={currentVoiceId}
+        selectedSegmentId={editor.selectedSegmentId || activeSegmentId}
+        zoom={zoom}
+        onSeek={onSeek}
+        onSelectSegment={(id, start) => {
+          editor.setSelectedSegmentId(id);
+          onSeek(start);
+        }}
+      />
     </section>
   );
 }
