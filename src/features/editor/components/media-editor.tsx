@@ -32,12 +32,16 @@ import { LogoWordmark } from "@/shared/components/logo-wordmark";
 import { cn } from "@/shared/lib/cn";
 import { captionStyles } from "../data/editor-config";
 import type { useCaptionEditor } from "../hooks/use-caption-editor";
-import { ensureSegmentWords, formatClockTimeWithMs } from "../lib/captions";
+import { useResizableEditorLayout } from "../hooks/use-resizable-editor-layout";
+import { ensureSegmentWords } from "../lib/captions";
 import { renderAndExportVideo } from "../lib/export-video";
 import { usePlanSummary } from "../store/plan-store";
 import { CaptionTimeline } from "./caption-timeline";
 import { EditorExportModal } from "./editor-export-modal";
 import { EditorCaptionList } from "./editor-caption-list";
+import { EditorShortcutsModal } from "./editor-shortcuts-modal";
+import { EditorMobileDrawer } from "./editor-mobile-drawer";
+import { EditorResizeHandle } from "./editor-resize-handle";
 
 type Props = {
   editor: ReturnType<typeof useCaptionEditor>;
@@ -119,50 +123,9 @@ export function MediaEditor({ editor, onBack }: Props) {
   const [isDraggingCaption, setIsDraggingCaption] = useState(false);
   const [activeRightTab, setActiveRightTab] = useState<ActiveRightTab>("styles");
 
-  // Adjustable Panel Sizes
-  const [leftWidth, setLeftWidth] = useState(320);
-  const [rightWidth, setRightWidth] = useState(340);
+  // Adjustable Panel Layout
+  const layout = useResizableEditorLayout();
   const [bottomHeight, setBottomHeight] = useState(185);
-
-  const handleLeftResizeStart = (e: React.PointerEvent) => {
-    e.preventDefault();
-    const startX = e.clientX;
-    const startWidth = leftWidth;
-
-    const onPointerMove = (moveEvent: PointerEvent) => {
-      const deltaX = moveEvent.clientX - startX;
-      const newWidth = Math.max(220, Math.min(520, startWidth + deltaX));
-      setLeftWidth(newWidth);
-    };
-
-    const onPointerUp = () => {
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("pointerup", onPointerUp);
-    };
-
-    window.addEventListener("pointermove", onPointerMove);
-    window.addEventListener("pointerup", onPointerUp);
-  };
-
-  const handleRightResizeStart = (e: React.PointerEvent) => {
-    e.preventDefault();
-    const startX = e.clientX;
-    const startWidth = rightWidth;
-
-    const onPointerMove = (moveEvent: PointerEvent) => {
-      const deltaX = startX - moveEvent.clientX;
-      const newWidth = Math.max(240, Math.min(520, startWidth + deltaX));
-      setRightWidth(newWidth);
-    };
-
-    const onPointerUp = () => {
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("pointerup", onPointerUp);
-    };
-
-    window.addEventListener("pointermove", onPointerMove);
-    window.addEventListener("pointerup", onPointerUp);
-  };
 
   const handleBottomResizeStart = (e: React.PointerEvent) => {
     e.preventDefault();
@@ -314,7 +277,10 @@ export function MediaEditor({ editor, onBack }: Props) {
         setShowExportModal(true);
       } else if (e.key === "Escape") {
         if (!isRenderingVideo) setShowExportModal(false);
+        setShowShortcutsModal(false);
         setMobileDrawer(null);
+      } else if (e.key === "?" && !e.metaKey && !e.ctrlKey) {
+        setShowShortcutsModal((prev) => !prev);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -472,7 +438,7 @@ export function MediaEditor({ editor, onBack }: Props) {
       <div className="flex-1 min-h-0 w-full flex flex-col lg:flex-row overflow-hidden relative">
         {/* Column 1 (Left): Captions List */}
         <section
-          style={{ width: `${leftWidth}px` }}
+          style={{ width: `${layout.layout.captions}px` }}
           aria-label="Captions transcript"
           className="shrink-0 border-r border-white/8 bg-[#0c0d0d] flex-col h-full hidden lg:flex overflow-hidden"
         >
@@ -504,14 +470,13 @@ export function MediaEditor({ editor, onBack }: Props) {
         </section>
 
         {/* Left Drag Resize Handle */}
-        <div
-          onPointerDown={handleLeftResizeStart}
-          onDoubleClick={() => setLeftWidth(320)}
-          className="group relative hidden lg:flex w-2 shrink-0 cursor-col-resize items-center justify-center bg-[#070808] hover:bg-[#f6c453] active:bg-[#f6c453] border-x border-white/5 transition-colors z-20"
-          title="Drag to adjust left sidebar (Double click to reset)"
-        >
-          <div className="h-8 w-0.5 rounded-full bg-white/20 group-hover:bg-black transition-colors" />
-        </div>
+        <EditorResizeHandle
+          panel="captions"
+          orientation="vertical"
+          active={layout.activePanel === "captions"}
+          onPointerDown={layout.beginResize}
+          onResizeBy={layout.resizeBy}
+        />
 
         {/* Column 2 (Middle): Media Video Preview Box */}
         <section className="flex-1 min-w-0 flex flex-col items-center justify-center bg-black p-3 relative overflow-hidden h-full">
@@ -682,18 +647,17 @@ export function MediaEditor({ editor, onBack }: Props) {
         </section>
 
         {/* Right Drag Resize Handle */}
-        <div
-          onPointerDown={handleRightResizeStart}
-          onDoubleClick={() => setRightWidth(340)}
-          className="group relative hidden lg:flex w-2 shrink-0 cursor-col-resize items-center justify-center bg-[#070808] hover:bg-[#f6c453] active:bg-[#f6c453] border-x border-white/5 transition-colors z-20"
-          title="Drag to adjust right sidebar (Double click to reset)"
-        >
-          <div className="h-8 w-0.5 rounded-full bg-white/20 group-hover:bg-black transition-colors" />
-        </div>
+        <EditorResizeHandle
+          panel="styles"
+          orientation="vertical"
+          active={layout.activePanel === "styles"}
+          onPointerDown={layout.beginResize}
+          onResizeBy={layout.resizeBy}
+        />
 
         {/* Column 3 (Right): Styles & Customization Sidebar */}
         <aside
-          style={{ width: `${rightWidth}px` }}
+          style={{ width: `${layout.layout.styles}px` }}
           className="shrink-0 border-l border-white/8 bg-[#0c0d0d] p-4 overflow-y-auto font-sans custom-scrollbar flex flex-col h-full hidden lg:flex"
         >
           {/* Tabbed Navigation Header */}
@@ -1004,120 +968,47 @@ export function MediaEditor({ editor, onBack }: Props) {
         remainingExports={plan.remainingExports}
       />
 
+      {/* Keyboard Shortcuts Cheatsheet Modal */}
+      <EditorShortcutsModal
+        isOpen={showShortcutsModal}
+        onClose={() => setShowShortcutsModal(false)}
+      />
+
       {/* Mobile Drawer Modal for Captions & Styles */}
-      {mobileDrawer ? (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 p-0 backdrop-blur-sm lg:hidden">
-          <div className="relative flex max-h-[85dvh] w-full flex-col rounded-t-3xl border-t border-white/10 bg-[#0c0d0d] p-4 font-sans text-white shadow-2xl overflow-hidden">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-3">
-              <h3 className="flex items-center gap-2 text-sm font-bold text-cream">
-                {mobileDrawer === "captions" ? (
-                  <>
-                    <Layers size={16} className="text-[#f6c453]" /> Captions Review & Edit
-                  </>
-                ) : (
-                  <>
-                    <Sparkles size={16} className="text-[#f6c453]" /> Styles & Customization
-                  </>
-                )}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setMobileDrawer(null)}
-                className="grid size-8 place-items-center rounded-full text-[#888] hover:bg-white/10 hover:text-white transition cursor-pointer"
-                aria-label="Close mobile panel"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            {/* Mobile Captions List */}
-            {mobileDrawer === "captions" ? (
-              <div className="flex-1 overflow-y-auto space-y-3 custom-scrollbar pr-1">
-                {editor.segments.map((segment, index) => {
-                  const isVoiceSpeaking =
-                    editor.currentTime >= segment.start && editor.currentTime <= segment.end;
-                  const isSelected = segment.id === activeSegmentId;
-                  const durationSec = (segment.end - segment.start).toFixed(1);
-                  return (
-                    <article
-                      key={segment.id}
-                      className={cn(
-                        "group relative rounded-xl border p-3 transition-all duration-150",
-                        isVoiceSpeaking
-                          ? "border-[#f6c453] bg-[#f6c453]/15 shadow-[0_0_20px_rgba(246,196,83,0.25)]"
-                          : isSelected
-                          ? "border-[#f6c453]/60 bg-[#f6c453]/5 shadow-[0_0_12px_rgba(246,196,83,0.1)]"
-                          : "border-white/8 bg-[#111213]",
-                      )}
-                    >
-                      <div className="flex items-center justify-between gap-3 text-left pl-1">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            editor.setSelectedSegmentId(segment.id);
-                            seekTo(segment.start);
-                            setMobileDrawer(null);
-                          }}
-                          className="flex items-center gap-2 cursor-pointer"
-                        >
-                          <span className={cn(
-                            "inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[11px] font-bold transition",
-                            isVoiceSpeaking ? "bg-[#f6c453] text-black border-[#f6c453]" : "bg-black/40 border-white/10 text-[#f6c453]"
-                          )}>
-                            <Play size={10} className={isVoiceSpeaking ? "fill-black" : "fill-[#f6c453]"} />
-                            {formatClockTimeWithMs(segment.start)}
-                          </span>
-                          <span className="text-[10px] font-medium text-[#727a7e]">Line {index + 1} ({durationSec}s)</span>
-                        </button>
-                      </div>
-
-                      <textarea
-                        value={segment.text}
-                        onFocus={() => editor.setSelectedSegmentId(segment.id)}
-                        onChange={(event) => editor.updateSegment(segment.id, event.target.value)}
-                        rows={2}
-                        className="mt-2.5 w-full resize-none rounded-lg bg-black/30 border-0 p-2 text-sm leading-6 text-cream outline-none focus:outline-none focus:ring-0 focus:border-0 placeholder:text-[#596064] transition"
-                      />
-                    </article>
-                  );
-                })}
-              </div>
-            ) : (
-              /* Mobile Styles Selection */
-              <div className="flex-1 overflow-y-auto space-y-4 custom-scrollbar pr-1">
-                <div className="grid grid-cols-2 gap-2.5">
-                  {captionStyles.map((style) => {
-                    const isSelected = selectedStyle?.id === style.id;
-                    return (
-                      <button
-                        key={style.id}
-                        type="button"
-                        onClick={() => {
-                          editor.setStyleId(style.id);
-                          setMobileDrawer(null);
-                        }}
-                        className={cn(
-                          "group relative flex flex-col items-center justify-center rounded-xl border p-3 transition text-center cursor-pointer min-h-[70px]",
-                          isSelected
-                            ? "border-[#f6c453] bg-[#f6c453]/15 shadow-[0_0_16px_rgba(246,196,83,0.25)]"
-                            : "border-white/10 bg-[#121314] hover:border-white/20",
-                        )}
-                      >
-                        <span className={cn("text-xs font-bold", style.previewClass)}>{style.name}</span>
-                        {isSelected ? (
-                          <span className="mt-1 rounded-full bg-[#f6c453] px-2 py-0.5 text-[9px] font-bold text-black">
-                            ACTIVE
-                          </span>
-                        ) : null}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      ) : null}
+      <EditorMobileDrawer
+        drawer={mobileDrawer}
+        onClose={() => setMobileDrawer(null)}
+        segments={editor.segments}
+        activeSegmentId={activeSegmentId}
+        currentTime={editor.currentTime}
+        onSelectSegment={(id, start) => {
+          editor.setSelectedSegmentId(id);
+          seekTo(start);
+          setMobileDrawer(null);
+        }}
+        onUpdateText={(id, text) => {
+          editor.updateSegment(id, text);
+        }}
+        onSplitSegment={(id) => {
+          editor.splitSegment(id);
+        }}
+        onDeleteSegment={(id) => {
+          editor.deleteSegment(id);
+        }}
+        styleId={editor.styleId}
+        onSelectStyle={(id) => {
+          editor.setStyleId(id as Parameters<typeof editor.setStyleId>[0]);
+          setMobileDrawer(null);
+        }}
+        highlightColor={activeHighlightHex}
+        onSelectHighlightColor={(color) => {
+          setActiveHighlightHex(color);
+        }}
+        onOpenExport={() => {
+          setMobileDrawer(null);
+          setShowExportModal(true);
+        }}
+      />
 
       {/* Bottom Drag Resize Handle */}
       <div
