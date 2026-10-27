@@ -12,6 +12,7 @@ import { PricingOneTimePacks } from "./pricing-onetime-packs";
 import { PricingComparisonTable } from "./pricing-comparison-table";
 import { PricingFaqSection } from "./pricing-faq-section";
 import { PricingTierCard } from "./pricing-tier-card";
+import { PricingCalculator } from "./pricing-calculator";
 import { ChevronDown } from "lucide-react";
 export function PricingPage() {
   const [billing, setBilling] = useState<BillingInterval>("Monthly");
@@ -66,6 +67,11 @@ export function PricingPage() {
             ))}
           </div>
         )}
+        <PricingCalculator
+          billing={billing === "One-time" ? "Monthly" : billing}
+          onSelectInterval={(interval) => setBilling(interval)}
+        />
+
         <p className="pricing-footnote">
           Billed by the length of your video. Monthly subscriptions can be
           cancelled anytime.
