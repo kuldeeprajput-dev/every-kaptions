@@ -1,10 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Layers, Play, Search, Sliders, X } from "lucide-react";
+import { ArrowLeftRight, Layers, Play, Search, Sliders, X } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import { formatClockTimeWithMs } from "../lib/captions";
 import type { CaptionSegment } from "../types/captions";
+
+export type CaptionFilterMode = "all" | "questions" | "short" | "long";
 
 export interface EditorCaptionListProps {
   segments: CaptionSegment[];
@@ -16,6 +18,7 @@ export interface EditorCaptionListProps {
   onMergeWithNext: (id: string) => void;
   onDelete: (id: string) => void;
   onNudgeTiming: (offset: number) => void;
+  onOpenFindReplace?: () => void;
   className?: string;
 }
 
@@ -29,20 +32,32 @@ export function EditorCaptionList({
   onMergeWithNext,
   onDelete,
   onNudgeTiming,
+  onOpenFindReplace,
   className,
 }: EditorCaptionListProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [filterMode, setFilterMode] = useState<CaptionFilterMode>("all");
 
   const filteredSegments = useMemo(() => {
-    if (!searchQuery.trim()) return segments;
+    let result = segments;
+
+    if (filterMode === "questions") {
+      result = result.filter((s) => s.text.includes("?"));
+    } else if (filterMode === "short") {
+      result = result.filter((s) => s.end - s.start <= 2.0);
+    } else if (filterMode === "long") {
+      result = result.filter((s) => s.end - s.start >= 4.5);
+    }
+
+    if (!searchQuery.trim()) return result;
     const q = searchQuery.toLowerCase();
-    return segments.filter(
+    return result.filter(
       (s, idx) =>
         s.text.toLowerCase().includes(q) ||
         `#${idx + 1}`.includes(q) ||
         formatClockTimeWithMs(s.start).includes(q),
     );
-  }, [segments, searchQuery]);
+  }, [segments, searchQuery, filterMode]);
 
   return (
     <section className={cn("flex flex-col h-full bg-surface font-sans", className)}>
@@ -58,9 +73,22 @@ export function EditorCaptionList({
               <p className="text-sm font-bold text-cream">Review & edit</p>
             </div>
           </div>
-          <span className="rounded-lg border border-amber/40 bg-amber/15 px-2.5 py-0.5 text-[11px] font-bold text-amber">
-            {segments.length} lines
-          </span>
+          <div className="flex items-center gap-2">
+            {onOpenFindReplace ? (
+              <button
+                type="button"
+                onClick={onOpenFindReplace}
+                title="Batch find & replace (Ctrl+F)"
+                className="flex items-center gap-1.5 rounded-lg border border-hairline bg-surface-raised px-2.5 py-1 text-[11px] font-semibold text-body hover:text-amber hover:border-amber/40 transition cursor-pointer"
+              >
+                <ArrowLeftRight size={12} className="text-amber" aria-hidden="true" />
+                <span className="hidden sm:inline">Find/Replace</span>
+              </button>
+            ) : null}
+            <span className="rounded-lg border border-amber/40 bg-amber/15 px-2.5 py-0.5 text-[11px] font-bold text-amber">
+              {segments.length} lines
+            </span>
+          </div>
         </div>
 
         {/* Live Search Bar */}
@@ -86,11 +114,56 @@ export function EditorCaptionList({
           )}
         </div>
 
+        {/* Quick Filter Chips */}
+        <div className="flex items-center gap-1 overflow-x-auto pb-0.5" role="tablist" aria-label="Caption filter mode">
+          {(
+            [
+              { id: "all", label: "All" },
+              { id: "questions", label: "Questions (?)" },
+              { id: "short", label: "Short (<2s)" },
+              { id: "long", label: "Long (>4.5s)" },
+            ] as const
+          ).map((item) => {
+            const isSelected = filterMode === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                role="tab"
+                aria-selected={isSelected}
+                onClick={() => setFilterMode(item.id)}
+                className={cn(
+                  "rounded-md px-2 py-0.5 text-[10px] font-bold whitespace-nowrap transition cursor-pointer",
+                  isSelected
+                    ? "bg-amber text-black shadow-sm"
+                    : "bg-surface-raised border border-hairline text-dim hover:text-cream hover:border-amber/30",
+                )}
+              >
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
+
         {/* Voice Sync Nudge Controls */}
         <div className="flex items-center justify-between gap-1 rounded-xl border border-hairline bg-surface-raised px-2.5 py-1.5 text-[11px]">
-          <span className="font-semibold text-body flex items-center gap-1.5">
-            <Sliders size={12} className="text-amber" aria-hidden="true" /> Voice Sync
-          </span>
+          <div className="flex items-center gap-1.5 font-semibold text-body">
+            <Sliders size={12} className="text-amber" aria-hidden="true" />
+            <span>Voice Sync</span>
+            {currentVoiceSegId ? (
+              <button
+                type="button"
+                onClick={() => {
+                  const card = document.getElementById(`caption-card-${currentVoiceSegId}`);
+                  card?.scrollIntoView({ behavior: "smooth", block: "center" });
+                }}
+                className="ml-1 rounded-md bg-amber/15 px-1.5 py-0.5 text-[9px] font-bold text-amber hover:bg-amber/25 transition cursor-pointer"
+                title="Scroll list to currently spoken caption"
+              >
+                Follow Voice
+              </button>
+            ) : null}
+          </div>
           <div className="flex items-center gap-1">
             <button
               type="button"
@@ -133,13 +206,16 @@ export function EditorCaptionList({
         {filteredSegments.length === 0 ? (
           <div className="py-12 text-center text-xs text-dim">
             <p>No matching captions found.</p>
-            {searchQuery && (
+            {(searchQuery || filterMode !== "all") && (
               <button
                 type="button"
-                onClick={() => setSearchQuery("")}
+                onClick={() => {
+                  setSearchQuery("");
+                  setFilterMode("all");
+                }}
                 className="mt-2 text-xs font-semibold text-amber hover:underline cursor-pointer"
               >
-                Clear filter
+                Reset filters
               </button>
             )}
           </div>
@@ -184,7 +260,12 @@ export function EditorCaptionList({
                     <Play size={10} className={isVoiceSpeaking ? "fill-white" : "fill-amber"} />
                     {formatClockTimeWithMs(segment.start)}
                   </span>
-                  <span className="text-[11px] font-medium text-body whitespace-nowrap">#{index + 1}</span>
+                  <span className="text-[11px] font-medium text-body whitespace-nowrap">
+                    #{index + 1}
+                  </span>
+                  <span className="text-[10px] text-dim font-mono">
+                    ({(segment.end - segment.start).toFixed(1)}s)
+                  </span>
                 </button>
 
                 <div className="flex items-center gap-1 text-[11px] text-body">
@@ -227,6 +308,19 @@ export function EditorCaptionList({
             </article>
           );
         })}
+      </div>
+
+      {/* Footer Status Bar */}
+      <div className="border-t border-hairline bg-surface/90 px-4 py-2.5 flex items-center justify-between text-[11px] text-dim shrink-0">
+        <span className="flex items-center gap-1.5">
+          <kbd className="font-mono bg-surface-raised border border-hairline px-1.5 py-0.5 rounded text-[10px] text-cream">
+            Ctrl+F
+          </kbd>{" "}
+          Find & Replace
+        </span>
+        <span className="font-medium text-body">
+          {filteredSegments.length} of {segments.length} lines shown
+        </span>
       </div>
     </section>
   );

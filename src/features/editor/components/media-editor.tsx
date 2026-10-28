@@ -19,6 +19,7 @@ import {
   Play,
   Plus,
   Redo2,
+  Search,
   Sliders,
   Sparkles,
   Type,
@@ -42,6 +43,7 @@ import { EditorCaptionList } from "./editor-caption-list";
 import { EditorShortcutsModal } from "./editor-shortcuts-modal";
 import { EditorMobileDrawer } from "./editor-mobile-drawer";
 import { EditorResizeHandle } from "./editor-resize-handle";
+import { EditorFindReplaceModal } from "./editor-find-replace-modal";
 
 type Props = {
   editor: ReturnType<typeof useCaptionEditor>;
@@ -118,6 +120,7 @@ export function MediaEditor({ editor, onBack }: Props) {
   const [aspectRatio, setAspectRatio] = useState<AspectRatioMode>("9:16");
   const [isEditingCanvasText, setIsEditingCanvasText] = useState(false);
   const [showShortcutsModal, setShowShortcutsModal] = useState(false);
+  const [showFindReplaceModal, setShowFindReplaceModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [mobileDrawer, setMobileDrawer] = useState<null | "captions" | "styles">(null);
   const [isDraggingCaption, setIsDraggingCaption] = useState(false);
@@ -125,27 +128,6 @@ export function MediaEditor({ editor, onBack }: Props) {
 
   // Adjustable Panel Layout
   const layout = useResizableEditorLayout();
-  const [bottomHeight, setBottomHeight] = useState(185);
-
-  const handleBottomResizeStart = (e: React.PointerEvent) => {
-    e.preventDefault();
-    const startY = e.clientY;
-    const startHeight = bottomHeight;
-
-    const onPointerMove = (moveEvent: PointerEvent) => {
-      const deltaY = startY - moveEvent.clientY;
-      const newHeight = Math.max(185, Math.min(420, startHeight + deltaY));
-      setBottomHeight(newHeight);
-    };
-
-    const onPointerUp = () => {
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("pointerup", onPointerUp);
-    };
-
-    window.addEventListener("pointermove", onPointerMove);
-    window.addEventListener("pointerup", onPointerUp);
-  };
 
   const [isRenderingVideo, setIsRenderingVideo] = useState(false);
   const [renderProgress, setRenderProgress] = useState(0);
@@ -272,12 +254,16 @@ export function MediaEditor({ editor, onBack }: Props) {
   // Keyboard shortcuts for export modal and quick dismiss
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "e") {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "f") {
+        e.preventDefault();
+        setShowFindReplaceModal(true);
+      } else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "e") {
         e.preventDefault();
         setShowExportModal(true);
       } else if (e.key === "Escape") {
         if (!isRenderingVideo) setShowExportModal(false);
         setShowShortcutsModal(false);
+        setShowFindReplaceModal(false);
         setMobileDrawer(null);
       } else if (e.key === "?" && !e.metaKey && !e.ctrlKey) {
         setShowShortcutsModal((prev) => !prev);
@@ -340,6 +326,26 @@ export function MediaEditor({ editor, onBack }: Props) {
     }
   };
 
+  const [replaceNotification, setReplaceNotification] = useState<string | null>(null);
+
+  const handleBatchReplaceCaptions = useCallback(
+    (newSegments: typeof editor.segments) => {
+      let count = 0;
+      newSegments.forEach((newSeg) => {
+        const oldSeg = editor.segments.find((s) => s.id === newSeg.id);
+        if (oldSeg && oldSeg.text !== newSeg.text) {
+          editor.updateSegment(newSeg.id, newSeg.text);
+          count++;
+        }
+      });
+      if (count > 0) {
+        setReplaceNotification(`Batch replaced words across ${count} ${count === 1 ? "line" : "lines"}`);
+        setTimeout(() => setReplaceNotification(null), 3000);
+      }
+    },
+    [editor],
+  );
+
   return (
     <main className="h-screen w-screen overflow-hidden bg-[#070808] font-sans text-[#d8d8d6] select-none flex flex-col">
       {/* Top Header */}
@@ -395,6 +401,16 @@ export function MediaEditor({ editor, onBack }: Props) {
 
           <button
             type="button"
+            onClick={() => setShowFindReplaceModal(true)}
+            className="hidden h-9 items-center gap-1.5 rounded-full border border-white/15 px-3 text-xs font-semibold text-white transition hover:border-white/30 sm:flex cursor-pointer"
+            title="Batch find and replace (Ctrl+F)"
+          >
+            <Search size={13} className="text-[#f6c453]" aria-hidden="true" />
+            <span>Find & Replace</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => setShowShortcutsModal(true)}
             className="hidden h-9 items-center gap-1.5 rounded-full border border-white/15 px-3 text-xs font-semibold text-white transition hover:border-white/30 xl:flex cursor-pointer"
             title="Keyboard shortcuts"
@@ -434,6 +450,12 @@ export function MediaEditor({ editor, onBack }: Props) {
         </div>
       ) : null}
 
+      {replaceNotification ? (
+        <div role="status" className="border-b border-[#22c55e]/30 bg-[#22c55e]/15 px-4 py-2 text-center text-xs font-semibold text-[#22c55e] shrink-0 animate-in fade-in duration-150">
+          ✓ {replaceNotification}
+        </div>
+      ) : null}
+
       {/* Main Studio Flex Workspace */}
       <div className="flex-1 min-h-0 w-full flex flex-col lg:flex-row overflow-hidden relative">
         {/* Column 1 (Left): Captions List */}
@@ -465,6 +487,7 @@ export function MediaEditor({ editor, onBack }: Props) {
             onNudgeTiming={(offset) => {
               editor.nudgeTiming(offset);
             }}
+            onOpenFindReplace={() => setShowFindReplaceModal(true)}
             className="h-full border-0 bg-transparent"
           />
         </section>
@@ -974,6 +997,14 @@ export function MediaEditor({ editor, onBack }: Props) {
         onClose={() => setShowShortcutsModal(false)}
       />
 
+      {/* Batch Find & Replace Modal */}
+      <EditorFindReplaceModal
+        isOpen={showFindReplaceModal}
+        onClose={() => setShowFindReplaceModal(false)}
+        segments={editor.segments}
+        onBatchReplace={handleBatchReplaceCaptions}
+      />
+
       {/* Mobile Drawer Modal for Captions & Styles */}
       <EditorMobileDrawer
         drawer={mobileDrawer}
@@ -1011,17 +1042,16 @@ export function MediaEditor({ editor, onBack }: Props) {
       />
 
       {/* Bottom Drag Resize Handle */}
-      <div
-        onPointerDown={handleBottomResizeStart}
-        onDoubleClick={() => setBottomHeight(185)}
-        className="group relative h-2 shrink-0 cursor-row-resize items-center justify-center bg-[#070808] hover:bg-[#f6c453] active:bg-[#f6c453] border-y border-white/5 transition-colors z-20 flex"
-        title="Drag to adjust bottom timeline height (Double click to reset)"
-      >
-        <div className="w-8 h-0.5 rounded-full bg-white/20 group-hover:bg-black transition-colors" />
-      </div>
+      <EditorResizeHandle
+        panel="timeline"
+        orientation="horizontal"
+        active={layout.activePanel === "timeline"}
+        onPointerDown={layout.beginResize}
+        onResizeBy={layout.resizeBy}
+      />
 
       {/* Bottom Timeline Dock */}
-      <div style={{ height: `${bottomHeight}px` }} className="shrink-0 min-h-0 overflow-hidden">
+      <div style={{ height: `${layout.layout.timeline}px` }} className="shrink-0 min-h-0 overflow-hidden">
         <CaptionTimeline
           editor={editor}
           onSeek={seekTo}
