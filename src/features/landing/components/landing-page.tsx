@@ -8,11 +8,12 @@ import { LandingWorkflowSteps } from "./landing-workflow-steps";
 import {
   LandingPresets,
   LandingUseCases,
-  LandingLanguages,
 } from "./landing-gallery";
+import { LandingLanguageShowcase } from "./landing-language-showcase";
 import { LandingCreatorReviews } from "./landing-creator-reviews";
 import { LandingFaq } from "./landing-faq";
 import { LandingFooter } from "./landing-footer";
+import { regionalCreatorTestimonials } from "../data/landing-content";
 import "./landing.css";
 
 export function LandingPage() {
@@ -54,7 +55,49 @@ export function LandingPage() {
         <LandingPresets />
         <LandingCreatorReviews />
         <LandingUseCases />
-        <LandingLanguages />
+        <LandingLanguageShowcase />
+
+        {/* Languages Summary Metric Banner */}
+        <div className="mx-auto max-w-4xl px-4 py-4 text-center">
+          <div className="inline-flex flex-wrap items-center justify-center gap-6 rounded-2xl border border-white/8 bg-[#0f1011] px-6 py-3 text-xs text-[#888]">
+            <span className="flex items-center gap-2">
+              <span className="size-2 rounded-full bg-[#f6c453]" />
+              <strong className="text-cream">8 Indian Languages</strong> Supported
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="size-2 rounded-full bg-[#22c55e]" />
+              <strong className="text-cream">99.4%</strong> Word-Level Sync Accuracy
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="size-2 rounded-full bg-[#06b6d4]" />
+              <strong className="text-cream">Zero Setup</strong> In-Browser Audio AI
+            </span>
+          </div>
+        </div>
+
+        {/* Regional Creator Testimonials */}
+        <section className="mx-auto max-w-6xl px-4 py-8 border-t border-white/5">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {regionalCreatorTestimonials.slice(0, 3).map((item) => (
+              <div
+                key={item.creator}
+                className="rounded-2xl border border-white/8 bg-[#121315] p-5 space-y-3 shadow-sm hover:border-white/15 transition"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xs font-bold text-cream">{item.creator}</h3>
+                    <p className="text-[11px] text-[#788084]">{item.channel} · {item.subscriberCount} followers</p>
+                  </div>
+                  <span className="rounded-md border border-[#f6c453]/30 bg-[#f6c453]/10 px-2 py-0.5 text-[10px] font-bold text-[#f6c453]">
+                    {item.language}
+                  </span>
+                </div>
+                <p className="text-xs text-[#b8bebe] leading-relaxed">&ldquo;{item.feedback}&rdquo;</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
         <LandingFaq />
       </main>
       <LandingFooter />

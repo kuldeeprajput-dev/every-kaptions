@@ -3,7 +3,6 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import {
   captionStyles,
-  indianLanguageOptions,
 } from "@/features/editor/data/editor-config";
 import { CaptionCta } from "./landing-ui";
 
@@ -158,50 +157,4 @@ export function LandingUseCases() {
   );
 }
 
-export function LandingLanguages() {
-  return (
-    <section
-      id="languages"
-      className="landing-section language-section"
-      aria-labelledby="languages-heading"
-    >
-      <div className="language-copy">
-        <h2 id="languages-heading">
-          Different languages.
-          <br />
-          One clear message.
-        </h2>
-        <div>
-          <p>
-            Create captions in the language you speak and bring more people into
-            the story.
-          </p>
-          <p>
-            Choose from English and supported Indian languages, including
-            Telugu, Hindi, Tamil, and Kannada. Review the transcript and shape
-            every line before you share.
-          </p>
-          <div
-            className="language-chips"
-            aria-label="Supported spoken languages"
-          >
-            {indianLanguageOptions
-              .filter((option) => option.supported)
-              .map((option) => (
-                <span key={option.value}>{option.label}</span>
-              ))}
-          </div>
-        </div>
-        <CaptionCta />
-      </div>
-      <div className="language-image">
-        <Image
-          src="/media/landing/language-tiles-teal.webp"
-          alt="Speech bubbles representing Telugu, Hindi, and English"
-          fill
-          sizes="(max-width: 768px) 100vw, 560px"
-        />
-      </div>
-    </section>
-  );
-}
+
