@@ -70,6 +70,20 @@ const SHORTCUT_ITEMS: ShortcutItem[] = [
     description: "Permanently delete selected caption line",
   },
   {
+    id: "open-templates",
+    category: "studio",
+    action: "Creator Templates",
+    keys: ["⌘", "T"],
+    description: "Open video preset template picker dialog",
+  },
+  {
+    id: "open-find-replace",
+    category: "caption",
+    action: "Find & Replace",
+    keys: ["⌘", "F"],
+    description: "Search and batch replace words across all subtitles",
+  },
+  {
     id: "open-export",
     category: "studio",
     action: "Open Export Modal",

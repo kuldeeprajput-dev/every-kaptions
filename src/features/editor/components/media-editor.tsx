@@ -12,6 +12,7 @@ import {
   Keyboard,
   Layers,
   Layout,
+  LayoutTemplate,
   Minus,
   Move,
   Palette,
@@ -44,6 +45,11 @@ import { EditorShortcutsModal } from "./editor-shortcuts-modal";
 import { EditorMobileDrawer } from "./editor-mobile-drawer";
 import { EditorResizeHandle } from "./editor-resize-handle";
 import { EditorFindReplaceModal } from "./editor-find-replace-modal";
+import {
+  EditorTemplatePicker,
+  CREATOR_TEMPLATES,
+  type CreatorTemplateConfig,
+} from "./editor-template-picker";
 
 type Props = {
   editor: ReturnType<typeof useCaptionEditor>;
@@ -55,7 +61,7 @@ type FontSizeMode = "sm" | "md" | "lg" | "xl";
 type TextAlignMode = "left" | "center" | "right";
 type TextTransformMode = "uppercase" | "none" | "lowercase";
 type AspectRatioMode = "9:16" | "1:1" | "16:9";
-type ActiveRightTab = "styles" | "customize" | "canvas";
+type ActiveRightTab = "templates" | "styles" | "customize" | "canvas";
 
 const HIGHLIGHT_COLORS = [
   { id: "yellow", name: "Yellow", hex: "#f6c453" },
@@ -121,10 +127,12 @@ export function MediaEditor({ editor, onBack }: Props) {
   const [isEditingCanvasText, setIsEditingCanvasText] = useState(false);
   const [showShortcutsModal, setShowShortcutsModal] = useState(false);
   const [showFindReplaceModal, setShowFindReplaceModal] = useState(false);
+  const [showTemplatePicker, setShowTemplatePicker] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [mobileDrawer, setMobileDrawer] = useState<null | "captions" | "styles">(null);
   const [isDraggingCaption, setIsDraggingCaption] = useState(false);
   const [activeRightTab, setActiveRightTab] = useState<ActiveRightTab>("styles");
+  const [templateCategoryFilter, setTemplateCategoryFilter] = useState<string>("all");
 
   // Adjustable Panel Layout
   const layout = useResizableEditorLayout();
@@ -254,7 +262,10 @@ export function MediaEditor({ editor, onBack }: Props) {
   // Keyboard shortcuts for export modal and quick dismiss
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "f") {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "t") {
+        e.preventDefault();
+        setShowTemplatePicker(true);
+      } else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "f") {
         e.preventDefault();
         setShowFindReplaceModal(true);
       } else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "e") {
@@ -264,6 +275,7 @@ export function MediaEditor({ editor, onBack }: Props) {
         if (!isRenderingVideo) setShowExportModal(false);
         setShowShortcutsModal(false);
         setShowFindReplaceModal(false);
+        setShowTemplatePicker(false);
         setMobileDrawer(null);
       } else if (e.key === "?" && !e.metaKey && !e.ctrlKey) {
         setShowShortcutsModal((prev) => !prev);
@@ -346,6 +358,22 @@ export function MediaEditor({ editor, onBack }: Props) {
     [editor],
   );
 
+  const handleApplyTemplate = useCallback(
+    (template: CreatorTemplateConfig) => {
+      editor.setStyleId(template.styleId as Parameters<typeof editor.setStyleId>[0]);
+      setActiveHighlightHex(template.highlightHex);
+      setAspectRatio(template.aspectRatio);
+      setPosition(template.position);
+      setCustomYPercent(template.customYPercent);
+      setFontSize(template.fontSize);
+      setTextAlign(template.textAlign);
+      setTextTransform(template.textTransform);
+      setReplaceNotification(`Applied "${template.name}" template`);
+      setTimeout(() => setReplaceNotification(null), 3000);
+    },
+    [editor],
+  );
+
   return (
     <main className="h-screen w-screen overflow-hidden bg-[#070808] font-sans text-[#d8d8d6] select-none flex flex-col">
       {/* Top Header */}
@@ -397,6 +425,16 @@ export function MediaEditor({ editor, onBack }: Props) {
             title="Toggle Styles"
           >
             <Sparkles size={13} /> <span className="hidden sm:inline">Styles</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowTemplatePicker(true)}
+            className="hidden h-9 items-center gap-1.5 rounded-full border border-white/15 px-3 text-xs font-semibold text-white transition hover:border-white/30 md:flex cursor-pointer"
+            title="Video preset templates (Ctrl+T)"
+          >
+            <LayoutTemplate size={13} className="text-[#f6c453]" aria-hidden="true" />
+            <span>Templates</span>
           </button>
 
           <button
@@ -687,6 +725,18 @@ export function MediaEditor({ editor, onBack }: Props) {
           <div className="flex items-center gap-1 rounded-xl border border-white/10 bg-black/50 p-1 mb-4">
             <button
               type="button"
+              onClick={() => setActiveRightTab("templates")}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs font-bold transition cursor-pointer",
+                activeRightTab === "templates"
+                  ? "bg-[#f6c453] text-black shadow-md"
+                  : "text-[#888] hover:text-white",
+              )}
+            >
+              <LayoutTemplate size={13} /> Presets
+            </button>
+            <button
+              type="button"
               onClick={() => setActiveRightTab("styles")}
               className={cn(
                 "flex-1 flex items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs font-bold transition cursor-pointer",
@@ -723,9 +773,114 @@ export function MediaEditor({ editor, onBack }: Props) {
             </button>
           </div>
 
+          {/* TAB 0: TEMPLATES */}
+          {activeRightTab === "templates" ? (
+            <div className="space-y-4 flex-1">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xs font-bold uppercase tracking-[.15em] text-[#788084]">Creator Presets</h3>
+                  <p className="text-sm font-bold text-cream mt-0.5">Full Studio Templates</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowTemplatePicker(true)}
+                  className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-white/10 transition cursor-pointer flex items-center gap-1"
+                >
+                  <LayoutTemplate size={12} className="text-[#f6c453]" />
+                  <span>Gallery</span>
+                </button>
+              </div>
+
+              {/* Category Pills */}
+              <div className="flex items-center gap-1 overflow-x-auto pb-1 no-scrollbar text-xs">
+                {(["all", "viral", "podcast", "tech", "minimal"] as const).map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setTemplateCategoryFilter(cat)}
+                    className={cn(
+                      "shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold transition cursor-pointer capitalize",
+                      templateCategoryFilter === cat
+                        ? "bg-[#f6c453] text-black"
+                        : "bg-white/5 text-[#888] hover:text-white hover:bg-white/10",
+                    )}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+
+              {/* Template List */}
+              <div className="space-y-2.5">
+                {CREATOR_TEMPLATES.filter(
+                  (t) => templateCategoryFilter === "all" || t.category === templateCategoryFilter,
+                ).map((tpl) => {
+                  const isActive =
+                    editor.styleId === tpl.styleId &&
+                    aspectRatio === tpl.aspectRatio &&
+                    position === tpl.position;
+                  return (
+                    <button
+                      key={tpl.id}
+                      type="button"
+                      onClick={() => handleApplyTemplate(tpl)}
+                      className={cn(
+                        "w-full rounded-xl border p-3 text-left transition cursor-pointer relative overflow-hidden group",
+                        isActive
+                          ? "border-[#f6c453] bg-[#f6c453]/15 shadow-[0_0_20px_rgba(246,196,83,0.15)] ring-1 ring-[#f6c453]/50"
+                          : "border-white/10 bg-[#121315] hover:border-white/25 hover:bg-[#18191c]",
+                      )}
+                    >
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-xs font-bold text-white group-hover:text-[#f6c453] transition">
+                          {tpl.name}
+                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="rounded bg-white/10 px-1.5 py-0.5 text-[9px] font-mono text-[#888]">
+                            {tpl.aspectRatio}
+                          </span>
+                          {isActive ? (
+                            <span className="rounded-full bg-[#f6c453] px-2 py-0.5 text-[9px] font-black text-black">
+                              ACTIVE
+                            </span>
+                          ) : null}
+                        </div>
+                      </div>
+                      <p className="text-[11px] text-[#81898e] line-clamp-1 mb-2">{tpl.description}</p>
+                      <div className="rounded-lg bg-black/60 px-2.5 py-1.5 flex items-center justify-between text-[11px]">
+                        <span className="font-semibold text-[#c8c2b6] truncate">{tpl.badge}</span>
+                        <span
+                          className="size-3.5 rounded-full shrink-0 ml-2"
+                          style={{ backgroundColor: tpl.highlightHex }}
+                        />
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
+
           {/* TAB 1: STYLES */}
           {activeRightTab === "styles" ? (
             <div className="space-y-4 flex-1">
+              {/* Creator Template Quick Banner */}
+              <div className="rounded-xl border border-[#f6c453]/20 bg-gradient-to-r from-[#f6c453]/10 to-transparent p-3 flex items-center justify-between">
+                <div>
+                  <span className="text-xs font-bold text-[#f6c453] flex items-center gap-1.5">
+                    <LayoutTemplate size={12} /> Creator Templates
+                  </span>
+                  <p className="text-[11px] text-[#888] mt-0.5">Quick-apply tested layouts & typography</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowTemplatePicker(true)}
+                  className="rounded-lg bg-[#f6c453] px-2.5 py-1 text-xs font-bold text-black hover:brightness-105 transition cursor-pointer"
+                >
+                  Browse
+                </button>
+              </div>
+
               <div>
                 <h3 className="text-xs font-bold uppercase tracking-[.15em] text-[#788084]">Preset Look</h3>
                 <p className="text-sm font-bold text-cream mt-0.5">10 Viral Caption Presets</p>
@@ -899,6 +1054,44 @@ export function MediaEditor({ editor, onBack }: Props) {
           {/* TAB 3: CANVAS & EXPORT */}
           {activeRightTab === "canvas" ? (
             <div className="space-y-5 flex-1">
+              {/* Preset Template Quick Cards */}
+              <div className="rounded-2xl border border-white/10 bg-[#111214] p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#81898e]">Template Presets</span>
+                  <button
+                    type="button"
+                    onClick={() => setShowTemplatePicker(true)}
+                    className="text-xs font-bold text-[#f6c453] hover:underline cursor-pointer"
+                  >
+                    View All ({CREATOR_TEMPLATES.length})
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {CREATOR_TEMPLATES.slice(0, 4).map((tpl) => (
+                    <button
+                      key={tpl.id}
+                      type="button"
+                      onClick={() => handleApplyTemplate(tpl)}
+                      className={cn(
+                        "rounded-xl border p-2.5 text-left transition cursor-pointer text-xs",
+                        editor.styleId === tpl.styleId && aspectRatio === tpl.aspectRatio
+                          ? "border-[#f6c453] bg-[#f6c453]/15 text-white font-bold"
+                          : "border-white/10 bg-black/40 text-[#888] hover:border-white/20 hover:text-white",
+                      )}
+                    >
+                      <div className="font-semibold truncate text-white">{tpl.name}</div>
+                      <div className="text-[10px] text-[#81898e] flex items-center justify-between mt-1">
+                        <span>{tpl.aspectRatio}</span>
+                        <span
+                          className="size-2.5 rounded-full inline-block"
+                          style={{ backgroundColor: tpl.highlightHex }}
+                        />
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* Aspect Ratio */}
               <div className="rounded-2xl border border-white/10 bg-[#111214] p-4 space-y-3">
                 <span className="text-xs font-bold uppercase tracking-wider text-[#81898e]">Aspect Ratio</span>
@@ -1003,6 +1196,13 @@ export function MediaEditor({ editor, onBack }: Props) {
         onClose={() => setShowFindReplaceModal(false)}
         segments={editor.segments}
         onBatchReplace={handleBatchReplaceCaptions}
+      />
+
+      {/* Video Preset Template Picker Modal */}
+      <EditorTemplatePicker
+        isOpen={showTemplatePicker}
+        onClose={() => setShowTemplatePicker(false)}
+        onApplyTemplate={handleApplyTemplate}
       />
 
       {/* Mobile Drawer Modal for Captions & Styles */}
