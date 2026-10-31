@@ -70,6 +70,13 @@ const SHORTCUT_ITEMS: ShortcutItem[] = [
     description: "Permanently delete selected caption line",
   },
   {
+    id: "open-metadata",
+    category: "studio",
+    action: "Social Post & Tags",
+    keys: ["⌘", "M"],
+    description: "Generate viral hooks, captions, and hashtags for social platforms",
+  },
+  {
     id: "open-templates",
     category: "studio",
     action: "Creator Templates",

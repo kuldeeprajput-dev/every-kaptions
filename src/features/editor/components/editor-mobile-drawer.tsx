@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useRef } from "react";
-import { Download, Layers, Play, Scissors, Sparkles, Trash2, X } from "lucide-react";
+import { Download, Layers, Play, Scissors, Share2, Sparkles, Trash2, X } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import { formatClockTimeWithMs } from "../lib/captions";
 import { captionStyles } from "../data/editor-config";
@@ -24,6 +24,7 @@ export interface EditorMobileDrawerProps {
   highlightColor: string;
   onSelectHighlightColor: (color: string) => void;
   onOpenExport: () => void;
+  onOpenSocialMetadata?: () => void;
 }
 
 export function EditorMobileDrawer({
@@ -41,6 +42,7 @@ export function EditorMobileDrawer({
   highlightColor,
   onSelectHighlightColor,
   onOpenExport,
+  onOpenSocialMetadata,
 }: EditorMobileDrawerProps) {
   const drawerRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
@@ -91,7 +93,26 @@ export function EditorMobileDrawer({
 
         {/* Captions Tab */}
         {drawer === "captions" ? (
-          <div className="flex-1 overflow-y-auto space-y-3 custom-scrollbar pr-1">
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden space-y-3">
+            {onOpenSocialMetadata ? (
+              <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 p-2.5 shrink-0">
+                <span className="text-xs text-[#9a9488] flex items-center gap-1.5">
+                  <Share2 size={13} className="text-[#f6c453]" />
+                  <span>{segments.length} captions loaded</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onOpenSocialMetadata();
+                  }}
+                  className="rounded-lg bg-[#f6c453] px-2.5 py-1 text-[11px] font-bold text-black hover:brightness-105 transition cursor-pointer"
+                >
+                  Social Post
+                </button>
+              </div>
+            ) : null}
+            <div className="flex-1 overflow-y-auto space-y-3 custom-scrollbar pr-1">
             {segments.map((segment, index) => {
               const isVoiceSpeaking = currentTime >= segment.start && currentTime <= segment.end;
               const isSelected = segment.id === activeSegmentId;
@@ -158,6 +179,7 @@ export function EditorMobileDrawer({
                 </article>
               );
             })}
+            </div>
           </div>
         ) : (
           /* Styles Tab */
@@ -203,7 +225,20 @@ export function EditorMobileDrawer({
               </div>
             </div>
 
-            <div className="pt-2">
+            <div className="pt-2 space-y-2">
+              {onOpenSocialMetadata ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onOpenSocialMetadata();
+                  }}
+                  className="w-full flex h-10 items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 text-xs font-semibold text-white hover:bg-white/10 transition cursor-pointer"
+                >
+                  <Share2 size={14} className="text-[#f6c453]" />
+                  <span>Generate Social Post & Tags</span>
+                </button>
+              ) : null}
               <button
                 type="button"
                 onClick={onOpenExport}

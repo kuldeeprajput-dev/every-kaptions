@@ -1,6 +1,6 @@
 "use client";
 
-import { Download, FileText, Film, Loader2, X } from "lucide-react";
+import { Download, FileText, Film, Loader2, Share2, X } from "lucide-react";
 import Link from "next/link";
 
 export interface EditorExportModalProps {
@@ -8,6 +8,7 @@ export interface EditorExportModalProps {
   onClose: () => void;
   onExportVideo: () => void;
   onExportSubtitles: (format: "srt" | "vtt" | "txt") => void;
+  onOpenSocialMetadata?: () => void;
   isRenderingVideo: boolean;
   renderProgress: number;
   exportError: string;
@@ -19,6 +20,7 @@ export function EditorExportModal({
   onClose,
   onExportVideo,
   onExportSubtitles,
+  onOpenSocialMetadata,
   isRenderingVideo,
   renderProgress,
   exportError,
@@ -185,6 +187,28 @@ export function EditorExportModal({
                 </button>
               </div>
             </div>
+
+            {/* Social Post & Metadata Generator */}
+            {onOpenSocialMetadata ? (
+              <div className="rounded-2xl border border-hairline bg-surface p-4 flex items-center justify-between">
+                <div>
+                  <span className="text-xs font-bold text-cream flex items-center gap-1.5">
+                    <Share2 size={14} className="text-amber" /> Social Post Generator
+                  </span>
+                  <p className="text-[11px] text-body mt-0.5">Viral hooks, descriptions, and hashtag packages</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onOpenSocialMetadata();
+                  }}
+                  className="rounded-xl border border-hairline bg-surface-raised px-3 py-1.5 text-xs font-bold text-cream hover:text-amber hover:border-amber/50 transition cursor-pointer"
+                >
+                  Generate
+                </button>
+              </div>
+            ) : null}
           </div>
         )}
 

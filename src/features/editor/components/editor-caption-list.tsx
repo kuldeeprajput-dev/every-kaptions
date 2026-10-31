@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowLeftRight, Layers, Play, Search, Sliders, X } from "lucide-react";
+import { ArrowLeftRight, Layers, Play, Search, Share2, Sliders, X } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import { formatClockTimeWithMs } from "../lib/captions";
 import type { CaptionSegment } from "../types/captions";
@@ -19,6 +19,7 @@ export interface EditorCaptionListProps {
   onDelete: (id: string) => void;
   onNudgeTiming: (offset: number) => void;
   onOpenFindReplace?: () => void;
+  onOpenSocialMetadata?: () => void;
   className?: string;
 }
 
@@ -33,10 +34,21 @@ export function EditorCaptionList({
   onDelete,
   onNudgeTiming,
   onOpenFindReplace,
+  onOpenSocialMetadata,
   className,
 }: EditorCaptionListProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterMode, setFilterMode] = useState<CaptionFilterMode>("all");
+
+  const captionMetrics = useMemo(() => {
+    const totalWords = segments.reduce(
+      (acc, s) => acc + s.text.trim().split(/\s+/).filter(Boolean).length,
+      0,
+    );
+    const maxEnd = segments.length > 0 ? Math.max(...segments.map((s) => s.end)) : 0;
+    const wpm = maxEnd > 0 ? Math.round(totalWords / (maxEnd / 60)) : 0;
+    return { totalWords, wpm };
+  }, [segments]);
 
   const filteredSegments = useMemo(() => {
     let result = segments;
@@ -74,19 +86,30 @@ export function EditorCaptionList({
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {onOpenSocialMetadata ? (
+              <button
+                type="button"
+                onClick={onOpenSocialMetadata}
+                title="Generate social copy & tags (Ctrl+M)"
+                className="flex items-center gap-1.5 rounded-lg border border-hairline bg-surface-raised px-2 py-1 text-[11px] font-semibold text-body hover:text-amber hover:border-amber/40 transition cursor-pointer"
+              >
+                <Share2 size={12} className="text-amber" aria-hidden="true" />
+                <span className="hidden sm:inline">Social</span>
+              </button>
+            ) : null}
             {onOpenFindReplace ? (
               <button
                 type="button"
                 onClick={onOpenFindReplace}
                 title="Batch find & replace (Ctrl+F)"
-                className="flex items-center gap-1.5 rounded-lg border border-hairline bg-surface-raised px-2.5 py-1 text-[11px] font-semibold text-body hover:text-amber hover:border-amber/40 transition cursor-pointer"
+                className="flex items-center gap-1.5 rounded-lg border border-hairline bg-surface-raised px-2 py-1 text-[11px] font-semibold text-body hover:text-amber hover:border-amber/40 transition cursor-pointer"
               >
                 <ArrowLeftRight size={12} className="text-amber" aria-hidden="true" />
-                <span className="hidden sm:inline">Find/Replace</span>
+                <span className="hidden sm:inline">Find</span>
               </button>
             ) : null}
-            <span className="rounded-lg border border-amber/40 bg-amber/15 px-2.5 py-0.5 text-[11px] font-bold text-amber">
-              {segments.length} lines
+            <span className="rounded-lg border border-amber/40 bg-amber/15 px-2 py-0.5 text-[11px] font-bold text-amber">
+              {segments.length} lines{captionMetrics.wpm > 0 ? ` • ${captionMetrics.wpm} wpm` : ""}
             </span>
           </div>
         </div>

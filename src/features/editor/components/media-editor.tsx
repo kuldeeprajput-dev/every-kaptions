@@ -21,6 +21,7 @@ import {
   Plus,
   Redo2,
   Search,
+  Share2,
   Sliders,
   Sparkles,
   Type,
@@ -45,6 +46,7 @@ import { EditorShortcutsModal } from "./editor-shortcuts-modal";
 import { EditorMobileDrawer } from "./editor-mobile-drawer";
 import { EditorResizeHandle } from "./editor-resize-handle";
 import { EditorFindReplaceModal } from "./editor-find-replace-modal";
+import { EditorMetadataModal } from "./editor-metadata-modal";
 import {
   EditorTemplatePicker,
   CREATOR_TEMPLATES,
@@ -128,6 +130,7 @@ export function MediaEditor({ editor, onBack }: Props) {
   const [showShortcutsModal, setShowShortcutsModal] = useState(false);
   const [showFindReplaceModal, setShowFindReplaceModal] = useState(false);
   const [showTemplatePicker, setShowTemplatePicker] = useState(false);
+  const [showMetadataModal, setShowMetadataModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [mobileDrawer, setMobileDrawer] = useState<null | "captions" | "styles">(null);
   const [isDraggingCaption, setIsDraggingCaption] = useState(false);
@@ -145,6 +148,19 @@ export function MediaEditor({ editor, onBack }: Props) {
     () => captionStyles.find((style) => style.id === editor.styleId) ?? captionStyles[0],
     [editor.styleId],
   );
+
+  const speechPaceStats = useMemo(() => {
+    const totalWords = editor.segments.reduce((acc, seg) => {
+      return acc + seg.text.trim().split(/\s+/).filter(Boolean).length;
+    }, 0);
+    const durationMin = Math.max(editor.duration / 60, 0.05);
+    const wpm = Math.round(totalWords / durationMin);
+    const paceCategory =
+      wpm > 175 ? "Fast / Viral Pacing" : wpm >= 125 ? "Optimal Engagement" : "Calm / Deliberate";
+    const avgWordsPerSegment =
+      editor.segments.length > 0 ? (totalWords / editor.segments.length).toFixed(1) : "0";
+    return { totalWords, wpm, paceCategory, avgWordsPerSegment };
+  }, [editor.segments, editor.duration]);
 
   const isAudio = editor.file?.type.startsWith("audio/");
 
@@ -262,7 +278,10 @@ export function MediaEditor({ editor, onBack }: Props) {
   // Keyboard shortcuts for export modal and quick dismiss
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "t") {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "m") {
+        e.preventDefault();
+        setShowMetadataModal(true);
+      } else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "t") {
         e.preventDefault();
         setShowTemplatePicker(true);
       } else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "f") {
@@ -276,6 +295,7 @@ export function MediaEditor({ editor, onBack }: Props) {
         setShowShortcutsModal(false);
         setShowFindReplaceModal(false);
         setShowTemplatePicker(false);
+        setShowMetadataModal(false);
         setMobileDrawer(null);
       } else if (e.key === "?" && !e.metaKey && !e.ctrlKey) {
         setShowShortcutsModal((prev) => !prev);
@@ -374,6 +394,13 @@ export function MediaEditor({ editor, onBack }: Props) {
     [editor],
   );
 
+  const handleCopyCleanTranscript = useCallback(() => {
+    const fullText = editor.segments.map((s) => s.text.trim()).filter(Boolean).join(" ");
+    void navigator.clipboard.writeText(fullText);
+    setReplaceNotification("Copied full transcript to clipboard");
+    setTimeout(() => setReplaceNotification(null), 3000);
+  }, [editor.segments]);
+
   return (
     <main className="h-screen w-screen overflow-hidden bg-[#070808] font-sans text-[#d8d8d6] select-none flex flex-col">
       {/* Top Header */}
@@ -425,6 +452,16 @@ export function MediaEditor({ editor, onBack }: Props) {
             title="Toggle Styles"
           >
             <Sparkles size={13} /> <span className="hidden sm:inline">Styles</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowMetadataModal(true)}
+            className="hidden h-9 items-center gap-1.5 rounded-full border border-white/15 px-3 text-xs font-semibold text-white transition hover:border-white/30 lg:flex cursor-pointer"
+            title="Social post & tags generator (Ctrl+M)"
+          >
+            <Share2 size={13} className="text-[#f6c453]" aria-hidden="true" />
+            <span>Social Post</span>
           </button>
 
           <button
@@ -526,6 +563,7 @@ export function MediaEditor({ editor, onBack }: Props) {
               editor.nudgeTiming(offset);
             }}
             onOpenFindReplace={() => setShowFindReplaceModal(true)}
+            onOpenSocialMetadata={() => setShowMetadataModal(true)}
             className="h-full border-0 bg-transparent"
           />
         </section>
@@ -1153,6 +1191,66 @@ export function MediaEditor({ editor, onBack }: Props) {
                 </div>
               </div>
 
+              {/* Speech & Pacing Stats */}
+              <div className="rounded-2xl border border-white/10 bg-[#111214] p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#81898e]">Speech & Pacing Stats</span>
+                  <span className="rounded-full bg-[#f6c453]/15 px-2 py-0.5 text-[10px] font-bold text-[#f6c453]">
+                    {speechPaceStats.paceCategory}
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div className="rounded-xl border border-white/5 bg-black/50 p-2.5">
+                    <span className="text-base font-extrabold text-cream font-mono">{speechPaceStats.wpm}</span>
+                    <span className="block text-[10px] uppercase font-bold text-[#788084] mt-0.5">WPM Pace</span>
+                  </div>
+                  <div className="rounded-xl border border-white/5 bg-black/50 p-2.5">
+                    <span className="text-base font-extrabold text-cream font-mono">{speechPaceStats.totalWords}</span>
+                    <span className="block text-[10px] uppercase font-bold text-[#788084] mt-0.5">Total Words</span>
+                  </div>
+                  <div className="rounded-xl border border-white/5 bg-black/50 p-2.5">
+                    <span className="text-base font-extrabold text-cream font-mono">{speechPaceStats.avgWordsPerSegment}</span>
+                    <span className="block text-[10px] uppercase font-bold text-[#788084] mt-0.5">Words / Line</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between pt-1 border-t border-white/5">
+                  <span className="text-[11px] text-[#788084]">
+                    Est. reading time: ~{Math.max(1, Math.ceil(speechPaceStats.totalWords / 200))} min
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleCopyCleanTranscript}
+                    className="flex items-center gap-1 text-[11px] font-semibold text-[#f6c453] hover:underline cursor-pointer"
+                  >
+                    <FileText size={11} />
+                    <span>Copy Raw Text</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Social Media Post Generator */}
+              <div className="rounded-2xl border border-white/10 bg-[#111214] p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#81898e] flex items-center gap-1.5">
+                    <Share2 size={13} className="text-[#f6c453]" /> Social Media Post
+                  </span>
+                  <span className="rounded bg-white/10 px-1.5 py-0.5 text-[9px] font-mono text-[#888]">
+                    AI Ready
+                  </span>
+                </div>
+                <p className="text-xs text-[#81898e] leading-relaxed">
+                  Turn video captions into viral hooks, platform-optimized descriptions, and trending hashtags.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setShowMetadataModal(true)}
+                  className="w-full flex h-10 items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 text-xs font-bold text-white hover:bg-white/10 hover:border-white/25 transition cursor-pointer"
+                >
+                  <Share2 size={13} className="text-[#f6c453]" />
+                  <span>Generate Social Captions & Tags</span>
+                </button>
+              </div>
+
               {/* Open Export Dialog */}
               <button
                 type="button"
@@ -1178,6 +1276,7 @@ export function MediaEditor({ editor, onBack }: Props) {
         onExportSubtitles={(format) => {
           handleDownloadCaptions(format);
         }}
+        onOpenSocialMetadata={() => setShowMetadataModal(true)}
         isRenderingVideo={isRenderingVideo}
         renderProgress={renderProgress}
         exportError={exportError}
@@ -1203,6 +1302,14 @@ export function MediaEditor({ editor, onBack }: Props) {
         isOpen={showTemplatePicker}
         onClose={() => setShowTemplatePicker(false)}
         onApplyTemplate={handleApplyTemplate}
+      />
+
+      {/* Social Post & Metadata Generator Modal */}
+      <EditorMetadataModal
+        isOpen={showMetadataModal}
+        onClose={() => setShowMetadataModal(false)}
+        segments={editor.segments}
+        videoTitle={editor.file?.name}
       />
 
       {/* Mobile Drawer Modal for Captions & Styles */}
@@ -1238,6 +1345,10 @@ export function MediaEditor({ editor, onBack }: Props) {
         onOpenExport={() => {
           setMobileDrawer(null);
           setShowExportModal(true);
+        }}
+        onOpenSocialMetadata={() => {
+          setMobileDrawer(null);
+          setShowMetadataModal(true);
         }}
       />
 
