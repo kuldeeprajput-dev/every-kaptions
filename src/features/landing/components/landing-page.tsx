@@ -1,103 +1,59 @@
 import { SiteHeader } from "@/shared/components/site-header";
 import Link from "next/link";
-import { Play } from "lucide-react";
-import { CaptionDemo } from "./caption-demo";
-import { CaptionCta } from "./landing-ui";
+import { CaptionShowcase } from "./caption-showcase";
+import { CaptionCta, EditorDemoCta } from "./landing-ui";
 import { LandingFeatures } from "./landing-features";
-import { LandingWorkflowSteps } from "./landing-workflow-steps";
 import {
   LandingPresets,
   LandingUseCases,
 } from "./landing-gallery";
-import { LandingLanguageShowcase } from "./landing-language-showcase";
 import { LandingCreatorReviews } from "./landing-creator-reviews";
 import { LandingFaq } from "./landing-faq";
 import { LandingFooter } from "./landing-footer";
-import { regionalCreatorTestimonials } from "../data/landing-content";
-import "./landing.css";
 
 export function LandingPage() {
   return (
-    <div className="landing-page">
+    <div className="min-h-screen bg-white text-[#18181b] font-sans antialiased selection:bg-amber/30 selection:text-black">
       <SiteHeader />
-      <main id="main-content" className="landing">
-        <section className="landing-hero" aria-labelledby="hero-heading">
-          <div className="hero-intro">
-            <h1 id="hero-heading">
+      <main id="main-content" className="w-full">
+        <section
+          className="mx-auto flex w-full max-w-[1240px] flex-col items-center px-5 pb-10 pt-10 text-center sm:px-7 sm:pb-14 sm:pt-12"
+          aria-labelledby="hero-heading"
+        >
+          <div className="w-full max-w-[960px]">
+            <h1
+              id="hero-heading"
+              className="text-[clamp(42px,5.3vw,72px)] font-[800] leading-[1.06] tracking-[-0.06em] text-[#18181b]"
+            >
               Auto captions.
               <br />
-              <span>Made for your voice.</span>
+              <span className="text-[#c63838]">Made for your voice.</span>
             </h1>
-            <p>
-              Turn videos into editable word-by-word captions. Style them, sync
-              them, and share your story.
+            <p className="mx-auto mt-5 max-w-[620px] text-[15px] leading-[1.7] text-[#5b5b65] sm:text-[17px]">
+              Turn videos into editable word-by-word captions.
+              Style them, sync them, and share your story.
             </p>
-            <div className="hero-actions">
-              <CaptionCta />
-              <Link className="hero-editor-link" href="/editor/demo">
-                <Play size={15} fill="currentColor" /> Try the editor
-              </Link>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+              <CaptionCta className="min-h-[49px] px-6 text-[14px]" />
+              <EditorDemoCta />
             </div>
-            <small>3 free minutes every month. No card needed.</small>
+            <p className="mt-3 text-[11px] text-[#71717a]">3 free minutes every month. No card needed.</p>
           </div>
-          <CaptionDemo />
-          <div className="hero-languages" aria-label="Featured languages">
+          <CaptionShowcase />
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[12px] font-semibold text-[#52525b]" aria-label="Featured caption languages">
             <span lang="te">తెలుగు</span>
-            <i />
+            <span className="size-1 rounded-full bg-[#d4d4d8]" aria-hidden="true" />
             <span lang="hi">हिन्दी</span>
-            <i />
+            <span className="size-1 rounded-full bg-[#d4d4d8]" aria-hidden="true" />
             <span>English</span>
-            <span className="hero-more-languages">& more</span>
+            <Link href="/#languages" className="font-normal text-[#71717a] hover:text-[#c63838]">&amp; more</Link>
           </div>
         </section>
+
         <LandingFeatures />
-        <LandingWorkflowSteps />
         <LandingPresets />
         <LandingCreatorReviews />
         <LandingUseCases />
-        <LandingLanguageShowcase />
-
-        {/* Languages Summary Metric Banner */}
-        <div className="mx-auto max-w-4xl px-4 py-4 text-center">
-          <div className="inline-flex flex-wrap items-center justify-center gap-6 rounded-2xl border border-white/8 bg-[#0f1011] px-6 py-3 text-xs text-[#888]">
-            <span className="flex items-center gap-2">
-              <span className="size-2 rounded-full bg-[#f6c453]" />
-              <strong className="text-cream">8 Indian Languages</strong> Supported
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="size-2 rounded-full bg-[#22c55e]" />
-              <strong className="text-cream">99.4%</strong> Word-Level Sync Accuracy
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="size-2 rounded-full bg-[#06b6d4]" />
-              <strong className="text-cream">Zero Setup</strong> In-Browser Audio AI
-            </span>
-          </div>
-        </div>
-
-        {/* Regional Creator Testimonials */}
-        <section className="mx-auto max-w-6xl px-4 py-8 border-t border-white/5">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {regionalCreatorTestimonials.slice(0, 3).map((item) => (
-              <div
-                key={item.creator}
-                className="rounded-2xl border border-white/8 bg-[#121315] p-5 space-y-3 shadow-sm hover:border-white/15 transition"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-xs font-bold text-cream">{item.creator}</h3>
-                    <p className="text-[11px] text-[#788084]">{item.channel} · {item.subscriberCount} followers</p>
-                  </div>
-                  <span className="rounded-md border border-[#f6c453]/30 bg-[#f6c453]/10 px-2 py-0.5 text-[10px] font-bold text-[#f6c453]">
-                    {item.language}
-                  </span>
-                </div>
-                <p className="text-xs text-[#b8bebe] leading-relaxed">&ldquo;{item.feedback}&rdquo;</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
         <LandingFaq />
       </main>
       <LandingFooter />
