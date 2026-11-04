@@ -1,5 +1,5 @@
 import type { CaptionSegment } from "../types/captions";
-import { ensureSegmentWords } from "./captions";
+import { drawCaptions } from "./draw-captions";
 
 export type RenderVideoOptions = {
   videoElement: HTMLVideoElement;
@@ -100,11 +100,14 @@ export async function renderAndExportVideo({
 
       const originalTime = videoElement.currentTime;
       const originalMuted = videoElement.muted;
+      const originalPlaybackRate = videoElement.playbackRate;
+      videoElement.playbackRate = 1;
 
       recorder.onstop = () => {
         try {
           videoElement.currentTime = originalTime;
           videoElement.muted = originalMuted;
+          videoElement.playbackRate = originalPlaybackRate;
 
           const blob = new Blob(chunks, { type: selectedMime || "video/mp4" });
           const url = URL.createObjectURL(blob);
@@ -125,16 +128,11 @@ export async function renderAndExportVideo({
       recorder.onerror = (e) => {
         videoElement.currentTime = originalTime;
         videoElement.muted = originalMuted;
+        videoElement.playbackRate = originalPlaybackRate;
         reject(e);
       };
 
       let animationFrameId: number;
-
-      const formatText = (txt: string) => {
-        if (textTransform === "uppercase") return txt.toUpperCase();
-        if (textTransform === "lowercase") return txt.toLowerCase();
-        return txt;
-      };
 
       const drawFrame = () => {
         if (videoElement.ended || videoElement.currentTime >= videoElement.duration) {
@@ -152,183 +150,7 @@ export async function renderAndExportVideo({
 
         ctx.drawImage(videoElement, 0, 0, width, height);
 
-        const activeSeg = segments.find(
-          (seg) => currentTime >= seg.start && currentTime <= seg.end,
-        );
-
-        if (activeSeg && activeSeg.text.trim()) {
-          let yPct = 82;
-          if (position === "top") yPct = 14;
-          else if (position === "center") yPct = 50;
-          else if (position === "bottom") yPct = 82;
-          else if (position === "custom") yPct = customYPercent;
-
-          const yPos = (yPct / 100) * height;
-
-          let fontSizePx = Math.round(height * 0.045);
-          if (fontSize === "sm") fontSizePx = Math.round(height * 0.032);
-          else if (fontSize === "lg") fontSizePx = Math.round(height * 0.055);
-          else if (fontSize === "xl") fontSizePx = Math.round(height * 0.068);
-
-          ctx.font = `bold ${fontSizePx}px Inter, system-ui, -apple-system, sans-serif`;
-          ctx.textBaseline = "middle";
-
-          const words = ensureSegmentWords(activeSeg);
-          const spaceWidth = ctx.measureText(" ").width;
-          const measuredWords = words.map((w) => {
-            const formatted = formatText(w.text);
-            const wWidth = ctx.measureText(formatted).width;
-            return { word: w, formatted, width: wWidth };
-          });
-
-          const totalContentWidth = measuredWords.reduce(
-            (sum, item, idx) => sum + item.width + (idx < measuredWords.length - 1 ? spaceWidth : 0),
-            0,
-          );
-
-          let xPos = width / 2;
-          if (textAlign === "left") xPos = width * 0.08;
-          if (textAlign === "right") xPos = width * 0.92;
-
-          let startX = xPos - totalContentWidth / 2;
-          if (textAlign === "left") startX = xPos;
-          if (textAlign === "right") startX = xPos - totalContentWidth;
-
-          const padX = Math.round(fontSizePx * 0.6);
-          const padY = Math.round(fontSizePx * 0.35);
-
-          type ContextWithRoundRect = CanvasRenderingContext2D & {
-            roundRect?: (x: number, y: number, w: number, h: number, r: number) => void;
-          };
-          const ctxWithRoundRect = ctx as ContextWithRoundRect;
-
-          if (
-            styleId === "yellow" ||
-            styleId === "classic" ||
-            styleId === "dark" ||
-            styleId === "red_box" ||
-            styleId === "hormozi"
-          ) {
-            ctx.save();
-            ctx.fillStyle =
-              styleId === "classic"
-                ? "#ffffff"
-                : styleId === "red_box"
-                ? "#ef4444"
-                : styleId === "hormozi"
-                ? "#ffe600"
-                : "rgba(0, 0, 0, 0.85)";
-
-            const boxWidth = totalContentWidth + padX * 2;
-            const boxHeight = fontSizePx + padY * 2;
-            const boxX = startX - padX;
-            const boxY = yPos - boxHeight / 2;
-
-            ctx.beginPath();
-            const rx = 12;
-            if (typeof ctxWithRoundRect.roundRect === "function") {
-              ctxWithRoundRect.roundRect(boxX, boxY, boxWidth, boxHeight, rx);
-            } else {
-              ctx.rect(boxX, boxY, boxWidth, boxHeight);
-            }
-            ctx.fill();
-
-            if (styleId === "dark" || styleId === "yellow") {
-              ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
-              ctx.lineWidth = 2;
-              ctx.stroke();
-            }
-
-            ctx.textAlign = "left";
-            let curX = startX;
-            for (const item of measuredWords) {
-              const isCurrent = currentTime >= item.word.start - 0.04 && currentTime <= item.word.end + 0.08;
-
-              if (isCurrent) {
-                if (styleId === "hormozi") {
-                  ctx.fillStyle = highlightHex || "#ffe600";
-                  ctx.beginPath();
-                  const badgePad = 4;
-                  if (typeof ctxWithRoundRect.roundRect === "function") {
-                    ctxWithRoundRect.roundRect(curX - badgePad, yPos - fontSizePx * 0.55, item.width + badgePad * 2, fontSizePx * 1.1, 6);
-                  } else {
-                    ctx.rect(curX - badgePad, yPos - fontSizePx * 0.55, item.width + badgePad * 2, fontSizePx * 1.1);
-                  }
-                  ctx.fill();
-                  ctx.fillStyle = "#000000";
-                  ctx.fillText(item.formatted, curX, yPos);
-                } else if (styleId === "yellow") {
-                  ctx.fillStyle = highlightHex || "#f6c453";
-                  ctx.fillText(item.formatted, curX, yPos);
-                } else if (styleId === "classic") {
-                  ctx.fillStyle = "#000000";
-                  ctx.fillText(item.formatted, curX, yPos);
-                } else {
-                  ctx.fillStyle = highlightHex || "#f6c453";
-                  ctx.fillText(item.formatted, curX, yPos);
-                }
-              } else {
-                ctx.fillStyle = styleId === "classic" || styleId === "hormozi" ? "#000000" : "#ffffff";
-                ctx.fillText(item.formatted, curX, yPos);
-              }
-
-              curX += item.width + spaceWidth;
-            }
-            ctx.restore();
-          } else {
-            ctx.save();
-            ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
-            ctx.shadowBlur = 12;
-            ctx.shadowOffsetY = 4;
-
-            ctx.textAlign = "left";
-            let curX = startX;
-            for (const item of measuredWords) {
-              const isCurrent = currentTime >= item.word.start - 0.04 && currentTime <= item.word.end + 0.08;
-              const strokeWidth = Math.max(3, Math.round(fontSizePx * 0.12));
-
-              ctx.save();
-              if (isCurrent) {
-                // Apply subtle active word scale & glow highlight on canvas
-                const wordCenterX = curX + item.width / 2;
-                ctx.translate(wordCenterX, yPos);
-                ctx.scale(1.08, 1.08);
-                ctx.translate(-wordCenterX, -yPos);
-
-                const activeGlowColor =
-                  styleId === "viral_alex"
-                    ? (highlightHex === "#f6c453" ? "#22c55e" : highlightHex)
-                    : styleId === "neon"
-                    ? (highlightHex === "#f6c453" ? "#ec4899" : highlightHex)
-                    : (highlightHex || "#f6c453");
-
-                ctx.shadowColor = activeGlowColor;
-                ctx.shadowBlur = 16;
-              }
-
-              ctx.strokeStyle = "rgba(0, 0, 0, 0.85)";
-              ctx.lineWidth = strokeWidth;
-              ctx.strokeText(item.formatted, curX, yPos);
-
-              if (isCurrent) {
-                ctx.fillStyle =
-                  styleId === "viral_alex"
-                    ? (highlightHex === "#f6c453" ? "#22c55e" : highlightHex)
-                    : styleId === "neon"
-                    ? (highlightHex === "#f6c453" ? "#ec4899" : highlightHex)
-                    : (highlightHex || "#f6c453");
-              } else {
-                ctx.fillStyle = "rgba(255, 255, 255, 0.88)";
-              }
-
-              ctx.fillText(item.formatted, curX, yPos);
-              ctx.restore();
-
-              curX += item.width + spaceWidth;
-            }
-            ctx.restore();
-          }
-        }
+        drawCaptions(ctx, width, height, segments, currentTime, styleId, { highlightHex, position, customYPercent, fontSize, textAlign, textTransform });
 
         if (recorder.state === "recording") {
           animationFrameId = requestAnimationFrame(drawFrame);

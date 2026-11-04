@@ -96,3 +96,16 @@ export type TranscriptionState =
   | "ready"
   | "error";
 
+
+export type CaptionAppearance = {
+  highlightHex: string;
+  position: "top" | "center" | "bottom" | "custom";
+  customYPercent: number;
+  fontSize: "sm" | "md" | "lg" | "xl";
+  textAlign: "left" | "center" | "right";
+  textTransform: "uppercase" | "none" | "lowercase";
+};
+export const defaultCaptionAppearance: CaptionAppearance = {
+  highlightHex: "#c63838", position: "bottom", customYPercent: 82,
+  fontSize: "md", textAlign: "center", textTransform: "none",
+};

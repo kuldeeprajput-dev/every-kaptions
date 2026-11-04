@@ -1,4 +1,4 @@
-import type { CaptionOutputLanguage, CaptionSegment } from "../types/captions";
+import type { CaptionAppearance, CaptionOutputLanguage, CaptionSegment } from "../types/captions";
 
 const DB_NAME = "ReplixCaptionsDB";
 const DB_VERSION = 1;
@@ -18,6 +18,7 @@ export type StoredProject = {
   segments: CaptionSegment[];
   duration: number;
   styleId?: string;
+  captionAppearance?: CaptionAppearance;
 };
 
 function openDB(): Promise<IDBDatabase> {

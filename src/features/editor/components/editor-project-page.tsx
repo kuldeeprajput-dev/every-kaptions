@@ -6,11 +6,12 @@ import { useRouter } from "next/navigation";
 import { LoaderCircle } from "lucide-react";
 import { useCaptionEditor } from "../hooks/use-caption-editor";
 import { getProject, saveProject } from "../lib/media-db";
-import { MediaEditor } from "./media-editor";
+import { CaptionEditor } from "./caption-editor";
 
 export function EditorProjectPage({ mediaId }: { mediaId: string }) {
   const router = useRouter();
   const editor = useCaptionEditor();
+  const { loadStoredProject } = editor;
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
@@ -57,7 +58,7 @@ export function EditorProjectPage({ mediaId }: { mediaId: string }) {
               styleId: "yellow",
             };
             await saveProject(demoProject);
-            editor.loadStoredProject(demoProject);
+            loadStoredProject(demoProject);
             setLoading(false);
             return;
           }
@@ -67,8 +68,13 @@ export function EditorProjectPage({ mediaId }: { mediaId: string }) {
           return;
         }
 
+        if (stored.status === "idle") {
+          router.replace(`/studio/${mediaId}`);
+          return;
+        }
+
         // Initialize editor with stored data directly
-        editor.loadStoredProject(stored);
+        loadStoredProject(stored);
         setLoading(false);
       } catch {
         if (!cancelled) {
@@ -83,7 +89,7 @@ export function EditorProjectPage({ mediaId }: { mediaId: string }) {
     return () => {
       cancelled = true;
     };
-  }, [mediaId]);
+  }, [mediaId, loadStoredProject, router]);
 
   // Auto-save changes back to IndexedDB when user edits captions or style
   useEffect(() => {
@@ -97,6 +103,7 @@ export function EditorProjectPage({ mediaId }: { mediaId: string }) {
             ...existing,
             segments: editor.segments,
             styleId: editor.styleId,
+            captionAppearance: editor.captionAppearance,
             language: editor.language,
             outputMode: editor.outputLanguage,
             updatedAt: Date.now(),
@@ -108,7 +115,7 @@ export function EditorProjectPage({ mediaId }: { mediaId: string }) {
     }, 400);
 
     return () => clearTimeout(timer);
-  }, [mediaId, loading, notFound, editor.segments, editor.styleId, editor.language, editor.outputLanguage, editor.status, editor.file]);
+  }, [mediaId, loading, notFound, editor.captionAppearance, editor.segments, editor.styleId, editor.language, editor.outputLanguage, editor.status, editor.file]);
 
   if (loading) {
     return (
@@ -134,5 +141,5 @@ export function EditorProjectPage({ mediaId }: { mediaId: string }) {
     );
   }
 
-  return <MediaEditor editor={editor} onBack={() => router.push("/studio")} />;
+  return <CaptionEditor editor={editor} onBack={() => router.push("/studio")} />;
 }

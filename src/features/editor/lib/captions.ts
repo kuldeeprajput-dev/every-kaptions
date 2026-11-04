@@ -61,7 +61,7 @@ export function ensureSegmentWords(segment: CaptionSegment): CaptionWord[] {
   if (tokens.length === 0) return [];
 
   if (segment.words && segment.words.length === tokens.length && segment.words.length > 0) {
-    return segment.words;
+    return segment.words.map((word, index) => ({ ...word, text: tokens[index] }));
   }
 
   return interpolateSegmentWords(segment);
@@ -248,4 +248,15 @@ export function buildVtt(segments: CaptionSegment[]) {
     .map((segment) => `${formatCaptionTimestamp(segment.start, ".")} --> ${formatCaptionTimestamp(segment.end, ".")}\n${segment.text}`)
     .join("\n\n");
   return `WEBVTT\n\n${cues}`;
+}
+
+/** Keep word timestamps attached to a line when its timing changes. */
+export function retimeCaptionSegment(segment: CaptionSegment, start: number, end: number): CaptionSegment {
+  const span = Math.max(.001, segment.end - segment.start);
+  const scale = (end - start) / span;
+  return { ...segment, start, end, words: ensureSegmentWords(segment).map(word => ({
+    ...word,
+    start: Math.max(start, Math.min(end, start + (word.start - segment.start) * scale)),
+    end: Math.max(start, Math.min(end, start + (word.end - segment.start) * scale)),
+  })) };
 }

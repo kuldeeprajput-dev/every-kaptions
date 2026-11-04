@@ -1,5 +1,7 @@
 "use client";
 
+import { defaultCaptionAppearance, type CaptionAppearance } from "../types/captions";
+import { retimeCaptionSegment } from "../lib/captions";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getCaptionMediaType, MAX_CAPTION_FILE_BYTES } from "../data/editor-config";
 import {
@@ -20,7 +22,7 @@ import {
   type TranscriptionState,
 } from "../types/captions";
 
-function fileError(file: File) {
+export function getCaptionFileError(file: File) {
   if (file.size === 0) return "This file is empty. Choose another recording.";
   if (file.size > MAX_CAPTION_FILE_BYTES) return "Choose a file smaller than 25 MB for transcription.";
   if (!getCaptionMediaType(file)) return "Choose an MP4, MOV, WebM, MP3, or WAV file.";
@@ -28,6 +30,7 @@ function fileError(file: File) {
 }
 
 export function useCaptionEditor() {
+  const [captionAppearance, setCaptionAppearance] = useState<CaptionAppearance>(defaultCaptionAppearance);
   const [file, setFile] = useState<File | null>(null);
   const [mediaUrl, setMediaUrl] = useState("");
   const [language, setLanguage] = useState("en");
@@ -53,7 +56,7 @@ export function useCaptionEditor() {
   }, []);
 
   const chooseFile = useCallback((nextFile: File) => {
-    const validationError = fileError(nextFile);
+    const validationError = getCaptionFileError(nextFile);
     if (validationError) {
       setError(validationError);
       setStatus("error");
@@ -127,6 +130,7 @@ export function useCaptionEditor() {
       plan.recordTranscription(result.duration);
       await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
       setStatus("ready");
+      return { segments: sanitizedSegments, duration: result.duration };
     } catch (caughtError) {
       if (temporaryPathname) await discardCaptionUpload(temporaryPathname);
       setError(caughtError instanceof Error ? caughtError.message : "Captions could not be created. Please try again.");
@@ -196,9 +200,7 @@ export function useCaptionEditor() {
 
     const next = segments.map((seg) => {
       if (seg.id !== segmentId) return seg;
-      const updated = { ...seg, start: safeStart, end: safeEnd };
-      updated.words = ensureSegmentWords(updated);
-      return updated;
+      return retimeCaptionSegment(seg, safeStart, safeEnd);
     });
 
     pushHistory(next);
@@ -324,6 +326,7 @@ export function useCaptionEditor() {
     segments: CaptionSegment[];
     duration: number;
     styleId?: string;
+    captionAppearance?: CaptionAppearance;
   }) => {
     const fileObj = new File([stored.fileBlob], stored.name, {
       type: stored.fileType || "video/mp4",
@@ -334,6 +337,7 @@ export function useCaptionEditor() {
 
     setFile(fileObj);
     setMediaUrl(nextUrl);
+    setCaptionAppearance({ ...defaultCaptionAppearance, ...stored.captionAppearance });
     setLanguage(stored.language || "en");
     setOutputLanguage(isCaptionOutputLanguage(stored.outputMode) ? stored.outputMode : "same");
     const sanitizedSegments = (stored.segments || []).map((seg) => ({
@@ -353,6 +357,7 @@ export function useCaptionEditor() {
   }, []);
 
   return {
+    captionAppearance, setCaptionAppearance,
     file,
     mediaUrl,
     language,
