@@ -22,19 +22,21 @@ export function CaptionDemoStyles({
 
   return (
     <aside
-      className="editor-right-panel"
+      className="hidden lg:flex flex-col bg-white border-l border-[#f0f0f4] p-[14px_12px] gap-2.5 overflow-hidden"
       aria-label="Caption Style Customizer"
     >
-      <div className="panel-title-bar">
-        <div className="panel-title-meta">
-          <Sparkles size={13} className="text-amber-500" aria-hidden="true" />
-          <strong>CAPTION STYLES</strong>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1.5">
+          <Sparkles size={13} className="text-[#c63838]" aria-hidden="true" />
+          <strong className="text-[11px] font-bold tracking-[0.06em] text-[#18181b]">
+            CAPTION STYLES
+          </strong>
         </div>
       </div>
 
       {/* Category Tabs */}
       <div
-        className="styles-tabs-row"
+        className="flex gap-[3px] bg-[#f4f4f6] rounded-md p-0.5"
         role="tablist"
         aria-label="Customizer sections"
       >
@@ -42,7 +44,11 @@ export function CaptionDemoStyles({
           type="button"
           role="tab"
           aria-selected={activeTab === "styles"}
-          className={`tab-pill ${activeTab === "styles" ? "is-active" : ""}`}
+          className={`flex-1 text-center text-[9px] font-semibold py-[3px] px-1 rounded transition-all cursor-pointer ${
+            activeTab === "styles"
+              ? "text-[#18181b] bg-white shadow-xs font-bold"
+              : "text-[#71717a] hover:text-[#18181b]"
+          }`}
           onClick={() => setActiveTab("styles")}
         >
           Styles
@@ -51,7 +57,11 @@ export function CaptionDemoStyles({
           type="button"
           role="tab"
           aria-selected={activeTab === "text"}
-          className={`tab-pill ${activeTab === "text" ? "is-active" : ""}`}
+          className={`flex-1 text-center text-[9px] font-semibold py-[3px] px-1 rounded transition-all cursor-pointer ${
+            activeTab === "text"
+              ? "text-[#18181b] bg-white shadow-xs font-bold"
+              : "text-[#71717a] hover:text-[#18181b]"
+          }`}
           onClick={() => setActiveTab("text")}
         >
           Text & Color
@@ -60,7 +70,11 @@ export function CaptionDemoStyles({
           type="button"
           role="tab"
           aria-selected={activeTab === "layout"}
-          className={`tab-pill ${activeTab === "layout" ? "is-active" : ""}`}
+          className={`flex-1 text-center text-[9px] font-semibold py-[3px] px-1 rounded transition-all cursor-pointer ${
+            activeTab === "layout"
+              ? "text-[#18181b] bg-white shadow-xs font-bold"
+              : "text-[#71717a] hover:text-[#18181b]"
+          }`}
           onClick={() => setActiveTab("layout")}
         >
           Layout
@@ -70,7 +84,7 @@ export function CaptionDemoStyles({
       {/* Preset Grid */}
       {activeTab === "styles" ? (
         <div
-          className="styles-preset-grid"
+          className="grid grid-cols-2 gap-1.5 overflow-y-auto"
           role="region"
           aria-label="Preset styles grid"
         >
@@ -82,20 +96,30 @@ export function CaptionDemoStyles({
                 type="button"
                 onClick={() => onSelectStyle(opt.id)}
                 aria-pressed={isCurrent}
-                className={`style-selector-card ${isCurrent ? "is-active" : ""}`}
+                className={`bg-[#fafafc] border rounded-[7px] p-1.5 text-left cursor-pointer flex flex-col gap-1 transition-all ${
+                  isCurrent
+                    ? "border-[#c63838] bg-[#fff8f8] shadow-[0_3px_10px_rgba(198,56,56,0.1)]"
+                    : "border-[#e8e8ed] hover:border-[#d4d4d8] hover:bg-white"
+                }`}
               >
                 <div
-                  className={`style-card-preview ${opt.tileBg}`}
+                  className={`flex items-center justify-center rounded p-[5px_3px] text-[8px] font-black leading-tight tracking-wider ${opt.tileBg}`}
                   aria-hidden="true"
                 >
                   <span className={opt.activeClass}>YOUR</span>&nbsp;STORY
                 </div>
-                <div className="style-card-footer">
-                  <strong>{opt.name}</strong>
+                <div className="flex items-center justify-between mt-0.5">
+                  <strong className="text-[9px] text-[#18181b] font-semibold">
+                    {opt.name}
+                  </strong>
                   {isCurrent ? (
-                    <span className="active-check">Active</span>
+                    <span className="text-[7px] font-bold text-[#c63838]">
+                      Active
+                    </span>
                   ) : (
-                    <small>{opt.badge}</small>
+                    <small className="text-[7px] text-[#71717a]">
+                      {opt.badge}
+                    </small>
                   )}
                 </div>
               </button>
