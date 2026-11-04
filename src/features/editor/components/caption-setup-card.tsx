@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { useDialogFocus } from "@/shared/hooks/use-dialog-focus";
-import { AlertCircle, LoaderCircle, X } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { AlertCircle, ArrowRight, LoaderCircle } from "lucide-react";
 import { getCaptionOutputOption, getCaptionOutputOptions, getLanguageOption, indianLanguageOptions } from "../data/editor-config";
 import type { CaptionOutputLanguage, TranscriptionState } from "../types/captions";
 
@@ -37,8 +36,6 @@ export function CaptionSetupCard({
   onGenerate,
   onReset,
 }: Props) {
-  const dialogRef = useRef<HTMLDivElement>(null);
-  useDialogFocus(dialogRef, true);
   const isWorking = ["uploading", "transcribing", "translating", "preparing"].includes(status);
   const willTranslate = outputLanguage !== "same";
   const progressSteps = willTranslate
@@ -54,12 +51,14 @@ export function CaptionSetupCard({
           ? { label: "Preparing your editor", index: progressSteps.length - 1 }
           : null;
 
-  const [mediaUrl, setMediaUrl] = useState<string>("");
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
-    if (!file) return;
+    const media = file.type.startsWith("audio/") ? audioRef.current : videoRef.current;
+    if (!media) return;
     const url = URL.createObjectURL(file);
-    setMediaUrl(url);
+    media.src = url;
     return () => {
       URL.revokeObjectURL(url);
     };
@@ -69,81 +68,44 @@ export function CaptionSetupCard({
   const outputOptions = getCaptionOutputOptions(language);
   const selectedOutput = getCaptionOutputOption(outputLanguage);
 
-  useEffect(() => {
-    if (isWorking) return;
-
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onReset();
-    };
-    window.addEventListener("keydown", closeOnEscape);
-    return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [isWorking, onReset]);
-
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 p-0 sm:items-center sm:p-4 backdrop-blur-sm animate-in fade-in duration-200">
-      <button
-        type="button"
-        className="absolute inset-0 w-full h-full cursor-default bg-transparent"
-        onClick={() => {
-          if (!isWorking) onReset();
-        }}
-        aria-label="Close modal"
-      />
-
-      <div
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
-        aria-busy={isWorking}
-        aria-labelledby="media-setup-title"
-        aria-describedby="media-setup-description"
-        className="relative z-10 max-h-[calc(100dvh-1rem)] w-full max-w-[460px] overflow-y-auto rounded-t-[24px] border border-hairline bg-surface p-5 shadow-sm font-sans sm:max-h-[calc(100dvh-2rem)] sm:rounded-[24px] sm:p-6">
-        <button
-          type="button"
-          onClick={onReset}
-          disabled={isWorking}
-          className="absolute right-4 top-4 grid size-8 place-items-center rounded-lg text-dim hover:bg-surface-raised hover:text-cream transition cursor-pointer disabled:opacity-40"
-          aria-label="Close setup modal"
-        >
-          <X size={18} />
-        </button>
-
-        <h2 id="media-setup-title" className="text-center text-xl font-bold tracking-tight text-cream sm:text-2xl">
-          Let’s find your words.
-        </h2>
+    <section className="studio-setup-content" aria-busy={isWorking} aria-labelledby="media-setup-title">
+        <h1 id="media-setup-title" className="text-xl font-bold tracking-tight text-cream sm:text-2xl">
+          Create your captions.
+        </h1>
         <p id="media-setup-description" className="mt-1.5 text-center text-xs leading-relaxed text-body">
-          Choose your spoken language and how you want your captions to read.
+          Preview your recording, choose a language, and we’ll take care of the first draft.
         </p>
 
+        <div className="studio-setup-columns">
+        <div>
         <div className="mt-4 overflow-hidden rounded-2xl border border-hairline bg-black aspect-video flex items-center justify-center relative">
-          {mediaUrl ? (
-            file.type.startsWith("audio/") ? (
+          {file.type.startsWith("audio/") ? (
               <div className="flex flex-col items-center justify-center p-4 text-center">
-                <audio src={mediaUrl} controls className="w-full max-w-[280px]" />
+                <audio ref={audioRef} controls className="w-full max-w-[280px]" />
                 <p className="mt-2 text-xs text-body">{file.name}</p>
               </div>
             ) : (
               <video
-                src={mediaUrl}
+                ref={videoRef}
                 controls
                 playsInline
                 className="h-full w-full object-contain"
                 preload="metadata"
               />
-            )
-          ) : null}
+            )}
         </div>
 
         <div aria-live="polite" className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs">
           <span
             className={isWorking
-              ? "flex items-center gap-2 font-medium text-amber"
+              ? "flex items-center gap-2 font-medium text-[#b32e2e]"
               : "flex items-center gap-2 font-medium text-[#4d6b43]"}
           >
             {isWorking ? (
               <LoaderCircle size={14} className="animate-spin" aria-hidden="true" />
             ) : (
-              <span className="size-2 rounded-lg bg-surface" />
+              <span className="size-1.5 rounded-full bg-[#4d8059]" />
             )}
             {progressStep?.label ?? "Ready for processing"}
           </span>
@@ -163,11 +125,11 @@ export function CaptionSetupCard({
                 <div key={step} className="min-w-0">
                   <div
                     className={index <= progressStep.index
-                      ? "h-1 rounded-lg bg-amber transition-colors"
+                      ? "h-1 rounded-lg bg-[#c63838] transition-colors"
                       : "h-1 rounded-lg bg-surface-raised transition-colors"}
                   />
                   <span className={index === progressStep.index
-                    ? "mt-1 block truncate text-[9px] font-semibold text-[#d9b95f]"
+                    ? "mt-1 block truncate text-[9px] font-semibold text-[#b32e2e]"
                     : "mt-1 block truncate text-[9px] text-dim"}
                   >
                     {step}
@@ -178,7 +140,7 @@ export function CaptionSetupCard({
             {status === "uploading" ? (
               <div className="mt-2 h-1.5 overflow-hidden rounded-lg bg-surface-raised">
                 <div
-                  className="h-full rounded-lg bg-amber transition-[width] duration-200"
+                  className="h-full rounded-lg bg-[#c63838] transition-[width] duration-200"
                   style={{ width: `${Math.max(2, uploadProgress)}%` }}
                 />
               </div>
@@ -186,10 +148,13 @@ export function CaptionSetupCard({
           </div>
         ) : null}
 
-        <div className="mt-5">
-          <p className="text-[10px] font-bold tracking-[0.14em] uppercase text-body">
-            LANGUAGE SETTINGS
-          </p>
+        </div>
+        <div className="studio-setup-settings">
+        <div>
+          <div className="studio-setup-settings-heading">
+            <h2>Caption settings</h2>
+            <p>Make the words work for your audience.</p>
+          </div>
 
           <label htmlFor="spoken-lang" className="mt-3 block text-xs font-medium text-cream">
             What language is spoken?
@@ -204,7 +169,7 @@ export function CaptionSetupCard({
               }}
               disabled={isWorking}
               style={{ outline: "none" }}
-              className="w-full h-11 appearance-none rounded-xl border border-hairline bg-surface px-4 text-sm font-semibold text-cream outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-amber transition cursor-pointer"
+              className="w-full h-11 appearance-none rounded-xl border border-hairline bg-surface px-4 text-sm font-semibold text-cream outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[#c63838] transition cursor-pointer"
             >
               {indianLanguageOptions.map((option) => (
                 <option
@@ -231,7 +196,7 @@ export function CaptionSetupCard({
               <label htmlFor="caption-output" className="text-xs font-medium text-cream">
                 Caption output
               </label>
-              <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-amber">
+              <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#b32e2e]">
                 {outputLanguage === "same" ? "Automatic" : "Translate"}
               </span>
             </div>
@@ -242,7 +207,7 @@ export function CaptionSetupCard({
                 onChange={(event) => onOutputLanguageChange(event.target.value as CaptionOutputLanguage)}
                 disabled={isWorking}
                 aria-describedby="caption-output-help"
-                className="h-11 w-full cursor-pointer appearance-none rounded-xl border border-hairline bg-surface px-4 pr-10 text-sm font-semibold text-cream outline-none transition focus:border-amber focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-60"
+                className="h-11 w-full cursor-pointer appearance-none rounded-xl border border-hairline bg-surface px-4 pr-10 text-sm font-semibold text-cream outline-none transition focus:border-[#c63838] focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {outputOptions.map((option) => (
                   <option key={option.value} value={option.value} className="bg-surface text-cream">
@@ -273,7 +238,7 @@ export function CaptionSetupCard({
           type="button"
           onClick={onGenerate}
           disabled={isWorking || !canTranscribe || !currentLang.supported}
-          className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-amber text-sm font-bold text-white shadow-sm transition hover:bg-surface disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+          className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#c63838] text-sm font-bold text-white shadow-sm transition hover:bg-[#ae2d2d] disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
         >
           {isWorking ? (
             <>
@@ -281,9 +246,11 @@ export function CaptionSetupCard({
               <span>{progressStep?.label ?? "Creating captions"}</span>
             </>
           ) : (
-            <span>Generate captions</span>
+            <><span>Generate captions</span><ArrowRight size={16} aria-hidden="true" /></>
           )}
         </button>
+
+        <p className="studio-setup-next-note">Edit the words, timing, and style in the next step.</p>
 
         <button
           type="button"
@@ -291,9 +258,10 @@ export function CaptionSetupCard({
           disabled={isWorking}
           className="mt-2.5 w-full text-center text-xs font-semibold text-body hover:text-cream transition cursor-pointer py-1"
         >
-          Cancel
+          Back to projects
         </button>
+        </div>
       </div>
-    </div>
+    </section>
   );
 }
