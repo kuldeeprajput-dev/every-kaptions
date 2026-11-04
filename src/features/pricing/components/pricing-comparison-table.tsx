@@ -9,7 +9,7 @@ export function PricingComparisonTable() {
 
       <p className="text-[12px] text-body text-center mb-3 md:hidden flex items-center justify-center gap-1">
         <svg
-          className="w-3.5 h-3.5 inline-block text-amber"
+          className="w-3.5 h-3.5 inline-block text-[#52525b]"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -25,7 +25,7 @@ export function PricingComparisonTable() {
         <span>Scroll horizontally to compare all features</span>
       </p>
 
-      <div className="overflow-x-auto border border-hairline rounded-[14px] bg-surface-raised focus-within:ring-1 focus-within:ring-amber/30">
+      <div className="overflow-x-auto border border-hairline rounded-[14px] bg-white focus-within:ring-1 focus-within:ring-[#c63838]/20">
         <table className="w-full border-collapse min-w-[520px]" aria-label="Feature comparison across plans">
           <caption className="sr-only">
             Detailed breakdown of features included in Free, One-time, Creator, and Studio plans
@@ -34,31 +34,31 @@ export function PricingComparisonTable() {
             <tr>
               <th
                 scope="col"
-                className="px-4 py-3 text-left text-[12px] font-bold uppercase tracking-[0.04em] text-body bg-black/20 border-b border-hairline"
+                className="px-4 py-3 text-left text-[12px] font-bold uppercase tracking-[0.04em] text-body bg-[#fafafa] border-b border-hairline"
               >
                 Feature
               </th>
               <th
                 scope="col"
-                className="px-4 py-3 text-left text-[12px] font-bold uppercase tracking-[0.04em] text-body bg-black/20 border-b border-hairline"
+                className="px-4 py-3 text-left text-[12px] font-bold uppercase tracking-[0.04em] text-body bg-[#fafafa] border-b border-hairline"
               >
                 Free
               </th>
               <th
                 scope="col"
-                className="px-4 py-3 text-left text-[12px] font-bold uppercase tracking-[0.04em] text-body bg-black/20 border-b border-hairline"
+                className="px-4 py-3 text-left text-[12px] font-bold uppercase tracking-[0.04em] text-body bg-[#fafafa] border-b border-hairline"
               >
                 One-time pack
               </th>
               <th
                 scope="col"
-                className="px-4 py-3 text-left text-[12px] font-bold uppercase tracking-[0.04em] text-body bg-black/20 border-b border-hairline"
+                className="px-4 py-3 text-left text-[12px] font-bold uppercase tracking-[0.04em] text-body bg-[#fafafa] border-b border-hairline"
               >
                 Creator
               </th>
               <th
                 scope="col"
-                className="px-4 py-3 text-left text-[12px] font-bold uppercase tracking-[0.04em] text-body bg-black/20 border-b border-hairline"
+                className="px-4 py-3 text-left text-[12px] font-bold uppercase tracking-[0.04em] text-body bg-[#fafafa] border-b border-hairline"
               >
                 Studio
               </th>
@@ -73,7 +73,7 @@ export function PricingComparisonTable() {
                 <td className="px-4 py-3 text-[13px] leading-[1.45] text-cream font-medium border-b border-hairline">
                   {row.feature}
                   {"isNew" in row && row.isNew && (
-                    <span className="inline-block ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-lg bg-amber text-amber align-middle tracking-[0.03em]">
+                    <span className="inline-block ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-lg bg-[#fdf0ef] text-[#52525b] align-middle tracking-[0.03em]">
                       New
                     </span>
                   )}
@@ -81,13 +81,13 @@ export function PricingComparisonTable() {
                 <td className="px-4 py-3 text-[13px] leading-[1.45] text-cream border-b border-hairline">
                   {row.free}
                 </td>
-                <td className="px-4 py-3 text-[13px] leading-[1.45] text-[#4d6b43] border-b border-hairline">
+                <td className="px-4 py-3 text-[13px] leading-[1.45] text-[#52525b] border-b border-hairline">
                   {row.onetime}
                 </td>
-                <td className="px-4 py-3 text-[13px] leading-[1.45] text-amber border-b border-hairline">
+                <td className="px-4 py-3 text-[13px] leading-[1.45] text-[#52525b] border-b border-hairline">
                   {row.creator}
                 </td>
-                <td className="px-4 py-3 text-[13px] leading-[1.45] text-amber border-b border-hairline">
+                <td className="px-4 py-3 text-[13px] leading-[1.45] text-[#52525b] border-b border-hairline">
                   {row.studio}
                 </td>
               </tr>

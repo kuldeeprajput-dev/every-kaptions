@@ -1,150 +1,30 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ChevronDown, HelpCircle, Search, Sparkles, X } from "lucide-react";
-import { cn } from "@/shared/lib/cn";
-import {
-  SUPPORT_CATEGORIES,
-  SUPPORT_GUIDES,
-  type SupportCategory,
-} from "../data/support-guides";
+import { ChevronDown, Search, X } from "lucide-react";
+import { CustomSelect } from "@/shared/components/custom-select";
+import { SUPPORT_CATEGORIES, SUPPORT_GUIDES, type SupportCategory } from "../data/support-guides";
 
 export function SupportGuides() {
   const [activeCategory, setActiveCategory] = useState<SupportCategory>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [expandedId, setExpandedId] = useState<string | null>("accuracy-boost");
-
   const filteredGuides = useMemo(() => {
-    return SUPPORT_GUIDES.filter((guide) => {
-      const matchCat = activeCategory === "all" || guide.category === activeCategory;
-      const matchSearch =
-        !searchQuery.trim() ||
-        guide.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        guide.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        guide.tag.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchCat && matchSearch;
-    });
+    const query = searchQuery.trim().toLowerCase();
+    return SUPPORT_GUIDES.filter(guide => (activeCategory === "all" || guide.category === activeCategory) && (!query || [guide.title, guide.summary, guide.tag, ...guide.steps].some(text => text.toLowerCase().includes(query))));
   }, [activeCategory, searchQuery]);
-
   return (
-    <section className="support-guides-section mt-12 w-full font-sans" aria-label="Creator help guides">
-      <div className="flex flex-col gap-2 mb-6">
-        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber">
-          <Sparkles size={14} aria-hidden="true" />
-          <span>Troubleshooting & Guides</span>
-        </div>
-        <h2 className="text-xl sm:text-2xl font-bold text-cream">Common questions answered</h2>
-        <p className="text-xs sm:text-sm text-body">
-          Explore quick guides for audio sync, transcription accuracy, and subtitle exports.
-        </p>
-      </div>
-
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
-        <div className="flex flex-wrap items-center gap-1.5" role="tablist" aria-label="Guide categories">
-          {SUPPORT_CATEGORIES.map((cat) => (
-            <button
-              key={cat.id}
-              type="button"
-              role="tab"
-              aria-selected={activeCategory === cat.id}
-              onClick={() => setActiveCategory(cat.id as SupportCategory)}
-              className={cn(
-                "rounded-full px-3 py-1.5 text-xs font-semibold transition cursor-pointer",
-                activeCategory === cat.id ? "bg-amber text-white shadow-sm" : "bg-surface-raised text-body hover:text-cream",
-              )}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="relative sm:w-64">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-dim pointer-events-none" aria-hidden="true" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search guides..."
-            aria-label="Search help guides"
-            className="w-full rounded-xl border border-hairline bg-surface py-2 pl-8 pr-8 text-xs text-cream placeholder-dim outline-none focus:border-amber/60 transition"
-          />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => setSearchQuery("")}
-              aria-label="Clear search"
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-dim hover:text-cream cursor-pointer"
-            >
-              <X size={13} />
-            </button>
-          )}
+    <section id="support-guides" className="mt-12 scroll-mt-28 border-t border-[#e4e4e7] pt-10 sm:mt-16 sm:pt-12" aria-labelledby="help-guides-title">
+      <h2 id="help-guides-title" className="text-[30px] font-bold leading-[1.15] tracking-[-0.045em] text-[#18181b]">Find a quick answer.</h2>
+      <p className="mt-3 text-[14px] leading-[1.8] text-[#71717a]">Simple steps for captions, timing, downloads, and your plan.</p>
+      <div className="mb-6 mt-6 flex flex-col gap-3 sm:flex-row">
+        <div className="relative min-w-0 flex-1"><Search size={16} className="pointer-events-none absolute left-3.5 top-3.5 text-[#a1a1aa]" aria-hidden="true" /><input type="text" role="searchbox" inputMode="search" value={searchQuery} onChange={event => setSearchQuery(event.target.value)} placeholder="Search for an answer" aria-label="Search help guides" className="support-field h-11 w-full rounded-xl border border-[#dedee5] bg-[#fafafa] pl-10 pr-10 text-[13px] text-[#27272a] outline-none placeholder:text-[#a1a1aa] focus:border-[#c63838]/50" />{searchQuery && <button type="button" onClick={() => setSearchQuery("")} aria-label="Clear search" className="absolute right-2 top-2 grid size-7 place-items-center rounded-md text-[#71717a] hover:bg-[#ededed]"><X size={13} aria-hidden="true" /></button>}</div>
+        <div className="flex items-center gap-3 sm:w-[250px]">
+          <span className="text-[12px] text-[#8b8b95]">Topic</span>
+          <CustomSelect label="Filter help guides by topic" options={SUPPORT_CATEGORIES.map(category => ({ value: category.id, label: category.label }))} value={activeCategory} onChange={value => setActiveCategory(value as SupportCategory)} />
         </div>
       </div>
-
-      <div className="flex flex-col gap-3">
-        {filteredGuides.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-hairline p-8 text-center bg-surface">
-            <HelpCircle size={24} className="mx-auto text-dim mb-2" aria-hidden="true" />
-            <p className="text-xs font-semibold text-cream">No help guides match your search.</p>
-            <button
-              type="button"
-              onClick={() => {
-                setSearchQuery("");
-                setActiveCategory("all");
-              }}
-              className="mt-2 text-xs font-bold text-amber hover:underline cursor-pointer"
-            >
-              Reset filters
-            </button>
-          </div>
-        ) : (
-          filteredGuides.map((guide) => {
-            const isExpanded = expandedId === guide.id;
-            return (
-              <div
-                key={guide.id}
-                className={cn(
-                  "rounded-2xl border border-hairline bg-surface transition-all overflow-hidden",
-                  isExpanded ? "ring-1 ring-amber/30 shadow-sm" : "hover:border-amber/30",
-                )}
-              >
-                <button
-                  type="button"
-                  onClick={() => setExpandedId(isExpanded ? null : guide.id)}
-                  aria-expanded={isExpanded}
-                  className="flex w-full items-start justify-between p-4 sm:p-5 text-left cursor-pointer gap-4"
-                >
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-2">
-                      <span className="rounded-md bg-surface-raised px-2 py-0.5 text-[10px] font-bold text-dim">{guide.tag}</span>
-                      <span className="text-[11px] text-body">{guide.categoryLabel}</span>
-                    </div>
-                    <h3 className="text-sm sm:text-base font-bold text-cream mt-1">{guide.title}</h3>
-                    <p className="text-xs text-body">{guide.summary}</p>
-                  </div>
-                  <ChevronDown
-                    size={16}
-                    className={cn("shrink-0 text-dim transition-transform duration-200 mt-1", isExpanded && "rotate-180 text-amber")}
-                    aria-hidden="true"
-                  />
-                </button>
-
-                {isExpanded && (
-                  <div className="border-t border-hairline bg-surface-raised/40 p-4 sm:p-5 pt-3">
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-body mb-2.5">Recommended Steps:</h4>
-                    <ol className="list-decimal list-inside space-y-2 text-xs text-cream leading-relaxed pl-1">
-                      {guide.steps.map((step, idx) => (
-                        <li key={idx} className="pl-1">
-                          <span dangerouslySetInnerHTML={{ __html: step }} />
-                        </li>
-                      ))}
-                    </ol>
-                  </div>
-                )}
-              </div>
-            );
-          })
-        )}
+      <div className="overflow-hidden rounded-2xl border border-[#e4e4e7] bg-white">
+        {filteredGuides.length === 0 ? <div className="px-5 py-10 text-center"><p className="text-[14px] font-semibold text-[#52525b]">No guides found.</p><p className="mt-2 text-[12px] text-[#8b8b95]">Try another word or browse all topics.</p><button type="button" onClick={() => { setSearchQuery(""); setActiveCategory("all"); }} className="mt-3 min-h-9 text-[12px] font-medium text-[#c63838] hover:underline">Show all guides</button></div> : filteredGuides.map(guide => <details key={guide.id} className="group border-b border-[#ededf1] last:border-b-0"><summary className="flex cursor-pointer list-none items-center justify-between gap-5 p-5 marker:content-none hover:bg-[#fafafa] [&::-webkit-details-marker]:hidden sm:p-6"><span><span className="block text-[14px] font-semibold leading-[1.5] text-[#27272a]">{guide.title}</span><span className="mt-1.5 block text-[12px] leading-[1.7] text-[#8b8b95]">{guide.summary}</span></span><ChevronDown size={16} aria-hidden="true" className="shrink-0 text-[#a1a1aa] transition-transform group-open:rotate-180 group-open:text-[#c63838]" /></summary><div className="border-t border-[#ededf1] bg-[#fafafa] px-5 py-5 sm:px-6"><ol className="ml-4 list-decimal space-y-3 text-[13px] leading-[1.85] text-[#71717a]">{guide.steps.map(step => <li key={step} className="pl-1 marker:font-semibold marker:text-[#c63838]">{step}</li>)}</ol></div></details>)}
       </div>
     </section>
   );

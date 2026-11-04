@@ -22,7 +22,7 @@ export function PricingOneTimePacks({
         aria-labelledby="pack-starter-title"
       >
         <div className="flex flex-wrap items-center gap-1.5 mb-3">
-          <span className="inline-block text-[10px] font-bold tracking-[0.06em] uppercase rounded-lg px-2.5 py-1 text-[#4d6b43] border border-hairline">
+          <span className="inline-block text-[10px] font-bold tracking-[0.06em] uppercase rounded-lg px-2.5 py-1 text-[#71717a] border border-hairline">
             One-time
           </span>
           <span className="text-[11px] text-body mono">
@@ -50,7 +50,7 @@ export function PricingOneTimePacks({
         <Link
           href="/studio"
           aria-label="Get Starter one-time pack and open studio"
-          className="inline-flex items-center justify-center gap-1.5 w-full min-h-[48px] px-5 bg-amber hover:brightness-105 text-white! text-[14px] font-semibold rounded-lg mt-auto no-underline cursor-pointer transition-all"
+          className="inline-flex items-center justify-center gap-1.5 w-full min-h-[48px] px-5 bg-[#c63838] hover:bg-[#ac3030] text-white! text-[14px] font-semibold rounded-lg mt-auto no-underline cursor-pointer transition-all"
         >
           <span>Buy pack</span>
           <ArrowUpRight size={15} />
@@ -59,14 +59,14 @@ export function PricingOneTimePacks({
 
       {/* Bulk Pack Card */}
       <article
-        className="bg-surface border border-amber ring-1 ring-amber rounded-[18px] p-[24px_20px] flex flex-col"
+        className="bg-surface border border-[#c63838]/50 rounded-[18px] p-[24px_20px] flex flex-col"
         aria-labelledby="pack-bulk-title"
       >
         <div className="flex flex-wrap items-center gap-1.5 mb-3">
-          <span className="inline-block text-[10px] font-bold tracking-[0.06em] uppercase rounded-lg px-2.5 py-1 text-[#4d6b43] border border-hairline">
+          <span className="inline-block text-[10px] font-bold tracking-[0.06em] uppercase rounded-lg px-2.5 py-1 text-[#71717a] border border-hairline">
             One-time
           </span>
-          <span className="inline-block text-[10px] font-bold tracking-[0.06em] uppercase rounded-lg px-2.5 py-1 text-cream bg-amber border border-amber">
+          <span className="inline-block text-[10px] font-bold tracking-[0.06em] uppercase rounded-lg px-2.5 py-1 text-[#c63838] bg-[#fdf0ef] border border-[#c63838]/20">
             Best value
           </span>
           <span className="text-[11px] text-body mono ml-auto">
@@ -94,7 +94,7 @@ export function PricingOneTimePacks({
         <Link
           href="/studio"
           aria-label="Get Bulk one-time pack and open studio"
-          className="inline-flex items-center justify-center gap-1.5 w-full min-h-[48px] px-5 bg-amber hover:brightness-105 text-white! text-[14px] font-semibold rounded-lg mt-auto no-underline cursor-pointer transition-all"
+          className="inline-flex items-center justify-center gap-1.5 w-full min-h-[48px] px-5 bg-[#c63838] hover:bg-[#ac3030] text-white! text-[14px] font-semibold rounded-lg mt-auto no-underline cursor-pointer transition-all"
         >
           <span>Buy pack</span>
           <ArrowUpRight size={15} />

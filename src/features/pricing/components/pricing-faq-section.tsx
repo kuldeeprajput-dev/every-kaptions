@@ -1,105 +1,24 @@
 import Link from "next/link";
-import { faqs } from "../data/pricing-data";
+import { ArrowUpRight, Plus } from "lucide-react";
+
+const questions = [
+  { question: "Can I start for free?", answer: <>Yes. The Free plan includes 3 minutes of caption generation and 3 video exports per month, with no card needed. Free video exports include a watermark.</> },
+  { question: "Which plan should I choose?", answer: <>Start with Free to try captioning. Creator includes 30 captioning minutes per month, while Studio includes 45. Compare the included styles and export limits above before choosing.</> },
+  { question: "What counts as a captioning minute?", answer: <>Captioning usage is based on the length of your recording. For example, twelve two-minute videos add up to 24 minutes of video. Check your remaining usage in the workspace.</> },
+  { question: "What’s the difference between monthly and yearly?", answer: <>Monthly prices are shown per month. The Yearly option shows the monthly equivalent, with the full annual amount listed below it. Your captioning allowance remains monthly.</> },
+  { question: "Can I buy minutes without a subscription?", answer: <>The One-time tab lists packs you pay for once: Starter includes 10 captioning minutes valid for 60 days, and Bulk includes 25 minutes valid for 90 days. Check the pack’s feature list, as it differs from a subscription.</> },
+  { question: "What files can I caption?", answer: <>Upload MP4, MOV, or WebM video, or MP3, WAV, and WebM audio. Files must be smaller than 25 MB. You can download captions as SRT, VTT, or plain text.</> },
+  { question: "Where can I get help with billing or a refund?", answer: <>Visit <Link href="/support">Help & support</Link> with your question. You can also review the <Link href="/legal/refund">refund policy</Link> for the applicable conditions.</> },
+];
 
 export function PricingFaqSection() {
   return (
-    <>
-      <section className="mt-12" aria-label="Frequently asked questions">
-        <h2 className="text-[22px] font-bold text-cream mb-4 tracking-[-0.01em]">
-          Common questions
-        </h2>
-        {faqs.map((item, idx) => (
-          <details
-            key={idx}
-            className="group border border-hairline rounded-[12px] bg-surface mb-2.5"
-          >
-            <summary className="list-none cursor-pointer px-[18px] py-4 text-[15px] font-semibold text-cream hover:text-cream flex items-center justify-between gap-3 select-none [&::-webkit-details-marker]:hidden after:content-['+'] after:text-[20px] after:font-normal after:text-body after:leading-none after:shrink-0 group-open:after:content-['−'] group-open:after:text-amber">
-              {item.question}
-            </summary>
-            <p className="px-[18px] pb-4 text-[14px] text-body leading-[1.6] [&_a]:text-amber [&_a]:no-underline hover:[&_a]:underline [&_strong]:text-cream">
-              {"hasHtml" in item && item.hasHtml ? (
-                <>
-                  <strong>Creator (₹399/mo)</strong> removes the watermark,
-                  unlocks Creator presets (Punch, Cove, Spotlight, Reel, Noir,
-                  Gradient Fill, Frosted Glass), premium fonts, keyword emphasis,
-                  caption animation, saved exports, Content Pack (AI YouTube
-                  titles, IG caption, and hashtags from your transcript),
-                  priority support, and posting Reels to Instagram after export.{" "}
-                  <strong>Studio (₹999/mo)</strong> includes everything in
-                  Creator plus Neon Pop, Gold Luxe, 45 minutes of captioning per
-                  month, more caption styles, and scheduling Instagram posts up
-                  to 30 days ahead.
-                </>
-              ) : "hasRefundLink" in item && item.hasRefundLink ? (
-                <>
-                  Monthly plans: refund within 7 days of your first charge if
-                  you&apos;ve used fewer than 3 minutes.{" "}
-                  <strong>
-                    One-time packs and yearly plans are non-refundable
-                  </strong>{" "}
-                  once any captioning minute is used or a paid export is made,
-                  except if we completely failed to deliver your purchase (100%
-                  technical failure on our side). Full details are in our{" "}
-                  <Link href="/legal/refund">Refund Policy</Link>.
-                </>
-              ) : item.question === "Are my exports saved?" ? (
-                <>
-                  On paid plans, your last 50 exported videos are saved in{" "}
-                  <strong>My Exports</strong> so you can download them again
-                  anytime while subscribed. Free exports are not saved; they
-                  expire about 1 hour after export.
-                </>
-              ) : item.question === "How does monthly billing work with UPI?" ? (
-                <>
-                  Monthly plans use UPI Autopay or card. PhonePe and Paytm will
-                  ask you to set up autopay and confirm with your UPI PIN. If UPI
-                  gets stuck, try card or switch to the Yearly tab for a
-                  one-time payment.
-                </>
-              ) : item.question ===
-                "What is the difference between a one-time pack and monthly?" ? (
-                <>
-                  One-time packs give you captioning minutes and unlimited
-                  watermark-free exports for 60 to 90 days. They do{" "}
-                  <strong>not</strong> unlock Creator presets, premium fonts,
-                  saved exports, or Content Pack. Those require a Creator or
-                  Studio subscription. New videos need minutes; re-exports of
-                  videos you already transcribed are free.
-                </>
-              ) : item.question === "How are payments handled?" ? (
-                <>
-                  Securely through Razorpay. <strong>Monthly</strong> plans use
-                  UPI Autopay (PhonePe/Paytm will ask you to set up autopay and
-                  enter your UPI PIN) or card. If UPI gets stuck, try{" "}
-                  <strong>Card</strong> or switch to <strong>Yearly</strong>{" "}
-                  (one-time payment, no autopay). Card details are processed by
-                  Razorpay, never stored on our servers.
-                </>
-              ) : (
-                item.answer
-              )}
-            </p>
-          </details>
-        ))}
-      </section>
-
-      <div className="mt-8 p-5 border border-[var(--hairline)] rounded-xl bg-surface text-center max-w-[560px] mx-auto">
-        <h3 className="text-[15px] font-semibold text-cream mb-1">
-          Have more questions about billing or plans?
-        </h3>
-        <p className="text-[13px] text-body mb-3 leading-normal">
-          We are here to help. Reach out directly and we typically reply within a few hours.
-        </p>
-        <a
-          href="mailto:hello@everykaptions.com"
-          className="inline-flex items-center gap-2 text-[13px] font-semibold text-amber hover:text-cream transition-colors"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-          </svg>
-          hello@everykaptions.com
-        </a>
+    <section className="mx-auto mt-14 max-w-[800px] sm:mt-16" aria-labelledby="pricing-faq-title">
+      <div className="mb-8 text-center"><h2 id="pricing-faq-title" className="text-[32px] font-bold leading-[1.15] tracking-[-0.045em] text-[#18181b]">A few helpful answers.</h2><p className="mt-3 text-[13px] leading-[1.8] text-[#71717a]">The essentials, before you choose a plan.</p></div>
+      <div className="border-t border-[#e4e4e7]">
+        {questions.map(item => <details key={item.question} className="group border-b border-[#e4e4e7]"><summary className="flex min-h-16 cursor-pointer list-none items-center justify-between gap-4 py-5 text-[14px] font-semibold text-[#3f3f46] [&::-webkit-details-marker]:hidden"><span>{item.question}</span><Plus size={16} aria-hidden="true" className="shrink-0 text-[#8b8b95] transition-transform group-open:rotate-45 group-open:text-[#c63838]" /></summary><p className="max-w-[690px] pb-5 pr-6 text-[13px] leading-[1.85] text-[#71717a] [&_a]:text-[#c63838] [&_a]:underline [&_a]:underline-offset-4">{item.answer}</p></details>)}
       </div>
-    </>
+      <div className="mt-6 flex flex-wrap items-center justify-center gap-2 text-[12px]"><span className="text-[#8b8b95]">Still unsure?</span><Link href="/support" className="inline-flex min-h-9 items-center gap-1 font-semibold text-[#c63838] hover:underline">We can help<ArrowUpRight size={13} aria-hidden="true" /></Link></div>
+    </section>
   );
 }

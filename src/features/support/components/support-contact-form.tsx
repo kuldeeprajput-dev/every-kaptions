@@ -1,118 +1,36 @@
 "use client";
 
-import { ArrowRight, Paperclip, Send } from "lucide-react";
-import { useRef, useState } from "react";
+import { ArrowUpRight, Paperclip } from "lucide-react";
+import { useState } from "react";
+import { CustomSelect } from "@/shared/components/custom-select";
+import { brand } from "@/shared/config/brand";
+
+const fieldClass = "support-field mt-2 block min-h-11 w-full rounded-lg border border-[#dedee5] bg-[#fafafa] px-3 py-2.5 text-[13px] font-normal text-[#27272a] outline-none transition-colors placeholder:text-[#a1a1aa] focus:border-[#c63838]/50 focus:bg-white";
+
+const supportTopics = ["Creating or editing captions", "Downloading my video or subtitles", "Plans and billing", "Signing in to my account", "Something else"].map(label => ({ value: label, label }));
 
 export function SupportContactForm() {
-  const [fileName, setFileName] = useState("");
-  const [error, setError] = useState("");
-  const fileRef = useRef<HTMLInputElement>(null);
-
-  const selectFile = (file?: File) => {
-    if (!file) return;
-    if (file.size > 10 * 1024 * 1024) {
-      setError("Choose an image smaller than 10 MB.");
-      return;
-    }
-    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-      setError("Choose a JPG, PNG, or WebP image.");
-      return;
-    }
-    setFileName(file.name);
-    setError("");
-  };
-
+  const [issue, setIssue] = useState("");
+  const [topicError, setTopicError] = useState(false);
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!issue) { setTopicError(true); document.getElementById("support-topic")?.focus(); return; }
     const data = new FormData(event.currentTarget);
     const subject = `EveryKaptions support: ${data.get("issue")}`;
-    const body = `From: ${data.get("email")}\n\n${data.get("message")}${
-      fileName ? `\n\nScreenshot to attach: ${fileName}` : ""
-    }`;
-    window.location.href = `mailto:hello@everykaptions.com?subject=${encodeURIComponent(
-      subject,
-    )}&body=${encodeURIComponent(body)}`;
+    const body = `From: ${data.get("email")}\n\n${data.get("message")}`;
+    window.location.href = `mailto:${brand.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
-
   return (
-    <form className="support-form" onSubmit={handleSubmit}>
-      <label>
-        Your email address
-        <input
-          name="email"
-          type="email"
-          required
-          placeholder="you@example.com"
-          autoComplete="email"
-        />
-      </label>
-
-      <label>
-        What can we help with?
-        <select name="issue" required defaultValue="">
-          <option value="" disabled>
-            Select a topic
-          </option>
-          <option>Caption or transcription issue</option>
-          <option>Export problem</option>
-          <option>Billing and plans</option>
-          <option>Account access</option>
-          <option>Something else</option>
-        </select>
-      </label>
-
-      <label>
-        Your message
-        <textarea
-          name="message"
-          required
-          placeholder="Tell us a little more. What happened, and what were you expecting?"
-          rows={5}
-        />
-      </label>
-
+    <form className="flex min-w-0 flex-col gap-5 rounded-2xl border border-[#e4e4e7] bg-white p-5 sm:p-7" onSubmit={handleSubmit}>
+      <label className="text-[12px] font-semibold text-[#52525b]">Your email address<input name="email" type="email" required placeholder="you@example.com" autoComplete="email" className={fieldClass} /></label>
       <div>
-        <span className="support-label">
-          Screenshot <small>(optional)</small>
-        </span>
-        <input
-          ref={fileRef}
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          className="sr-only"
-          onChange={(event) => selectFile(event.target.files?.[0])}
-        />
-        <button
-          type="button"
-          className="support-attachment"
-          onClick={() => fileRef.current?.click()}
-          onDragOver={(event) => event.preventDefault()}
-          onDrop={(event) => {
-            event.preventDefault();
-            selectFile(event.dataTransfer.files[0]);
-          }}
-        >
-          <Paperclip size={17} aria-hidden="true" />
-          <span>{fileName || "Choose an image or drop it here"}</span>
-        </button>
-        <p className="support-hint">
-          JPG, PNG, WebP · Max 10 MB. Attach your image to the email draft.
-        </p>
-        {error && (
-          <p role="alert" className="mt-2 text-xs text-red-700">
-            {error}
-          </p>
-        )}
+        <label htmlFor="support-topic" className="mb-2 block text-[12px] font-semibold text-[#52525b]">What do you need help with?</label>
+        <CustomSelect id="support-topic" name="issue" label="What do you need help with?" required placeholder="Choose a topic" options={supportTopics} value={issue} onChange={value => { setIssue(value); setTopicError(false); }} errorId={topicError ? "support-topic-error" : undefined} />
+        {topicError && <p id="support-topic-error" role="alert" className="mt-2 text-[12px] text-[#c63838]">Choose a topic before continuing.</p>}
       </div>
-
-      <button type="submit" className="action-primary">
-        <Send size={15} aria-hidden="true" />
-        <span>Continue in email</span>
-        <ArrowRight size={16} aria-hidden="true" />
-      </button>
-      <p className="support-hint">
-        Opens your email app with your message ready to send.
-      </p>
+      <label className="text-[12px] font-semibold text-[#52525b]">Tell us what happened<textarea name="message" required maxLength={4000} placeholder="What were you trying to do? What happened instead?" rows={4} className={`${fieldClass} h-32 resize-none overflow-y-auto leading-[1.8]`} /></label>
+      <p className="flex items-start gap-2 text-[11px] leading-[1.7] text-[#8b8b95]"><Paperclip size={14} className="mt-0.5 shrink-0" aria-hidden="true" />Have a screenshot? Attach it in your email app after opening the draft.</p>
+      <div className="border-t border-[#ededf1] pt-5"><button type="submit" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#c63838] px-5 text-[13px] font-semibold text-white transition-colors hover:bg-[#ac3030]">Continue in email<ArrowUpRight size={15} aria-hidden="true" /></button><p className="mt-3 text-center text-[10px] leading-[1.7] text-[#8b8b95]">Opens your email app. Review your message and send it from there.</p></div>
     </form>
   );
 }

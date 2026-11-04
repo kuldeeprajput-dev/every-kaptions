@@ -34,14 +34,14 @@ export function CookieBanner() {
     <aside
       role="region"
       aria-label="Cookie consent banner"
-      className="fixed bottom-0 inset-x-0 z-[90] w-full max-w-full overflow-hidden bg-surface/96 border-t border-hairline backdrop-blur-md px-4 sm:px-6 py-3 sm:py-3.5 flex flex-row items-center justify-between gap-3 sm:gap-4 animate-[fadeUp_0.3s_ease_both]"
+      className="fixed bottom-0 inset-x-0 z-[90] w-full max-w-full overflow-hidden bg-white/95 border-t border-[#dedee5] backdrop-blur-md px-4 sm:px-6 py-3 sm:py-3.5 flex flex-row items-center justify-between gap-3 sm:gap-4 animate-[fadeUp_0.3s_ease_both]"
     >
-      <p className="text-[12px] sm:text-[13px] text-body m-0 leading-[1.5]">
+      <p className="text-[12px] sm:text-[13px] text-[#5b5b65] m-0 leading-[1.5]">
         We use cookies to keep you signed in and tools that measure usage and help
         us fix problems.{" "}
         <Link
           href="/legal/privacy"
-          className="text-amber hover:text-cream font-semibold underline underline-offset-2 transition-colors"
+          className="text-[#c63838] hover:text-[#18181b] font-semibold underline underline-offset-2 transition-colors"
         >
           Privacy Policy.
         </Link>
@@ -49,7 +49,7 @@ export function CookieBanner() {
       <button
         type="button"
         onClick={handleDismiss}
-        className="px-4 sm:px-5 py-2 min-h-[36px] bg-amber hover:bg-amber/90 text-white font-bold text-xs rounded-lg transition-all cursor-pointer shrink-0 shadow-sm"
+        className="px-4 sm:px-5 py-2 min-h-[36px] bg-[#18181b] hover:bg-black text-white font-bold text-xs rounded-lg transition-all cursor-pointer shrink-0 shadow-sm"
       >
         Got it
       </button>

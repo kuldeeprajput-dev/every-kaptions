@@ -6,34 +6,40 @@ const links = [
   ["Privacy", "/legal/privacy"],
   ["Refunds", "/legal/refund"],
   ["Data deletion", "/legal/data-deletion"],
-  ["Contact", "/legal/contact"],
   ["Support", "/support"],
 ];
 export function SiteFooter() {
   return (
-    <footer className="site-footer">
-      <Link href="/" aria-label="EveryKaptions home">
-        <LogoWordmark />
-      </Link>
-      <nav aria-label="Footer navigation">
-        {links.map(([label, href]) => (
-          <Link key={href} href={href}>
-            {label}
-          </Link>
-        ))}
-      </nav>
-      <p className="footer-credit">
-        Made for your words. Built by{" "}
-        <a
-          href={brand.socialUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-cream"
-        >
-          {brand.founderHandle}
-        </a>
-        .
-      </p>
+    <footer className="w-full select-none border-t border-[#e4e4e7] bg-[#fafafa]">
+      <div className="mx-auto w-full max-w-[1176px] px-5 py-8 sm:px-7 sm:py-10">
+        <div className="flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-center lg:gap-10">
+          <div className="shrink-0">
+            <Link href="/" aria-label="EveryKaptions home" className="inline-flex">
+              <LogoWordmark />
+            </Link>
+            <p className="mt-2 text-[11px] leading-[1.8] text-[#8b8b95]">
+              Made for your words. Built by{" "}
+              <a
+                href={brand.socialUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-[#52525b] transition-colors hover:text-[#18181b]"
+              >
+                {brand.founderHandle}
+              </a>
+              .
+            </p>
+          </div>
+          <nav aria-label="Footer navigation" className="flex flex-wrap items-center gap-x-5 gap-y-3 sm:gap-x-6">
+            {links.map(([label, href]) => (
+              <Link key={href} href={href} className="text-[12px] leading-6 text-[#71717a] transition-colors hover:text-[#18181b]">
+                {label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+
+      </div>
     </footer>
   );
 }
