@@ -1,17 +1,21 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import { Inter, Archivo_Black } from "next/font/google";
 import "./globals.css";
-import "./product.css";
 import { AuthProvider } from "@/features/auth/store/auth-store";
 import { AuthModal } from "@/features/auth/components/auth-modal";
 import { CookieBanner } from "@/shared/components/cookie-banner";
 
-const inter = localFont({
-  src: "../../public/fonts/Inter-Variable.ttf",
+const inter = Inter({
+  subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",
-  preload: true,
-  weight: "100 900",
+});
+
+const archivoBlack = Archivo_Black({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -21,7 +25,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={`${inter.variable} ${archivoBlack.variable}`}>
       <body>
         <AuthProvider>
           {children}
