@@ -80,7 +80,7 @@ export function EditorStyleInspector({
                   type="button"
                   onClick={() => onSelectStyle(style.id)}
                   aria-pressed={isSelected}
-                  className={cn("preset-tile group relative rounded-lg border p-2.5 text-left transition cursor-pointer overflow-hidden", isSelected ? "border-amber bg-amber/15 shadow-sm ring-1 ring-amber/50" : "border-hairline bg-surface hover:border-hairline hover:bg-surface")}
+                  className={cn("preset-tile group relative rounded-lg border p-2.5 text-left transition cursor-pointer overflow-hidden [&_[class~='mt-2.5']]:mt-[8px] [&_[class~='mt-2.5']_>_span:first-child]:text-[10px] [&_[class~='mt-2.5']_>_span:first-child]:font-[500] [&_[class~='mt-2.5']_>_span:nth-child(2)]:[padding:2px_3px] [&_[class~='mt-2.5']_>_span:nth-child(2)]:text-[7px]", isSelected ? "border-amber bg-amber/15 shadow-sm ring-1 ring-amber/50" : "border-hairline bg-surface hover:border-hairline hover:bg-surface")}
                 >
                   <span className={cn("block rounded-md bg-black/80 px-1 py-3 text-center text-[11px] font-bold", style.textClass)}>
                     YOUR <span className={style.activeWordClass}>STORY</span>

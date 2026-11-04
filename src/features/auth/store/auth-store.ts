@@ -124,7 +124,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const redirectUrl =
         typeof window !== "undefined"
-          ? `${window.location.origin}/`
+          ? `${window.location.origin}${window.location.pathname === "/studio" || window.location.pathname.startsWith("/studio/") || window.location.pathname.startsWith("/editor/") ? window.location.pathname + window.location.search : "/"}`
           : undefined;
 
       const { error } = await supabase.auth.signInWithOAuth({

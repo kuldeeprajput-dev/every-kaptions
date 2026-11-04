@@ -99,7 +99,7 @@ export function EditorVideoStage({
   }, [wordsList, currentTime]);
 
   return (
-    <div className="caption-canvas flex-1 min-w-0 flex flex-col items-center justify-center p-4 relative overflow-hidden h-full">
+    <div className="caption-canvas flex-1 min-w-0 flex flex-col items-center justify-center p-4 relative overflow-hidden h-full [background:#282a25] [&_>_div_>_div]:rounded-[7px] [&_>_div_>_div]:[box-shadow:0_8px_25px_#0003] [&_.text-cream]:[color:#f7f7f4] [&_.bg-surface]:[background:#181a16] [&_.bg-surface-raised]:[background:#1c1e1a] [&_button[aria-label='Play_video']]:[-webkit-backdrop-filter:none] [&_button[aria-label='Play_video']]:[backdrop-filter:none] [&_button[aria-label='Play_video']]:[background:none] [&_button[aria-label='Play_video']_>_div]:[color:#252622] [&_button[aria-label='Play_video']_>_div]:[background:#ffffffde] [&_button[aria-label='Play_video']_>_div]:w-[48px] [&_button[aria-label='Play_video']_>_div]:h-[48px] [&_button[aria-label='Play_video']_>_div]:[box-shadow:0_5px_20px_#0002] [&_button[aria-label='Play_video']_svg]:[fill:currentColor] [&_button[aria-label='Play_video']_svg]:w-[19px] [&_button[aria-label='Play_video']_svg]:h-[19px] product-max-639:[padding:12px]">
       <div className="mx-auto flex w-full max-w-5xl h-full flex-1 items-center justify-center min-h-0 my-auto p-2">
         <div
           ref={containerRef}
