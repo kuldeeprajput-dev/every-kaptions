@@ -1,33 +1,31 @@
 import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 
-interface LegalNavProps {
-  current?: "terms" | "privacy" | "refund" | "data-deletion" | "contact";
-}
+export type LegalPage = "terms" | "privacy" | "refund" | "data-deletion";
 
 const LEGAL_LINKS = [
-  { href: "/legal/terms", label: "Terms", id: "terms" },
-  { href: "/legal/privacy", label: "Privacy", id: "privacy" },
-  { href: "/legal/refund", label: "Refunds", id: "refund" },
-  { href: "/legal/contact", label: "Contact", id: "contact" },
-  { href: "/legal/data-deletion", label: "Data deletion", id: "data-deletion" },
-  { href: "/", label: "Back to home", id: "home" },
+  { href: "/legal/terms", label: "Terms of Service", id: "terms" },
+  { href: "/legal/privacy", label: "Privacy Policy", id: "privacy" },
+  { href: "/legal/refund", label: "Refund Policy", id: "refund" },
+  { href: "/legal/data-deletion", label: "Data Deletion", id: "data-deletion" },
 ] as const;
 
-export function LegalNav({ current }: LegalNavProps) {
+export function LegalNav({ current }: { current: LegalPage }) {
   return (
-    <nav
-      className="mt-9 pt-5 border-t border-[var(--hairline)] text-[0.875rem] leading-[1.65]"
-      aria-label="Legal"
-    >
-      {LEGAL_LINKS.filter((item) => item.id !== current).map((item) => (
-        <Link
-          key={item.href}
-          href={item.href}
-          className="text-amber hover:text-cream hover:underline mr-4 no-underline inline-block transition-colors duration-150"
-        >
-          {item.label}
-        </Link>
-      ))}
-    </nav>
+    <aside className="legal-sidebar">
+      <p className="legal-sidebar-label">Legal &amp; policies</p>
+      <nav aria-label="Legal policies" className="legal-navigation">
+        {LEGAL_LINKS.map((item) => (
+          <Link key={item.id} href={item.href} aria-current={item.id === current ? "page" : undefined}>
+            {item.label}
+          </Link>
+        ))}
+      </nav>
+      <div className="legal-help">
+        <p>Have a question?</p>
+        <span>We can help you understand these policies.</span>
+        <Link href="/support">Talk to support <ArrowUpRight size={15} aria-hidden="true" /></Link>
+      </div>
+    </aside>
   );
 }
