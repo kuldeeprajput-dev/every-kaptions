@@ -1,3 +1,4 @@
+import { MobileLandingPage } from "./mobile-landing-page";
 import { SiteHeader } from "@/shared/components/site-header";
 import Link from "next/link";
 import { CaptionShowcase } from "./caption-showcase";
@@ -13,7 +14,9 @@ import { LandingFooter } from "./landing-footer";
 
 export function LandingPage() {
   return (
-    <div className="min-h-screen bg-white text-[#18181b] font-sans antialiased selection:bg-amber/30 selection:text-black">
+    <>
+    <MobileLandingPage />
+    <div className="hidden md:block min-h-screen bg-white text-[#18181b] font-sans antialiased selection:bg-amber/30 selection:text-black">
       <SiteHeader />
       <main id="main-content" className="w-full">
         <section
@@ -41,7 +44,7 @@ export function LandingPage() {
           </div>
           <CaptionShowcase />
           <div className="mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[12px] font-semibold text-[#52525b]" aria-label="Featured caption languages">
-            <span lang="te">తెలుగు</span>
+            <span lang="hi-Latn">Hinglish</span>
             <span className="size-1 rounded-full bg-[#d4d4d8]" aria-hidden="true" />
             <span lang="hi">हिन्दी</span>
             <span className="size-1 rounded-full bg-[#d4d4d8]" aria-hidden="true" />
@@ -58,5 +61,6 @@ export function LandingPage() {
       </main>
       <LandingFooter />
     </div>
+    </>
   );
 }

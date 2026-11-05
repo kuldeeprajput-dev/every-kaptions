@@ -20,3 +20,7 @@ export function LogoWordmark({ className }: { className?: string }) {
     </span>
   );
 }
+
+export function MobileHeaderLogo() {
+  return <LogoWordmark className="gap-1.5! font-sans antialiased [&>span:first-child]:w-7! [&>span:first-child]:text-[29px]! [&>span:last-child]:text-[18px]!" />;
+}

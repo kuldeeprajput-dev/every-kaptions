@@ -7,8 +7,8 @@ export default function LegalLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="legal-site">
-      <SiteHeader />
+    <div className="legal-site font-sans antialiased">
+      <SiteHeader compactMobile mobileMenu="general" />
       {children}
       <SiteFooter />
     </div>

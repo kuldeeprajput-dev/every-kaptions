@@ -45,6 +45,7 @@ export function AccountMenu({ open, onToggle }: { open: boolean; onToggle: () =>
         onClick={onToggle}
         aria-expanded={open}
         aria-controls="studio-account-options"
+        aria-label="My account"
         className="studio-account-trigger"
       >
         <UserRound size={15} aria-hidden="true" /><span>My account</span>

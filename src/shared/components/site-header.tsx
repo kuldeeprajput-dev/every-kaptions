@@ -4,7 +4,8 @@ import { ArrowUpRight, ChevronDown, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/features/auth/store/auth-store";
-import { LogoWordmark } from "./logo-wordmark";
+import { LogoWordmark, MobileHeaderLogo } from "./logo-wordmark";
+import { MobileAccountSummary } from "./mobile-account-summary";
 import { cn } from "@/shared/lib/cn";
 
 const groups = [
@@ -22,7 +23,7 @@ const groups = [
     id: "languages",
     label: "Languages",
     links: [
-      { label: "Telugu captions", description: "For your words in తెలుగు", href: "/#languages" },
+      { label: "Hinglish captions", description: "For your Hindi-English conversations", href: "/#languages" },
       { label: "Hindi captions", description: "Create captions in हिन्दी", href: "/#languages" },
       { label: "English & more", description: "See supported spoken languages", href: "/#languages" },
     ],
@@ -38,7 +39,7 @@ const groups = [
   },
 ];
 
-export function SiteHeader() {
+export function SiteHeader({ compactMobile = false, mobileMenu = "pricing" }: { compactMobile?: boolean; mobileMenu?: "pricing" | "general" }) {
   const { user, openAuthModal, signOut } = useAuth();
   const [profileError, setProfileError] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -117,9 +118,9 @@ export function SiteHeader() {
       </a>
       <header
         ref={headerRef}
-        className="sticky top-3 z-50 mx-auto mt-3 h-[64px] w-[calc(100%_-_24px)] max-w-[1184px] rounded-2xl border border-[#e4e4e7] bg-white/95 shadow-[0_6px_24px_-12px_rgba(24,24,27,0.18)] backdrop-blur-xl sm:top-4 sm:mt-4 sm:h-[68px] sm:w-[calc(100%_-_48px)]"
+        className={cn("font-sans antialiased max-md:top-2! max-md:mt-2! max-md:h-[58px]! max-md:w-[calc(100%_-_24px)]! max-md:rounded-xl max-md:shadow-none max-md:backdrop-blur-lg", "sticky top-3 z-50 mx-auto mt-3 h-[64px] w-[calc(100%_-_24px)] max-w-[1184px] rounded-2xl border border-[#e4e4e7] bg-white/95 shadow-[0_6px_24px_-12px_rgba(24,24,27,0.18)] backdrop-blur-xl sm:top-4 sm:mt-4 sm:h-[68px] sm:w-[calc(100%_-_48px)]")}
       >
-        <div className="mx-auto flex h-full w-full items-center justify-between gap-3 px-3.5 sm:gap-5 sm:px-5">
+        <div className={cn("mx-auto flex h-full w-full items-center justify-between gap-3 px-3.5 sm:gap-5 sm:px-5", "max-md:h-14 max-md:px-4!")}>
           {/* Logo */}
           <Link
             href="/"
@@ -127,7 +128,8 @@ export function SiteHeader() {
             onClick={closeAll}
             className="shrink-0 flex items-center"
           >
-            <LogoWordmark className="[&>span:last-child]:text-[16px] sm:[&>span:last-child]:text-[20px]" />
+            <span className="md:hidden"><MobileHeaderLogo /></span>
+            <span className="hidden md:inline-flex"><LogoWordmark className="font-sans antialiased [&>span:last-child]:text-[16px] sm:[&>span:last-child]:text-[20px]" /></span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -200,7 +202,7 @@ export function SiteHeader() {
           </nav>
 
           {/* Header Actions */}
-          <div className="ml-auto flex items-center gap-1.5 sm:gap-3 lg:ml-0">
+          <div className={cn("ml-auto flex items-center gap-1.5 sm:gap-3 lg:ml-0", compactMobile && "max-md:[&>div]:hidden max-md:[&>a]:hidden max-md:[&>button:not(:last-child)]:hidden")}>
             {user && (
               <div className="relative">
                 <button
@@ -269,9 +271,9 @@ export function SiteHeader() {
                 setMobileOpen(!mobileOpen);
                 setActiveGroup(null);
               }}
-              className="grid size-9 shrink-0 place-items-center rounded-lg text-[#52525b] transition-colors hover:bg-[#f5f5f5] lg:hidden cursor-pointer"
+              className={cn("grid size-9 shrink-0 place-items-center rounded-lg text-[#52525b] transition-colors hover:bg-[#f5f5f5] lg:hidden cursor-pointer max-md:size-11 max-md:text-[#3f3f46] max-md:[&>svg]:size-[23px]", compactMobile && "max-md:outline-none max-md:focus-visible:outline-none max-md:hover:bg-transparent")}
             >
-              {mobileOpen ? <X size={21} /> : <Menu size={21} />}
+              {mobileOpen ? <X size={21} className="max-md:size-[22px]" /> : <Menu size={21} />}
             </button>
           </div>
         </div>
@@ -281,8 +283,37 @@ export function SiteHeader() {
           <nav
             id="mobile-navigation"
             aria-label="Mobile navigation"
-            className="absolute inset-x-0 top-[calc(100%+8px)] flex max-h-[calc(100dvh-100px)] flex-col gap-2 overflow-y-auto rounded-2xl border border-[#e4e4e7] bg-white p-5 shadow-[0_16px_36px_-12px_rgba(24,24,27,0.2)] lg:hidden"
+            className={cn("absolute inset-x-0 top-[calc(100%+8px)] flex max-h-[calc(100dvh-100px)] flex-col gap-2 overflow-y-auto rounded-2xl border border-[#e4e4e7] bg-white p-5 shadow-[0_16px_36px_-12px_rgba(24,24,27,0.2)] lg:hidden", compactMobile && "max-md:gap-0 max-md:rounded-xl max-md:p-3")}
           >
+            {compactMobile && <div className="md:hidden">
+              <MobileAccountSummary />
+              {(mobileMenu === "general" ? [
+                ["Home", "/"],
+                ["Pricing", "/pricing"],
+                ["Help & support", "/support"],
+              ] : [
+                ["Home", "/"],
+                ["Compare features", "/pricing#plan-comparison"],
+                ["Pricing questions", "/pricing#pricing-faq-title"],
+                ["Billing help", "/support"],
+              ]).map(([label, href]) => <Link key={href} href={href} onClick={() => {
+                if (href === "/pricing#plan-comparison") {
+                  const comparison = document.getElementById("plan-comparison");
+                  if (comparison instanceof HTMLDetailsElement) comparison.open = true;
+                }
+                closeAll();
+              }} aria-current={href === "/pricing#planGrid" ? "page" : undefined} className={cn("flex min-h-11 items-center rounded-lg px-3 text-[14px] font-medium", href === "/pricing#planGrid" ? "bg-[#faf0f0] text-[#b32e2e]" : "text-[#3f3f46]")}>{label}</Link>)}
+              <div className="flex flex-wrap items-center justify-between border-t border-[#ededf0]">
+                {user ? <Link href="/studio" onClick={closeAll} className="flex min-h-11 items-center px-3 font-semibold text-[#c63838]">My studio</Link> : <button type="button" onClick={signIn} className="flex min-h-11 w-full cursor-pointer items-center px-3 text-[14px] font-semibold text-[#c63838]">Sign in</button>}
+                {user && <button type="button" onClick={async () => {
+                  const { error } = await signOut();
+                  if (error) setProfileError(error.message);
+                  else closeAll();
+                }} className="flex min-h-11 cursor-pointer items-center px-3 text-[13px] text-[#71717a]">Sign out</button>}
+                {profileError && <p role="alert" className="px-3 pt-2 text-xs text-[#b32e2e]">{profileError}</p>}
+              </div>
+            </div>}
+            <div className={cn("contents", compactMobile && "max-md:hidden")}>
             {groups.map((group) => {
               const isOpen = activeGroup === group.id;
               return (
@@ -328,6 +359,8 @@ export function SiteHeader() {
               Pricing
             </Link>
 
+
+
             {!user && (
               <button
                 type="button"
@@ -337,6 +370,7 @@ export function SiteHeader() {
                 Sign in
               </button>
             )}
+            </div>
           </nav>
         )}
       </header>
