@@ -41,7 +41,7 @@ export function LandingWorkflowSteps() {
         {/* Monochrome workflow banner */}
         <div className="relative grid items-center gap-4 overflow-hidden min-h-[280px] p-6 sm:grid-cols-[1.2fr_0.8fr] sm:p-[35px] rounded-[13px] bg-[#e9e9ee]">
           <Image
-            src="/media/landing/paper-backdrop.webp"
+            src="/landing/paper-backdrop.webp"
             className="absolute inset-0 object-cover object-[50%_15%] pointer-events-none grayscale"
             alt=""
             fill
@@ -65,7 +65,7 @@ export function LandingWorkflowSteps() {
 
           <div className="relative z-[1] h-[180px] w-full bg-transparent pointer-events-none sm:h-[250px]">
             <Image
-              src="/media/landing/workflow-quotation-sculpture.webp"
+              src="/landing/workflow-quotation-sculpture.webp"
               alt="Sculptural silver quotation marks representing spoken words"
               fill
               sizes="(max-width: 768px) 45vw, 400px"

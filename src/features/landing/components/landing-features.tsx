@@ -36,15 +36,15 @@ const features = [
     id: "languages",
     title: "Your language. Your words.",
     description:
-      "Create captions in Indian languages including Telugu, Hindi, English, Tamil, Kannada, and more. Choose your spoken language before you generate.",
+      "Create captions in Indian languages including Hinglish, Hindi, English, Tamil, Kannada, and more. Choose your spoken language before you generate.",
     extra:
       "Review every word and make the final version feel natural to your audience.",
     visual: (
       <div className="relative w-full h-[360px]">
         <Image
           className="object-cover grayscale"
-          src="/media/landing/language-tiles-teal.webp"
-          alt="Speech bubbles with Telugu, Hindi, and English letters"
+          src="/landing/language-tiles-teal.webp"
+          alt="Speech bubbles with Hinglish, Hindi, and English letters"
           fill
           sizes="(max-width: 768px) 100vw, 560px"
         />
@@ -113,7 +113,7 @@ export function LandingFeatures() {
                     className={`absolute inset-0 object-cover pointer-events-none grayscale ${
                       index === 1 ? "rotate-180 scale-110" : ""
                     }`}
-                    src="/media/landing/paper-backdrop.webp"
+                    src="/landing/paper-backdrop.webp"
                     alt=""
                     fill
                     sizes="(max-width: 768px) 100vw, 560px"

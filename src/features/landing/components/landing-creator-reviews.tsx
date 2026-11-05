@@ -59,7 +59,7 @@ export function LandingCreatorReviews() {
             </blockquote>
             <figcaption className="flex items-center gap-3 mt-6">
               <Image
-                src={`/media/reviews/demo-creator-${active + 1}.png`}
+                src={`/reviews/demo-creator-${active + 1}.png`}
                 width={48}
                 height={48}
                 alt="AI-generated demo portrait, not the reviewer's photo"

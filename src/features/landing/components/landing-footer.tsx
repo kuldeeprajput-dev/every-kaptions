@@ -44,7 +44,7 @@ export function LandingFooter() {
         <div className="relative flex min-h-[290px] items-center overflow-hidden rounded-[23px] border border-white/10 bg-[#1c1c1c] p-7 sm:min-h-[310px] sm:px-12 sm:py-12">
           <div className="pointer-events-none absolute inset-0" aria-hidden="true">
             <Image
-              src="/media/landing/footer-paper-shade-v2.webp"
+              src="/landing/footer-paper-shade-v2.webp"
               alt=""
               fill
               unoptimized

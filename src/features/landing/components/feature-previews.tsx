@@ -28,7 +28,7 @@ function CreatorStage({ image, alt, children }: { image: string; alt: string; ch
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="relative aspect-[4/5] h-full max-w-full overflow-hidden rounded-xl">
           <Image
-            src={`/media/landing/${image}.webp`}
+            src={`/landing/${image}.webp`}
             alt={alt}
             fill
             unoptimized

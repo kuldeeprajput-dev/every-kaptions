@@ -51,7 +51,7 @@ export function CaptionShowcase() {
             <div className="rounded-[14px] border border-[#e0e0e5] bg-white p-1.5 shadow-[0_12px_28px_-16px_rgba(24,24,27,0.25)] sm:rounded-[20px] sm:p-2">
               <div className="relative aspect-[3/4] overflow-hidden rounded-[9px] bg-[#e4e4e7] sm:rounded-[13px]">
                 <Image
-                  src={`/media/landing/${preview.image}.webp`}
+                  src={`/landing/${preview.image}.webp`}
                   alt={preview.alt}
                   fill
                   unoptimized

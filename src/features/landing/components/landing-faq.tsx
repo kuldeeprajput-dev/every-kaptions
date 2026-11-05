@@ -16,7 +16,7 @@ const questions = [
     question: "Which languages are supported?",
     answer: (
       <>
-        You can choose English, Hindi, Telugu, Tamil, Kannada, Malayalam,
+        You can choose English, Hindi, Hinglish, Tamil, Kannada, Malayalam,
         Marathi, Bengali, Gujarati, or Punjabi as your spoken language. Review
         the transcript before exporting, especially names and local expressions.
       </>

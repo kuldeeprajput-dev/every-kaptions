@@ -183,7 +183,7 @@ export function CaptionDemo() {
               : "h-[340px] aspect-[9/16] lg:h-full"
           }`}>
             <Image
-              src="/media/landing/creator-podcast.webp"
+              src="/landing/creator-podcast.webp"
               alt="Male creator recording a podcast video with captions"
               fill
               sizes="(max-width: 768px) 100vw, 700px"

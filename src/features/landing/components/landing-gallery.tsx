@@ -93,7 +93,7 @@ export function LandingPresets() {
               >
                 <div className="relative aspect-[9/13] overflow-hidden rounded-[10px] bg-[#e4e4e7]">
                   <Image
-                    src={`/media/landing/${photos[index]}.webp`}
+                    src={`/landing/${photos[index]}.webp`}
                     alt={`Creator portrait with a ${style.name} caption example`}
                     fill
                     unoptimized
@@ -142,7 +142,7 @@ export function LandingUseCases() {
             >
               <div className="relative aspect-[1.2] overflow-hidden">
                 <Image
-                  src={`/media/landing/${item.photo}.webp`}
+                  src={`/landing/${item.photo}.webp`}
                   alt={`${item.title} creator example`}
                   fill
                   unoptimized
@@ -192,7 +192,7 @@ export function LandingLanguages() {
           </p>
           <p className="text-[14px] leading-[1.8] text-[#5b5b65] mt-[15px]">
             Choose from English and supported Indian languages, including
-            Telugu, Hindi, Tamil, and Kannada. Review the transcript and shape
+            Hinglish, Hindi, Tamil, and Kannada. Review the transcript and shape
             every line before you share.
           </p>
           <div
@@ -206,7 +206,7 @@ export function LandingLanguages() {
                   key={option.value}
                   className="text-[#6b6b76] bg-white border border-[#dedee5] rounded-full px-2.5 py-1 text-[9px] font-semibold"
                 >
-                  {option.label}
+                  {option.value === "te" ? "Hinglish" : option.label}
                 </span>
               ))}
           </div>
@@ -216,8 +216,8 @@ export function LandingLanguages() {
 
       <div className="relative w-full aspect-square rounded-[19px] overflow-hidden bg-[#f5f5f5]">
         <Image
-          src="/media/landing/language-tiles-teal.webp"
-          alt="Speech bubbles representing Telugu, Hindi, and English"
+          src="/landing/language-tiles-teal.webp"
+          alt="Speech bubbles representing Hinglish, Hindi, and English"
           fill
           sizes="(max-width: 768px) 100vw, 560px"
           className="object-cover grayscale"
