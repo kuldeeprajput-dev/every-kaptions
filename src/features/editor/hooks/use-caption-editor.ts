@@ -222,19 +222,18 @@ export function useCaptionEditor() {
     const tokens = segment.text.trim().split(/\s+/).filter(Boolean);
     if (tokens.length < 2) return;
 
-    const ratio = (splitTime - segment.start) / (segment.end - segment.start);
-    const tokenIndex = Math.min(tokens.length - 1, Math.max(1, Math.round(tokens.length * ratio)));
-    const hasWordTiming = segment.words.length >= 2;
-    const wordIndex = hasWordTiming
-      ? Math.min(segment.words.length - 1, Math.max(1, Math.round(segment.words.length * ratio)))
-      : 0;
-    const first = { ...segment, text: tokens.slice(0, tokenIndex).join(" "), end: splitTime, words: hasWordTiming ? segment.words.slice(0, wordIndex) : [] };
+    const words = ensureSegmentWords(segment);
+    // Split at the nearest actual word boundary instead of a word-count/time ratio.
+    let boundary = 1;
+    for (let i = 2; i < words.length; i++) {
+      if (Math.abs(words[i].start - splitTime) < Math.abs(words[boundary].start - splitTime)) boundary = i;
+    }
+    const boundaryTime = Math.max(segment.start + .2, Math.min(segment.end - .2, words[boundary].start));
+    const first = { ...segment, text: tokens.slice(0, boundary).join(" "), end: boundaryTime, words: words.slice(0, boundary).map(word => ({ ...word, end: Math.min(word.end, boundaryTime) })) };
     const second = {
-      ...segment,
-      id: `${segment.id}-split-${splitTime.toFixed(2)}`,
-      text: tokens.slice(tokenIndex).join(" "),
-      start: splitTime,
-      words: hasWordTiming ? segment.words.slice(wordIndex) : [],
+      ...segment, id: `${segment.id}-split-${boundaryTime.toFixed(2)}`,
+      text: tokens.slice(boundary).join(" "), start: boundaryTime,
+      words: words.slice(boundary).map(word => ({ ...word, start: Math.max(word.start, boundaryTime) })),
     };
     const next = [...segments];
     next.splice(index, 1, first, second);

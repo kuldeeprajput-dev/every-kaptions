@@ -1,3 +1,5 @@
+import type { OriginalCaptionPresetId } from "../data/caption-presets";
+
 export type CaptionWord = {
   id: string;
   text: string;
@@ -14,6 +16,7 @@ export type CaptionSegment = {
 };
 
 export type CaptionStyleId =
+  | OriginalCaptionPresetId
   | "yellow"
   | "minimal"
   | "classic"

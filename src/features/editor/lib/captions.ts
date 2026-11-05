@@ -21,7 +21,7 @@ export function normalizeWord(
 
 /**
  * Generates smoothly distributed word timings across a segment's duration based on token character length.
- * Guarantees every segment has word-level timestamps for voice-sync highlighting.
+ * Provides approximate word timestamps when the transcription has no word alignment.
  */
 export function interpolateSegmentWords(
   segment: Pick<CaptionSegment, "id" | "text" | "start" | "end">,
@@ -34,7 +34,7 @@ export function interpolateSegmentWords(
   const totalDuration = end - start;
 
   // Weight each word by token length + 2 (so short words like "to", "a" get adequate duration)
-  const weights = tokens.map((token) => Math.max(1, token.replace(/[^\w]/g, "").length + 2));
+  const weights = tokens.map((token) => Math.max(1, Array.from(token.replace(/[^\p{L}\p{N}]/gu, "")).length + 2));
   const totalWeight = weights.reduce((sum, w) => sum + w, 0);
 
   let currentStart = start;
@@ -61,7 +61,12 @@ export function ensureSegmentWords(segment: CaptionSegment): CaptionWord[] {
   if (tokens.length === 0) return [];
 
   if (segment.words && segment.words.length === tokens.length && segment.words.length > 0) {
-    return segment.words.map((word, index) => ({ ...word, text: tokens[index] }));
+    const aligned = segment.words.map((word, index, words) => ({
+      ...word, text: tokens[index],
+      start: Math.max(segment.start, word.start),
+      end: Math.min(segment.end, word.end, words[index + 1]?.start ?? segment.end),
+    }));
+    if (aligned.every((word, index) => Number.isFinite(word.start) && Number.isFinite(word.end) && word.end > word.start && (index === 0 || word.start >= aligned[index - 1].end))) return aligned;
   }
 
   return interpolateSegmentWords(segment);

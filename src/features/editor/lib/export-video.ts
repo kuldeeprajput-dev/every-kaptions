@@ -1,5 +1,6 @@
 import type { CaptionSegment } from "../types/captions";
 import { drawCaptions } from "./draw-captions";
+import { observeVideoFrames } from "./video-frames";
 
 export type RenderVideoOptions = {
   videoElement: HTMLVideoElement;
@@ -103,11 +104,17 @@ export async function renderAndExportVideo({
       const originalPlaybackRate = videoElement.playbackRate;
       videoElement.playbackRate = 1;
 
+      let recordingFailed = false;
+      let stopFrames = () => {};
+      const finish = () => { if (recorder.state === "recording") recorder.stop(); };
+      const cleanup = () => { stopFrames(); videoElement.removeEventListener("ended", finish); };
       recorder.onstop = () => {
+        cleanup();
         try {
           videoElement.currentTime = originalTime;
           videoElement.muted = originalMuted;
           videoElement.playbackRate = originalPlaybackRate;
+          if (recordingFailed) return;
 
           const blob = new Blob(chunks, { type: selectedMime || "video/mp4" });
           const url = URL.createObjectURL(blob);
@@ -126,46 +133,45 @@ export async function renderAndExportVideo({
       };
 
       recorder.onerror = (e) => {
+        cleanup();
         videoElement.currentTime = originalTime;
         videoElement.muted = originalMuted;
         videoElement.playbackRate = originalPlaybackRate;
         reject(e);
       };
 
-      let animationFrameId: number;
-
-      const drawFrame = () => {
-        if (videoElement.ended || videoElement.currentTime >= videoElement.duration) {
-          cancelAnimationFrame(animationFrameId);
-          if (recorder.state === "recording") {
-            recorder.stop();
-          }
-          return;
-        }
-
-        const currentTime = videoElement.currentTime;
+      const drawFrame = (currentTime: number) => {
+        if (videoElement.ended) { finish(); return; }
         if (onProgress && videoElement.duration) {
           onProgress(Math.min(100, Math.round((currentTime / videoElement.duration) * 100)));
         }
-
         ctx.drawImage(videoElement, 0, 0, width, height);
-
         drawCaptions(ctx, width, height, segments, currentTime, styleId, { highlightHex, position, customYPercent, fontSize, textAlign, textTransform });
-
-        if (recorder.state === "recording") {
-          animationFrameId = requestAnimationFrame(drawFrame);
-        }
       };
 
-      videoElement.currentTime = 0;
-      videoElement.muted = false;
-
-      videoElement.onseeked = () => {
-        videoElement.onseeked = null;
+      const startRecording = () => {
+        videoElement.removeEventListener("seeked", startRecording);
+        drawFrame(0);
+        videoElement.addEventListener("ended", finish, { once: true });
         recorder.start(250);
-        videoElement.play().catch((err) => reject(err));
-        drawFrame();
+        stopFrames = observeVideoFrames(videoElement, drawFrame);
+        videoElement.play().catch(err => {
+          recordingFailed = true;
+          cleanup();
+          videoElement.currentTime = originalTime;
+          videoElement.muted = originalMuted;
+          videoElement.playbackRate = originalPlaybackRate;
+          if (recorder.state !== "inactive") recorder.stop();
+          reject(err);
+        });
       };
+      videoElement.muted = false;
+      if (videoElement.currentTime === 0 && !videoElement.seeking) startRecording();
+      else {
+        videoElement.addEventListener("seeked", startRecording, { once: true });
+        videoElement.currentTime = 0;
+      }
+
     } catch (err) {
       reject(err);
     }
