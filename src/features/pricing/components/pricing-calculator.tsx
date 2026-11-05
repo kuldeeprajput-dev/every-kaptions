@@ -4,6 +4,13 @@ import { useState } from "react";
 import { ArrowRight } from "lucide-react";
 import type { BillingInterval } from "../data/pricing-data";
 
+const videoPresets = [
+  { label: "Short (30s)", mins: 0.5 },
+  { label: "Reel (60s)", mins: 1 },
+  { label: "Explainer (2m)", mins: 2 },
+  { label: "Interview (5m)", mins: 5 },
+];
+
 export function PricingCalculator({ billing, className = "" }: { billing: BillingInterval; className?: string }) {
   const [videos, setVideos] = useState(12);
   const [minutes, setMinutes] = useState(2);
@@ -15,6 +22,19 @@ export function PricingCalculator({ billing, className = "" }: { billing: Billin
         <div>
           <h2 id="caption-estimate-title" className="text-[24px] font-bold leading-[1.2] tracking-[-0.04em] text-[#27272a]">How many minutes do you need?</h2>
           <p className="mt-3 text-[13px] leading-[1.8] text-[#71717a]">Use your typical video length to estimate your monthly captioning needs.</p>
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <span className="text-[11px] font-medium text-[#8b8b95]">Quick presets:</span>
+            {videoPresets.map((preset) => (
+              <button
+                key={preset.label}
+                type="button"
+                onClick={() => setMinutes(preset.mins)}
+                className={`rounded-md border px-2.5 py-1 text-[11px] font-medium transition-colors ${minutes === preset.mins ? "border-[#c63838] bg-[#fdf4f4] text-[#b32e2e]" : "border-[#dedee5] bg-white text-[#52525b] hover:bg-[#f4f4f5]"}`}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
           <div className="mt-6 grid gap-6 sm:grid-cols-2">
             <label className="block"><span className="mb-3 flex justify-between gap-3 text-[12px] text-[#71717a]">Videos per month<strong className="font-semibold text-[#c63838]">{videos}</strong></span><input type="range" min={1} max={60} value={videos} onChange={event => setVideos(Number(event.target.value))} className="w-full accent-[#c63838]" /></label>
             <label className="block"><span className="mb-3 flex justify-between gap-3 text-[12px] text-[#71717a]">Minutes per video<strong className="font-semibold text-[#c63838]">{minutes}</strong></span><input type="range" min={0.5} max={15} step={0.5} value={minutes} onChange={event => setMinutes(Number(event.target.value))} className="w-full accent-[#c63838]" /></label>

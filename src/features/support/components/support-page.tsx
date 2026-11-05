@@ -8,9 +8,9 @@ import { SupportGuides } from "./support-guides";
 
 export function SupportPage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white font-sans antialiased text-[#18181b]">
       <SiteHeader />
-      <main id="main-content" className="mx-auto w-full max-w-[1100px] px-5 pb-16 pt-10 sm:px-7 sm:pt-14">
+      <main id="main-content" className="mx-auto w-full max-w-[1176px] px-5 pb-16 pt-8 sm:px-7 md:pt-12">
         <div className="mb-9 border-b border-[#e4e4e7] pb-8 sm:mb-10 sm:pb-10">
           <h1 className="text-[clamp(36px,4.5vw,54px)] font-bold leading-[1.1] tracking-[-0.055em] text-[#18181b]">A little help.<br />More time to create.</h1>
           <p className="mt-4 max-w-[560px] text-[15px] leading-[1.8] text-[#71717a]">Find an answer below or tell us what’s happening. We’ll help you take the next step.</p>
