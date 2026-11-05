@@ -305,7 +305,7 @@ export function useCaptionEditor() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      window.setTimeout(() => URL.revokeObjectURL(url), 30_000);
 
       // ONLY record export quota after successful file delivery!
       plan.recordExport();
@@ -385,6 +385,8 @@ export function useCaptionEditor() {
     mergeWithNext,
     deleteSegment,
     downloadCaptions,
+    canExport: plan.canExport,
+    recordExport: plan.recordExport,
     setLanguage,
     setOutputLanguage,
     setDuration,

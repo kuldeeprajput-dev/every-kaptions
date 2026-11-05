@@ -7,8 +7,13 @@ import type { CaptionAppearance } from "../types/captions";
 import { formatClockTime } from "../lib/captions";
 import { drawCaptions } from "../lib/draw-captions";
 import { observeVideoFrames } from "../lib/video-frames";
-import { renderAndExportVideo } from "../lib/export-video";
-import { usePlanSummary } from "../store/plan-store";
+import {
+  renderAndExportVideo,
+  videoExportFrameRates,
+  videoExportQualities,
+  type VideoExportFrameRate,
+  type VideoExportQuality,
+} from "../lib/export-video";
 import "./caption-editor.css";
 import { PlaybackSpeed } from "./playback-speed";
 import { EditorColorPicker, EditorSelect } from "./editor-appearance-controls";
@@ -173,10 +178,11 @@ export function CaptionEditor({ editor, onBack }: { editor: ReturnType<typeof us
   const [mediaSize, setMediaSize] = useState({ width: 1280, height: 720 });
   const [stageSize, setStageSize] = useState({ width: 800, height: 500 });
   const [exporting, setExporting] = useState(false);
-  const [exportOpen, setExportOpen] = useState(false);
+  const [exportMenu, setExportMenu] = useState<"formats" | "video" | null>(null);
+  const [exportQuality, setExportQuality] = useState<VideoExportQuality>("full-hd");
+  const [exportFrameRate, setExportFrameRate] = useState<VideoExportFrameRate>(30);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState("");
-  const plan = usePlanSummary();
   const appearance = editor.captionAppearance;
   const setAppearance = (patch: Partial<CaptionAppearance>) => editor.setCaptionAppearance(previous => ({ ...previous, ...patch }));
   const duration = Math.max(.01, editor.duration);
@@ -214,12 +220,12 @@ export function CaptionEditor({ editor, onBack }: { editor: ReturnType<typeof us
     drawCaptions(ctx, mediaSize.width, mediaSize.height, editor.segments, time, editor.styleId, appearance);
   }, [mediaSize, editor.segments, editor.styleId, appearance]);
   useEffect(() => {
-    if (!playing || !video.current) return;
+    if (exporting || !playing || !video.current) return;
     return observeVideoFrames(video.current, time => { paintCaptions(time); setTime(time); });
-  }, [playing, paintCaptions, setTime]);
+  }, [exporting, playing, paintCaptions, setTime]);
   useEffect(() => {
-    if (!playing) paintCaptions(editor.currentTime);
-  }, [playing, paintCaptions, editor.currentTime]);
+    if (!exporting && !playing) paintCaptions(editor.currentTime);
+  }, [exporting, playing, paintCaptions, editor.currentTime]);
   useEffect(() => {
     if (follow && playing && active) rows.current?.querySelector(`[data-caption-id="${CSS.escape(active.id)}"]`)?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [follow, playing, active]);
@@ -237,14 +243,16 @@ export function CaptionEditor({ editor, onBack }: { editor: ReturnType<typeof us
 
   const exportVideo = async () => {
     if (!video.current || exporting) return;
-    if (!plan.canExport) { setError("Your video export allowance is used. Choose a plan to export more videos."); return; }
-    setExporting(true); setProgress(0); setError(""); setExportOpen(false);
-    video.current.pause();
+    setExportMenu(null);
+    if (!editor.canExport) { setError("Your video export allowance is used. Choose a plan to export more videos."); return; }
+    setExporting(true); setProgress(0); setError("");
     try {
-      const success = await renderAndExportVideo({ videoElement: video.current, segments: editor.segments, styleId: editor.styleId, ...appearance, filename: editor.file?.name, onProgress: setProgress });
-      if (success) plan.recordExport();
+      const success = await renderAndExportVideo({ videoElement: video.current, segments: editor.segments, styleId: editor.styleId, ...appearance, filename: editor.file?.name, quality: exportQuality, frameRate: exportFrameRate, onProgress: setProgress });
+      if (success) editor.recordExport();
       else setError("The video could not be exported.");
-    } catch { setError("Video export failed. Your export allowance was not used."); }
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Video export failed. Please try again.");
+    }
     finally { setExporting(false); }
   };
 
@@ -255,8 +263,37 @@ export function CaptionEditor({ editor, onBack }: { editor: ReturnType<typeof us
         <span className="ce-filename" title={editor.file?.name}>{editor.file?.name || "Caption editor"}</span>
         <div className="ce-history"><button type="button" onClick={editor.undo} disabled={!editor.canUndo || exporting} title="Undo" aria-label="Undo"><Undo2 size={17} /></button><button type="button" onClick={editor.redo} disabled={!editor.canRedo || exporting} title="Redo" aria-label="Redo"><Redo2 size={17} /></button></div>
         <div className="ce-export">
-          <button type="button" className="ce-primary" onClick={() => setExportOpen(open => !open)} disabled={exporting || !editor.segments.length} aria-expanded={exportOpen}><Download size={15} />{exporting ? `Exporting ${progress}%` : "Export"}</button>
-          {exportOpen && <div className="ce-export-menu"><button type="button" disabled={audio} onClick={() => void exportVideo()}>Captioned video</button>{(["srt", "vtt", "txt"] as const).map(format => <button type="button" key={format} onClick={() => { editor.downloadCaptions(format); setExportOpen(false); }}>{format.toUpperCase()} subtitles</button>)}<button type="button" onClick={() => setExportOpen(false)}>Close</button></div>}
+          <button type="button" className="ce-primary" onClick={() => setExportMenu(menu => menu ? null : "formats")} disabled={exporting || !editor.segments.length} aria-expanded={exportMenu !== null}>
+            <Download size={15} />{exporting ? `Exporting ${progress}%` : "Export"}
+          </button>
+          {exportMenu === "formats" && (
+            <div className="ce-export-menu">
+              <button type="button" disabled={audio} onClick={() => setExportMenu("video")}>Captioned video</button>
+              {(["srt", "vtt", "txt"] as const).map(format => (
+                <button type="button" key={format} onClick={() => {
+                  setError("");
+                  editor.downloadCaptions(format);
+                  setExportMenu(null);
+                }}>{format.toUpperCase()} subtitles</button>
+              ))}
+              <button type="button" onClick={() => setExportMenu(null)}>Close</button>
+            </div>
+          )}
+          {exportMenu === "video" && (
+            <form className="ce-export-menu ce-video-options" aria-label="Captioned video settings" onSubmit={event => {
+              event.preventDefault();
+              void exportVideo();
+            }}>
+              <h2>Captioned video</h2>
+              <EditorSelect label="Quality" value={exportQuality} options={videoExportQualities.map(option => ({ value: option.id, label: option.label }))} onChange={value => setExportQuality(value as VideoExportQuality)} />
+              <EditorSelect label="Frame rate" value={String(exportFrameRate)} options={videoExportFrameRates.map(rate => ({ value: String(rate), label: `${rate} fps` }))} onChange={value => setExportFrameRate(Number(value) as VideoExportFrameRate)} />
+              <p>Use 60 fps for high-frame-rate footage. Keep this tab visible while exporting.</p>
+              <div className="ce-video-options-actions">
+                <button type="button" onClick={() => setExportMenu("formats")}>Back</button>
+                <button type="submit" className="ce-primary">Export video</button>
+              </div>
+            </form>
+          )}
         </div>
       </header>
       {(error || editor.error) && <p className="ce-error" role="alert">{error || editor.error}</p>}
@@ -286,8 +323,8 @@ export function CaptionEditor({ editor, onBack }: { editor: ReturnType<typeof us
             <div className="ce-stage" ref={stage}>
               <div className="ce-video-frame" style={{ width: mediaSize.width * scale, height: mediaSize.height * scale }}>
                 {audio && <div className="ce-audio"><Volume2 size={40} /><span>Audio caption preview</span></div>}
-                <video ref={video} src={editor.mediaUrl} playsInline onClick={() => { if (!exporting) toggle(); }} onLoadedMetadata={event => { const node = event.currentTarget; if (node.videoWidth) setMediaSize({ width: node.videoWidth, height: node.videoHeight }); if (Number.isFinite(node.duration)) editor.setDuration(node.duration); }} onTimeUpdate={event => { if (event.currentTarget.paused || audio) setTime(event.currentTarget.currentTime); }} onSeeked={event => setTime(event.currentTarget.currentTime)} onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} onEnded={() => setPlaying(false)} className={audio ? "ce-audio-media" : ""} />
-                <canvas ref={canvas} width={mediaSize.width} height={mediaSize.height} aria-hidden="true" />
+                <video ref={video} src={editor.mediaUrl} playsInline onClick={() => { if (!exporting) toggle(); }} onLoadedMetadata={event => { const node = event.currentTarget; if (node.videoWidth) setMediaSize({ width: node.videoWidth, height: node.videoHeight }); if (Number.isFinite(node.duration)) editor.setDuration(node.duration); }} onTimeUpdate={event => { if (!exporting && (event.currentTarget.paused || audio)) setTime(event.currentTarget.currentTime); }} onSeeked={event => { if (!exporting) setTime(event.currentTarget.currentTime); }} onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} onEnded={() => setPlaying(false)} className={audio ? "ce-audio-media" : ""} />
+                <canvas ref={canvas} hidden={exporting} width={mediaSize.width} height={mediaSize.height} aria-hidden="true" />
               </div>
             </div>
           </section>

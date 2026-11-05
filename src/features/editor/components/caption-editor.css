@@ -8,9 +8,22 @@
 .ce-history { display: flex; gap: 4px; margin-left: auto; }
 .ce-export { position: relative; }
 .ce-editor .ce-primary { min-height: 36px; padding-inline: 16px; background: #c63838; color: #fff; }
-.ce-editor .ce-primary:hover { background: #ae2d2d; }
+.ce-editor .ce-primary:is(:hover, [aria-expanded=true]) { background: #ae2d2d; color: #fff; }
+.ce-editor .ce-primary:focus-visible { outline: 2px solid #ae2d2d; outline-offset: 2px; }
 .ce-export-menu { position: absolute; top: calc(100% + 10px); right: 0; z-index: 60; width: 190px; padding: 6px; border: 1px solid #e4e4e7; border-radius: 10px; background: #fff; box-shadow: 0 12px 32px #18181b14; }
 .ce-export-menu button { justify-content: flex-start; width: 100%; min-height: 38px; }
+.ce-editor .ce-export-menu button:not(.ce-primary):hover:not(:disabled) { background: #fdf0f0; color: #9f2929; }
+.ce-video-options { display: grid; width: min(280px, calc(100vw - 28px)); gap: 12px; padding: 14px; }
+.ce-video-options h2 { margin: 0; color: #18181b; font-size: 14px; font-weight: 650; }
+.ce-video-options label { display: grid; gap: 5px; color: #3f3f46; font-weight: 600; }
+.ce-video-options .ce-setting-field { margin-top: 0; color: #3f3f46; font-size: 11px; font-weight: 600; }
+.ce-video-options .ce-setting-select { min-height: 38px; margin-top: 6px; background: #faf9f6; }
+.ce-video-options .ce-setting-menu { z-index: 100; }
+.ce-video-options .ce-setting-menu button:hover { background: transparent; color: #52525b; }
+.ce-video-options .ce-setting-menu button[aria-selected=true] { background: #fdf0f0; color: #9f2929; }
+.ce-video-options .ce-setting-menu button:focus-visible { background: #f7f5f1; outline: 1px solid #c9c1b7; }
+.ce-video-options p { margin: 0; color: #65656f; line-height: 1.45; }
+.ce-video-options-actions { display: grid; grid-template-columns: auto 1fr; gap: 8px; }
 .ce-body { display: flex; flex: 1; min-width: 0; min-height: 0; flex-direction: column; margin: 0; padding: 0; border: 0; }
 .ce-workspace { display: grid; flex: 1; min-height: 232px; grid-template-columns: minmax(320px, clamp(320px, var(--ce-transcript-width, 360px), 420px)) 4px minmax(240px, 1fr) 4px minmax(360px, clamp(360px, var(--ce-settings-width, 360px), 420px)); row-gap: 8px; padding: 8px 8px 0; }
 .ce-divider { position: relative; z-index: 2; flex-shrink: 0; touch-action: none; outline-offset: -1px; }
