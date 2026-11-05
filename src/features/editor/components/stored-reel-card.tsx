@@ -38,6 +38,37 @@ export function StoredReelCard({ project, onDelete, selected, onSelect, onUpdate
     document.addEventListener("keydown", escape);
     return () => { document.removeEventListener("pointerdown", outside); document.removeEventListener("keydown", escape); };
   }, [menuOpen]);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const positionMenu = () => {
+      const root = menuRef.current;
+      const menu = root?.querySelector<HTMLElement>(".studio-card-menu");
+      if (!root || !menu) return;
+      if (!window.matchMedia("(max-width: 767px)").matches) {
+        menu.removeAttribute("style");
+        return;
+      }
+      const trigger = root.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const width = Math.min(190, window.innerWidth - 24);
+      menu.style.maxHeight = `${viewportHeight - 24}px`;
+      const height = Math.min(menu.scrollHeight + 2, viewportHeight - 24);
+      const top = trigger.bottom + 6 + height <= viewportHeight - 12
+        ? trigger.bottom + 6 : trigger.top - height - 6;
+      Object.assign(menu.style, {
+        position: "fixed", width: `${width}px`, right: "auto",
+        left: `${Math.max(12, Math.min(trigger.right - width, window.innerWidth - width - 12))}px`,
+        top: `${Math.max(12, top)}px`, overflowY: "auto",
+      });
+    };
+    positionMenu();
+    window.addEventListener("resize", positionMenu);
+    window.addEventListener("scroll", positionMenu, true);
+    return () => {
+      window.removeEventListener("resize", positionMenu);
+      window.removeEventListener("scroll", positionMenu, true);
+    };
+  }, [menuOpen]);
   const runAction = async (action: () => Promise<void>) => {
     if (busy) return;
     setBusy(true); setError(""); setMenuOpen(false);

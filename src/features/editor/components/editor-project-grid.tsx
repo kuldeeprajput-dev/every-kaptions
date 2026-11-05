@@ -63,13 +63,7 @@ export function EditorProjectGrid({ projects, onDeleteProject, onUpdateProject, 
     if (selectAllRef.current) selectAllRef.current.indeterminate = !allSelected && filteredProjects.some(project => selection.has(project.id));
   }, [allSelected, filteredProjects, selection]);
 
-  return (
-    <>
-      <header className="compact-studio-header">
-        <div className="compact-studio-navigation">
-          <nav aria-label="Breadcrumb" className="compact-breadcrumb">
-            <Link href="/">Home</Link><ChevronRight size={15} aria-hidden="true" /><span aria-current="page">All projects</span>
-          </nav>
+  const libraryControls = <>
           <div className="compact-view-toggle" role="group" aria-label="Project layout">
             <button type="button" aria-label="Grid view" aria-pressed={view === "grid"} onClick={() => setView("grid")}><LayoutGrid size={17} aria-hidden="true" /></button>
             <button type="button" aria-label="List view" aria-pressed={view === "list"} onClick={() => setView("list")}><List size={18} aria-hidden="true" /></button>
@@ -94,6 +88,16 @@ export function EditorProjectGrid({ projects, onDeleteProject, onUpdateProject, 
               }}><Trash2 size={16} aria-hidden="true" /></button>
             </div>
           )}
+  </>;
+
+  return (
+    <>
+      <header className="compact-studio-header">
+        <div className="compact-studio-navigation">
+          <nav aria-label="Breadcrumb" className="compact-breadcrumb">
+            <Link href="/">Home</Link><ChevronRight size={15} aria-hidden="true" /><span aria-current="page">All projects</span>
+          </nav>
+          <div className="compact-desktop-controls">{libraryControls}</div>
         </div>
         <div className="compact-studio-actions">
           <div className="studio-project-search">
@@ -101,7 +105,7 @@ export function EditorProjectGrid({ projects, onDeleteProject, onUpdateProject, 
             {searchQuery && <button type="button" onClick={() => setSearchQuery("")} aria-label="Clear search" className="absolute right-2 top-1/2 grid size-7 -translate-y-1/2 cursor-pointer place-items-center rounded text-[#85858f] hover:text-[#18181b]"><X size={14} aria-hidden="true" /></button>}
           </div>
           <AccountMenu open={accountOpen} onToggle={() => setAccountOpen(open => !open)} />
-          <button type="button" onClick={onUpload} className="studio-new-project">New project</button>
+          <button type="button" onClick={onUpload} className="studio-new-project"><span className="md:hidden">New</span><span className="hidden md:inline">New project</span></button>
         </div>
       </header>
 
@@ -112,7 +116,7 @@ export function EditorProjectGrid({ projects, onDeleteProject, onUpdateProject, 
               const next = new Set(previous);
               filteredProjects.forEach(project => { if (allSelected) next.delete(project.id); else next.add(project.id); });
               return next;
-            })} />{selectedIds.length ? `${selectedIds.length} selected` : "Select all"}</label>
+            })} /><span>{selectedIds.length ? `${selectedIds.length} selected` : "Select all"}</span></label>
             <div className="compact-sort">
               <CustomSelect label="Sort projects by" value={sortBy} onChange={value => {
                 setSortBy(value as SortOption);
@@ -125,7 +129,7 @@ export function EditorProjectGrid({ projects, onDeleteProject, onUpdateProject, 
                 {sortDirection === "asc" ? <ArrowUp size={16} aria-hidden="true" /> : <ArrowDown size={16} aria-hidden="true" />}
               </button>
             </div>
-
+            <div className="compact-mobile-controls">{libraryControls}</div>
           </div>
           <p className="compact-plan-summary">{plan.remainingMinutes.toFixed(1)} min available <span>·</span> {plan.remainingExports} exports left <Link href="/pricing">Upgrade</Link></p>
         </div>

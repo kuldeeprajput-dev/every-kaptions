@@ -304,3 +304,67 @@
 .studio-project-info-dialog dl { display: grid; grid-template-columns: 78px minmax(0, 1fr); gap: 16px 14px; margin: 0; font-size: 12px; line-height: 1.7; }
 .studio-project-info-dialog dt { color: #92929c; }
 .studio-project-info-dialog dd { margin: 0; color: #52525b; overflow-wrap: anywhere; }
+
+/* Compact mobile library controls. */
+@media (max-width: 767px) {
+  .compact-view-toggle { display: none; }
+  .compact-studio-header { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 42px auto; gap: 14px 10px; }
+  .compact-studio-navigation { min-width: 0; gap: 8px; }
+  .compact-breadcrumb { gap: 6px; font-size: 12px; white-space: nowrap; }
+  .compact-studio-actions { display: contents; }
+  .compact-studio-actions > .relative { position: static; grid-column: 2; grid-row: 1; min-width: 0; margin-left: 0; }
+  .compact-studio-actions .studio-account-dropdown { top: 52px; right: 0; width: min(340px, 100%); max-width: 100%; max-height: calc(100dvh - 112px); padding: 14px; }
+  .compact-studio-actions .studio-account-heading > div { min-width: 0; }
+  .compact-studio-actions .studio-account-heading p { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .compact-studio-actions .studio-account-trigger { width: 42px; min-height: 42px; padding: 0; justify-content: center; }
+  .compact-studio-actions .studio-account-trigger span,
+  .compact-studio-actions .studio-account-trigger > svg:last-child { display: none; }
+  .compact-studio-actions > .studio-new-project { grid-column: 3; grid-row: 1; min-height: 42px; padding-inline: 18px; }
+  .compact-studio-actions .studio-project-search { grid-column: 1 / -1; grid-row: 2; width: 100%; }
+  .compact-studio-actions .studio-search-input { min-height: 44px; }
+}
+
+.compact-desktop-controls { display: contents; }
+.compact-mobile-controls { display: none; }
+@media (max-width: 767px) {
+  .compact-desktop-controls { display: none; }
+  .compact-library-summary { width: 100%; flex-wrap: nowrap; gap: 12px; }
+  .compact-select-all > span { display: none; }
+  .compact-select-all { padding-right: 12px; border-right: 1px solid #e4e4e7; }
+  .compact-mobile-controls { display: flex; flex: 1; align-items: center; gap: 12px; }
+  .compact-mobile-controls .compact-view-toggle { display: flex; padding: 3px; }
+  .compact-mobile-controls .compact-view-toggle button { width: 26px; height: 28px; }
+  .compact-mobile-controls .compact-view-toggle button[aria-pressed="true"] { background: #ededf0; color: #27272a; }
+  .compact-mobile-controls .compact-selection-actions { margin-left: auto; gap: 6px; }
+  .compact-mobile-controls .compact-selection-actions button { width: 32px; height: 32px; }
+  .compact-mobile-controls .compact-selection-actions button:hover:not(:disabled) { background: #fbeeee; color: #b32e2e; }
+  .compact-sort button[role="combobox"] { padding-inline: 0 8px; }
+}
+
+@media (max-width: 767px) {
+  .compact-mobile-controls .compact-view-toggle button:hover { color: #92929c; background: transparent; }
+  .compact-mobile-controls .compact-view-toggle button[aria-pressed="true"] { background: #ededf0; color: #27272a; }
+  .compact-mobile-controls .compact-selection-actions button:hover:not(:disabled) { border-color: #e0e0e5; background: transparent; color: #52525b; }
+  .studio-project-delete:hover { background: transparent; color: #92929c; }
+  .studio-card-menu { z-index: 100; overscroll-behavior: contain; }
+  .studio-card-menu button { min-height: 40px; }
+}
+
+@media (max-width: 767px) {
+  .studio-shell.studio-compact { height: 100dvh; min-height: 0; overflow: hidden; }
+  .compact-studio-header, .compact-library-toolbar { flex-shrink: 0; }
+  .compact-studio-body { overflow: hidden; padding-top: 18px; }
+  .studio-shell .compact-project-grid,
+  .compact-project-list { flex: 1; min-height: 0; align-content: start; overflow-y: auto; overscroll-behavior-y: contain; margin-top: 12px; padding: 4px 5px 12px; }
+  .compact-storage-note { flex-shrink: 0; padding-top: 12px; }
+  .compact-studio-empty { flex: 1; min-height: 0; overflow-y: auto; }
+}
+
+@media (max-width: 767px) {
+  .studio-shell .compact-project-grid,
+  .compact-project-list,
+  .compact-studio-empty { scrollbar-width: none; }
+  .studio-shell .compact-project-grid::-webkit-scrollbar,
+  .compact-project-list::-webkit-scrollbar,
+  .compact-studio-empty::-webkit-scrollbar { display: none; }
+}
